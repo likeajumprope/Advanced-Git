@@ -87,11 +87,10 @@ efficient and conceptually clean: every commit is a complete picture of your pro
 Every file in a Git repository is in one of three states:
 
 ```{mermaid}
-%%{init: {'theme': 'dark'}}%%
 flowchart LR
-    W["Working Directory\n(your files on disk)"]
-    S["Staging Area\n(the index)"]
-    R["Repository\n(.git/objects)"]
+    W["Working Directory<br/>(your files on disk)"]
+    S["Staging Area<br/>(the index)"]
+    R["Repository<br/>(.git/objects)"]
 
     W -->|"git add"| S
     S -->|"git commit"| R
@@ -280,11 +279,11 @@ As you make more commits, Git builds a **directed acyclic graph** (DAG) —
 a chain of commits where each one points back to its parent(s).
 
 ```{mermaid}
-%%{init: {'gitGraph': {'theme': 'dark'}} }%%
-gitGraph
+ gitGraph
    commit id: "3f2a1b4 Initial script"
    commit id: "9d4c7e1 Add normalization"
    commit id: "1a5f3b2 Fix baseline calc"
+
 ```
 
 "Directed" means each commit knows its parent (arrows point backwards in time).
