@@ -1,7 +1,123 @@
 ---
 title: "Advanced_Git"
+subtitle: "Terminal-Based Git for Rehabilitation Science Researchers"
 ---
 
-This is a Quarto website.
+## Welcome
 
-To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
+This course teaches Git entirely through the command line — no graphical interfaces,
+no point-and-click. You will start from zero terminal experience and finish with
+the skills to manage, share, and document your research code professionally.
+
+**No prerequisites required.** If you can open a browser, you can start here.
+
+## Why Learn Git via the Terminal?
+
+Rehabilitation science increasingly demands reproducible, documented workflows.
+The terminal gives you that — and more:
+
+- **Reproducibility**: Every command you run can be copied, saved, and shared exactly
+- **Documentation**: Your terminal history *is* your audit trail
+- **Portability**: Terminal commands work identically on every machine, every server,
+  every collaborator's computer
+- **Understanding**: The terminal shows you what Git is actually doing — no black boxes
+
+GUI tools hide the mechanics that matter when things go wrong. The terminal puts
+you in control.
+
+## What You Will Learn
+
+After completing this course, you will be able to:
+
+1. Navigate file systems and run commands in the terminal
+2. Understand Git's internal structure (the `.git` repository)
+3. Explain Git's conceptual model: snapshots, commits, branches, HEAD
+4. Perform all basic Git operations from the command line
+5. Create and manage branches entirely in the terminal
+6. Resolve merge conflicts using terminal text editors
+7. Clean commit history with interactive rebase
+8. Collaborate via terminal-based workflows
+9. Protect sensitive research data with proper `.gitignore` configuration
+10. Troubleshoot Git problems by understanding what Git does internally
+11. Document research workflows through commit history
+
+## Learning Path
+
+```{mermaid}
+flowchart LR
+    A([Start Here]) --> B[Module 00\nTerminal Fundamentals]
+    B --> C[Module 01\nGit Concepts]
+    C --> D[Module 02\nBasic Workflow]
+    D --> E[Module 03\nRemote Repositories]
+    E --> F[Module 04\nBranching]
+    F --> G[Module 05\nMerging & Conflicts]
+    G --> H{Advanced\nTopics}
+    H --> I[Module 06\nRebase]
+    H --> J[Module 07\nAdvanced Ops]
+    H --> K[Module 08\nData Management]
+    K --> L[Module 09\nCollaboration]
+    L --> M[Module 10\nTroubleshooting]
+    M --> N[Module 11\nTool Integration]
+    N --> O([Module 12\nProfessional Repos])
+
+    style A fill:#50fa7b,color:#000
+    style O fill:#50fa7b,color:#000
+    style K fill:#ff5555,color:#fff
+```
+
+::: {.callout-important}
+## Before Module 03 (Remotes): Read Module 08 First
+Module 08 covers what **must not** go into a repository (participant data, credentials,
+large files). Read the Data Safety section at the end of **Module 02** before pushing
+to any remote. Module 08 provides the full treatment.
+:::
+
+## Before You Begin: Set Up Your Environment
+
+Choose your operating system and follow the setup guide:
+
+::: {.panel-tabset}
+## macOS
+[macOS Setup Guide →](resources/setup-guides/macos.qmd)
+
+Install Git via Homebrew, configure your terminal, and set up SSH keys.
+Estimated time: 15 minutes.
+
+## Linux
+[Linux Setup Guide →](resources/setup-guides/linux.qmd)
+
+Install Git via your package manager, confirm your bash/zsh environment,
+and set up SSH keys. Estimated time: 10 minutes.
+
+## Windows
+[Windows Setup Guide →](resources/setup-guides/windows.qmd)
+
+Install Git for Windows (Git Bash) or set up WSL2. Both paths are documented.
+Estimated time: 20–30 minutes.
+:::
+
+## How to Use This Course
+
+Each module follows the same structure:
+
+1. **Read the concept** — understand what and why before any commands
+2. **Study the annotated examples** — every command shows its exact output
+3. **Work through the exercises** — hands-on practice with a real research project
+4. **Check your output** — collapse the "Expected Output" to verify your results
+
+**This course uses a running example**: a fictional grip-strength rehabilitation study
+(`rehab-research/`). You will build this repository from scratch in Module 00 and
+carry it through the entire course.
+
+## Quick Navigation
+
+| I want to… | Go to… |
+|------------|--------|
+| Open a terminal for the first time | [Module 00](modules/00-terminal-fundamentals.qmd) |
+| Understand what Git actually does | [Module 01](modules/01-git-concepts.qmd) |
+| Start committing my research scripts | [Module 02](modules/02-basic-workflow.qmd) |
+| Push my work to GitHub | [Module 03](modules/03-remotes.qmd) |
+| Protect my data files from Git | [Module 08](modules/08-data-management.qmd) |
+| Fix a mistake I just made | [Module 10](modules/10-troubleshooting.qmd) |
+| Look up a command I forgot | [Command Index](reference/command-index.qmd) |
+| Decode an error message | [Error Messages](reference/error-messages.qmd) |
