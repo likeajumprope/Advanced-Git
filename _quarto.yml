@@ -1,19 +1,172 @@
 project:
   type: website
+  render:
+    - "*.qmd"
+    - "modules/*.qmd"
+    - "exercises/*.qmd"
+    - "reference/*.qmd"
+    - "resources/*.qmd"
+    - "resources/setup-guides/*.qmd"
 
 website:
   title: "Advanced_Git"
+  description: "Terminal-Based Git for Rehabilitation Science Researchers"
+  favicon: assets/img/favicon.ico
+  search: true
+  repo-url: https://github.com/johannabayer/Advanced_Git
+  repo-actions: [edit, issue]
+
   navbar:
     left:
-      - href: index.qmd
-        text: Home
-      - about.qmd
+      - text: "Home"
+        href: index.qmd
+      - text: "Modules"
+        menu:
+          - text: "00 — Terminal Fundamentals"
+            href: modules/00-terminal-fundamentals.qmd
+          - text: "01 — Git Concepts"
+            href: modules/01-git-concepts.qmd
+          - text: "02 — Basic Workflow"
+            href: modules/02-basic-workflow.qmd
+          - text: "03 — Remote Repositories"
+            href: modules/03-remotes.qmd
+          - text: "04 — Branching"
+            href: modules/04-branching.qmd
+          - text: "05 — Merging & Conflicts"
+            href: modules/05-merging.qmd
+          - text: "06 — Rebase"
+            href: modules/06-rebase.qmd
+          - text: "07 — Advanced Operations"
+            href: modules/07-advanced-operations.qmd
+          - text: "08 — Data Management"
+            href: modules/08-data-management.qmd
+          - text: "09 — Collaboration"
+            href: modules/09-collaboration.qmd
+          - text: "10 — Troubleshooting"
+            href: modules/10-troubleshooting.qmd
+          - text: "11 — Tool Integration"
+            href: modules/11-tool-integration.qmd
+          - text: "12 — Professional Repos"
+            href: modules/12-professional-repos.qmd
+      - text: "Reference"
+        menu:
+          - text: "Command Index"
+            href: reference/command-index.qmd
+          - text: "Error Messages"
+            href: reference/error-messages.qmd
+          - text: "Cheat Sheet"
+            href: reference/cheat-sheet.qmd
+          - text: "Glossary"
+            href: reference/glossary.qmd
+      - text: "Resources"
+        menu:
+          - text: "macOS Setup"
+            href: resources/setup-guides/macos.qmd
+          - text: "Linux Setup"
+            href: resources/setup-guides/linux.qmd
+          - text: "Windows Setup"
+            href: resources/setup-guides/windows.qmd
+          - text: "Further Reading"
+            href: resources/further-reading.qmd
+          - text: "Git Internals Deep Dive"
+            href: resources/git-internals-deep-dive.qmd
+
+  sidebar:
+    - title: "Learning Path"
+      style: "docked"
+      contents:
+        - index.qmd
+        - section: "Module 00 — Terminal Fundamentals"
+          contents:
+            - modules/00-terminal-fundamentals.qmd
+            - exercises/00-exercises.qmd
+        - section: "Module 01 — Git Concepts"
+          contents:
+            - modules/01-git-concepts.qmd
+            - exercises/01-exercises.qmd
+        - section: "Module 02 — Basic Workflow"
+          contents:
+            - modules/02-basic-workflow.qmd
+            - exercises/02-exercises.qmd
+        - section: "Module 03 — Remote Repositories"
+          contents:
+            - modules/03-remotes.qmd
+            - exercises/03-exercises.qmd
+        - section: "Module 04 — Branching"
+          contents:
+            - modules/04-branching.qmd
+            - exercises/04-exercises.qmd
+        - section: "Module 05 — Merging & Conflicts"
+          contents:
+            - modules/05-merging.qmd
+            - exercises/05-exercises.qmd
+        - section: "Module 06 — Rebase"
+          contents:
+            - modules/06-rebase.qmd
+            - exercises/06-exercises.qmd
+        - section: "Module 07 — Advanced Operations"
+          contents:
+            - modules/07-advanced-operations.qmd
+            - exercises/07-exercises.qmd
+        - section: "Module 08 — Data Management"
+          contents:
+            - modules/08-data-management.qmd
+            - exercises/08-exercises.qmd
+        - section: "Module 09 — Collaboration"
+          contents:
+            - modules/09-collaboration.qmd
+            - exercises/09-exercises.qmd
+        - section: "Module 10 — Troubleshooting"
+          contents:
+            - modules/10-troubleshooting.qmd
+            - exercises/10-exercises.qmd
+        - section: "Module 11 — Tool Integration"
+          contents:
+            - modules/11-tool-integration.qmd
+            - exercises/11-exercises.qmd
+        - section: "Module 12 — Professional Repos"
+          contents:
+            - modules/12-professional-repos.qmd
+            - exercises/12-exercises.qmd
+        - section: "Reference"
+          contents:
+            - reference/command-index.qmd
+            - reference/error-messages.qmd
+            - reference/cheat-sheet.qmd
+            - reference/glossary.qmd
+        - section: "Resources"
+          contents:
+            - resources/setup-guides/macos.qmd
+            - resources/setup-guides/linux.qmd
+            - resources/setup-guides/windows.qmd
+            - resources/further-reading.qmd
+            - resources/git-internals-deep-dive.qmd
+
+  page-footer:
+    left: "Advanced_Git — Terminal-Based Git for Rehabilitation Science"
+    right:
+      - icon: github
+        href: https://github.com/johannabayer/Advanced_Git
 
 format:
   html:
-    theme: cosmo
-    css: styles.css
+    theme:
+      - cyborg
+      - assets/scss/custom.scss
     toc: true
+    toc-depth: 3
+    toc-title: "On this page"
+    code-copy: true
+    code-fold: false
+    code-overflow: wrap
+    code-line-numbers: false
+    highlight-style: monokai
+    link-external-icon: true
+    link-external-newwindow: true
+    smooth-scroll: true
+    anchor-sections: true
+    citations-hover: false
 
-
-
+execute:
+  echo: true
+  eval: false

@@ -1,0 +1,217 @@
+/*-- scss:defaults --*/
+
+// Typography
+$font-family-monospace: "JetBrains Mono", "Fira Code", "Cascadia Code", "Courier New", monospace;
+
+// Terminal colour palette (Dracula-inspired, WCAG AA compliant on cyborg bg)
+$terminal-green:  #50fa7b;   // commands / success — contrast ~10.5:1 on #060606
+$terminal-grey:   #6c757d;   // output / muted
+$terminal-yellow: #f1fa8c;   // warnings / notes
+$terminal-red:    #ff5555;   // errors
+$terminal-cyan:   #8be9fd;   // links / references
+$terminal-purple: #bd93f9;   // keywords
+
+/*-- scss:rules --*/
+
+// ── Code blocks ────────────────────────────────────────────────────────────
+
+// All code: use monospace font
+pre, code, kbd, samp {
+  font-family: $font-family-monospace !important;
+}
+
+// bash / shell input blocks — green left border (command input)
+div.sourceCode pre.sourceCode.bash,
+div.sourceCode pre.sourceCode.sh,
+div.sourceCode pre.sourceCode.shell,
+div.sourceCode pre.sourceCode.zsh {
+  border-left: 4px solid $terminal-green;
+  background-color: #0d1117;
+  padding-left: 1rem;
+}
+
+// text / output blocks — grey left border (terminal output)
+div.sourceCode pre.sourceCode.text,
+div.sourceCode pre.sourceCode.plain {
+  border-left: 4px solid $terminal-grey;
+  background-color: #0a0a0a;
+  color: #abb2bf;
+  padding-left: 1rem;
+}
+
+// yaml / markdown blocks
+div.sourceCode pre.sourceCode.yaml,
+div.sourceCode pre.sourceCode.markdown {
+  border-left: 4px solid $terminal-cyan;
+  background-color: #0d1117;
+  padding-left: 1rem;
+}
+
+// Copy button: position and style
+div.sourceCode {
+  position: relative;
+
+  button.code-copy-button {
+    position: absolute;
+    top: 0.4rem;
+    right: 0.4rem;
+    font-size: 0.75rem;
+    color: $terminal-grey;
+    background: transparent;
+    border: 1px solid $terminal-grey;
+    border-radius: 3px;
+    padding: 0.15rem 0.4rem;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+
+    &:hover {
+      opacity: 1;
+      color: $terminal-green;
+      border-color: $terminal-green;
+    }
+  }
+}
+
+// ── Callout blocks ─────────────────────────────────────────────────────────
+
+// Data Safety (important) — bold red border, non-collapsible by design
+.callout-important {
+  border-left-color: $terminal-red !important;
+  background-color: rgba(255, 85, 85, 0.08) !important;
+
+  .callout-title {
+    color: $terminal-red;
+  }
+}
+
+// Tips (platform notes) — cyan border
+.callout-tip {
+  border-left-color: $terminal-cyan !important;
+  background-color: rgba(139, 233, 253, 0.06) !important;
+}
+
+// Notes (expected output, info) — green border
+.callout-note {
+  border-left-color: $terminal-green !important;
+  background-color: rgba(80, 250, 123, 0.06) !important;
+}
+
+// Warning (destructive operations) — yellow border
+.callout-warning {
+  border-left-color: $terminal-yellow !important;
+  background-color: rgba(241, 250, 140, 0.06) !important;
+}
+
+// ── Panel tabsets (platform callouts) ──────────────────────────────────────
+
+.panel-tabset {
+  .nav-tabs {
+    border-bottom: 1px solid $terminal-grey;
+
+    .nav-link {
+      color: $terminal-grey;
+      font-family: $font-family-monospace;
+      font-size: 0.85rem;
+      padding: 0.3rem 0.8rem;
+
+      &.active {
+        color: $terminal-green;
+        border-bottom: 2px solid $terminal-green;
+        background: transparent;
+      }
+
+      &:hover:not(.active) {
+        color: $terminal-cyan;
+      }
+    }
+  }
+
+  .tab-content {
+    padding-top: 0.75rem;
+  }
+}
+
+// ── Sidebar ────────────────────────────────────────────────────────────────
+
+// Active page in sidebar — highlight with green
+#quarto-sidebar {
+  .sidebar-item-container .sidebar-item.active > a {
+    color: $terminal-green;
+    font-weight: 600;
+  }
+
+  .sidebar-item-container .sidebar-item > a:hover {
+    color: $terminal-cyan;
+  }
+
+  .sidebar-section .sidebar-section-item {
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: $terminal-grey;
+    margin-top: 1rem;
+  }
+}
+
+// ── Headings ───────────────────────────────────────────────────────────────
+
+h1, h2, h3 {
+  font-family: $font-family-monospace;
+}
+
+h2 {
+  border-bottom: 1px solid #2a2a2a;
+  padding-bottom: 0.3rem;
+}
+
+// ── Term definitions (first-use pattern) ───────────────────────────────────
+
+// Bold terms on first use render with a subtle underline
+strong:first-child + em,
+p > strong {
+  // No extra style — bold is sufficient; keep it clean
+}
+
+// ── Links ──────────────────────────────────────────────────────────────────
+
+a {
+  color: $terminal-cyan;
+
+  &:hover {
+    color: $terminal-green;
+    text-decoration: underline;
+  }
+}
+
+// ── Mermaid diagrams ───────────────────────────────────────────────────────
+
+.mermaid {
+  background-color: #0d1117;
+  border-radius: 4px;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+// ── Accessibility ──────────────────────────────────────────────────────────
+
+// Ensure focus indicators are visible (keyboard navigation)
+:focus-visible {
+  outline: 2px solid $terminal-green;
+  outline-offset: 2px;
+}
+
+// ── Print / PDF ────────────────────────────────────────────────────────────
+
+@media print {
+  #quarto-sidebar,
+  .code-copy-button,
+  nav.navbar {
+    display: none !important;
+  }
+
+  pre {
+    border: 1px solid #ccc;
+    background: #f8f8f8 !important;
+    color: #000 !important;
+  }
+}
