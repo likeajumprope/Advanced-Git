@@ -1,0 +1,361 @@
+---
+title: "Module 02: Basic Git Terminal Workflow"
+description: "Learn the daily Git commands — status, add, commit, log, diff — and start versioning your research."
+module: 2
+prerequisites:
+  - 0
+  - 1
+learning_objectives:
+  - "Learner can use git status to identify the state of all files in a repository"
+  - "Learner can stage specific files with git add"
+  - "Learner can create a commit with a meaningful research-grade message"
+  - "Learner can read commit history with git log"
+  - "Learner can compare file states with git diff"
+  - "Learner can explain the four minimum data safety rules before pushing"
+platform_coverage:
+  - macos
+  - linux
+  - windows-gitbash
+  - windows-wsl2
+---
+
+## Overview
+
+Module 01 showed you what Git does internally. Now you will learn the five commands
+you will use every single day: `git status`, `git add`, `git commit`, `git log`,
+and `git diff`. By the end of this module, your research scripts will be in version
+control with a meaningful history.
+
+## Prerequisites
+
+- [Module 00 — Terminal Fundamentals](00-terminal-fundamentals.qmd)
+- [Module 01 — Git Concepts](01-git-concepts.qmd)
+- `~/rehab-research/` exists and has been initialized with `git init`
+
+---
+
+### git init: Starting a Repository
+
+If you have not already done so from Module 01 exercises:
+
+```bash
+cd ~/rehab-research
+git init
+```
+
+```text
+Initialized empty Git repository in /Users/yourname/rehab-research/.git/
+```
+
+You only run `git init` once per project. After this, every `git` command you run
+inside `rehab-research/` (and any subdirectory) will apply to this repository.
+
+---
+
+### git status: Your Constant Companion
+
+**`git status`**: shows the current state of your working directory and staging area.
+
+Run it constantly — before and after every other Git command. It always tells you
+what to do next.
+
+```bash
+git status
+```
+
+Here are the five states you will encounter, with what each means:
+
+**Nothing to commit (clean)**:
+```text
+On branch main
+nothing to commit, working tree clean
+```
+
+**Untracked files** (Git sees them but is not tracking them):
+```text
+On branch main
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        scripts/analysis.R
+```
+
+**Changes not staged** (tracked file has been modified):
+```text
+On branch main
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+        modified:   scripts/analysis.R
+```
+
+**Changes staged for commit** (ready to commit):
+```text
+On branch main
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+        modified:   scripts/analysis.R
+```
+
+**Mixed state** (some staged, some not):
+```text
+On branch main
+Changes to be committed:
+        modified:   scripts/analysis.R
+
+Changes not staged for commit:
+        modified:   docs/protocol.md
+```
+
+---
+
+### git add: Staging Changes
+
+**`git add`**: moves a file from the working directory into the staging area.
+
+```bash
+git add scripts/analysis.R   # stage one specific file
+```
+
+```bash
+git add scripts/             # stage all files in a directory
+```
+
+```bash
+git add .                    # stage all changes in the current directory
+```
+
+::: {.callout-tip}
+Prefer `git add scripts/analysis.R` (specific file) over `git add .` (everything).
+Staging specifically forces you to think about what is going into each commit —
+a good habit that prevents accidentally committing data files or credentials.
+:::
+
+**What staging really does**: When you run `git add`, Git computes the SHA-1 hash
+of the file's contents and stores a **blob object** in `.git/objects/`. The staging
+area (index file) records this hash alongside the file's path and metadata.
+
+```bash
+ls .git/objects/   # before git add
+```
+```text
+info  pack
+```
+
+```bash
+git add scripts/analysis.R
+ls .git/objects/   # after git add
+```
+```text
+1a  info  pack
+```
+
+A new subdirectory appeared — that is your file's blob object.
+
+---
+
+### git commit: Creating Snapshots
+
+**`git commit`**: takes everything in the staging area and creates a permanent snapshot.
+
+```bash
+git commit -m "Add initial dplyr data cleaning script"
+```
+
+```text
+[main (root-commit) 3f2a1b4] Add initial dplyr data cleaning script
+ 1 file changed, 1 insertion(+)
+ create mode 100644 scripts/analysis.R
+```
+
+The output tells you:
+
+- `main` — the branch the commit was made on
+- `root-commit` — this is the very first commit (has no parent)
+- `3f2a1b4` — the first 7 characters of the commit's SHA-1 hash
+- `1 file changed, 1 insertion(+)` — what changed
+
+---
+
+### Writing Research-Grade Commit Messages
+
+A commit message is your lab notebook entry. Future you — and collaborators —
+will read these to understand what changed and why.
+
+**Format**:
+
+```text
+Short subject line (50 characters or less)
+
+Optional body explaining WHY this change was made,
+not what was changed (the diff shows that).
+Wrap lines at 72 characters.
+```
+
+**Examples using rehabilitation research context**:
+
+| Bad message | Good message |
+|-------------|--------------|
+| `fix` | `Fix: correct normalization formula for balance index` |
+| `update analysis` | `Add baseline grip strength measurement function` |
+| `changes` | `Data: exclude participant 42 — incomplete follow-up` |
+| `wip` | `WIP: exploring two-way ANOVA for outcome measures` |
+| `final` | `Manuscript: freeze analysis at Wave 1 submission version` |
+
+**Convention for this course**: Start messages with a category word:
+
+- `Add:` — new functionality or content
+- `Fix:` — correcting an error
+- `Data:` — data management decisions
+- `Docs:` — documentation changes
+- `Refactor:` — restructuring without changing behaviour
+- `WIP:` — work-in-progress (clean up before merging)
+
+---
+
+### git log: Reading History
+
+**`git log`**: displays the commit history.
+
+```bash
+git log
+```
+
+```text
+commit 1a5f3b2c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a
+Author: Your Name <your@institution.edu>
+Date:   Thu Feb 28 09:30:00 2026 -0500
+
+    Fix: correct normalization formula for balance index
+
+commit 9d4c7e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d
+Author: Your Name <your@institution.edu>
+Date:   Thu Feb 28 09:15:00 2026 -0500
+
+    Add baseline grip strength measurement function
+
+commit 3f2a1b4c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a
+Author: Your Name <your@institution.edu>
+Date:   Thu Feb 28 09:00:00 2026 -0500
+
+    Add initial dplyr data cleaning script
+```
+
+Use flags to control the output:
+
+```bash
+git log --oneline          # one line per commit
+```
+```text
+1a5f3b2 Fix: correct normalization formula for balance index
+9d4c7e1 Add baseline grip strength measurement function
+3f2a1b4 Add initial dplyr data cleaning script
+```
+
+```bash
+git log --oneline --graph --all   # ASCII graph of all branches
+```
+```text
+* 1a5f3b2 (HEAD -> main) Fix: correct normalization formula
+* 9d4c7e1 Add baseline grip strength measurement function
+* 3f2a1b4 Add initial dplyr data cleaning script
+```
+
+---
+
+### git diff: Comparing States
+
+**`git diff`**: shows what changed between two states.
+
+```bash
+git diff                    # working directory vs staging area (unstaged changes)
+git diff --staged           # staging area vs last commit (staged changes)
+git diff HEAD~1 HEAD        # last commit vs the one before it
+```
+
+```bash
+# After modifying analysis.R but before staging:
+git diff
+```
+
+```text
+diff --git a/scripts/analysis.R b/scripts/analysis.R
+index a8c3d5e..f4e9b2c 100644
+--- a/scripts/analysis.R
++++ b/scripts/analysis.R
+@@ -1,2 +1,5 @@
+ library(dplyr)
++
++# Normalize balance scores to 0-100 range
++normalize_balance <- function(x) {
++  (x - min(x)) / (max(x) - min(x)) * 100
++}
+```
+
+Reading diff output:
+
+- `---` and `+++` — the two versions being compared (before and after)
+- `@@` — which lines are shown (context)
+- Lines starting with `+` — added lines (green in many terminals)
+- Lines starting with `-` — removed lines (red)
+- Lines with no prefix — unchanged context lines
+
+---
+
+## Before You Push: Data Safety Minimum
+
+::: {.callout-important}
+## Four Rules Before Any `git push`
+
+Before connecting to a remote repository (Module 03), you must know these four rules.
+Violating them can expose participant data, credentials, or bloat your repository
+permanently.
+
+**Rule 1: Never commit files in `data/`**
+Create a `.gitignore` file with `data/` as the first entry.
+Data files — even "synthetic" ones — should not be in version control by default.
+
+**Rule 2: Never commit `.env` or credential files**
+API keys, passwords, and authentication tokens committed to Git are permanently
+accessible in history, even after deletion. Add `.env` to `.gitignore` immediately.
+
+**Rule 3: Never commit files containing participant identifiers or PHI**
+De-identification does not protect against accidental commits. Use `.gitignore` to
+exclude all data folders. Module 08 covers this in full detail.
+
+**Rule 4: Always run `git status` before `git push`**
+Check that no unexpected files are staged. Look at what you are about to share.
+
+**Quick `.gitignore` to create right now**:
+
+```bash
+cat > .gitignore << 'EOF'
+data/
+.env
+*.RData
+*.csv
+*.xlsx
+EOF
+git add .gitignore
+git commit -m "Add: initial .gitignore for research data"
+```
+
+Full data management coverage is in [Module 08 — Data Management](08-data-management.qmd).
+:::
+
+---
+
+## Hands-on Exercise
+
+**[Exercises 02 →](../exercises/02-exercises.qmd)**
+
+**Quick check**: Run the following and confirm you see at least one commit:
+
+```bash
+cd ~/rehab-research
+git log --oneline
+```
+
+## What's Next
+
+In **[Module 03 — Remote Repositories](03-remotes.qmd)**, you will push your
+repository to GitHub using SSH, learn how `git push` and `git pull` work,
+and troubleshoot common authentication problems.

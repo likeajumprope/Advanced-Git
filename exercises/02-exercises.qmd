@@ -1,0 +1,358 @@
+---
+title: "Exercises: Module 02 — Basic Git Workflow"
+module: 2
+exercise_count: 3
+estimated_minutes: 30
+platform_tested:
+  - macos-14
+  - ubuntu-24.04
+  - windows-gitbash-2.44
+---
+
+## Before You Begin
+
+Complete:
+
+- [Module 02 reading](../modules/02-basic-workflow.qmd)
+- [Exercises 01](01-exercises.qmd) — you should have `~/rehab-research/` with a git repository and at least one commit
+
+---
+
+### Exercise 2.1 — Your First Three Commits
+
+**Goal**: Create `scripts/analysis.R`, make a meaningful first commit, then make two more
+commits documenting different analytical decisions.
+
+**Steps**:
+
+1. Navigate to your project:
+
+   ```bash
+   cd ~/rehab-research
+   git status
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+On branch main
+nothing to commit, working tree clean
+```
+
+If you see untracked files from Module 01 exercises, you can commit or ignore them.
+:::
+
+2. Create the analysis script with initial content:
+
+   ```bash
+   echo "library(dplyr)" > scripts/analysis.R
+   echo "library(tidyr)" >> scripts/analysis.R
+   cat scripts/analysis.R
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+library(dplyr)
+library(tidyr)
+```
+:::
+
+3. Stage and commit:
+
+   ```bash
+   git add scripts/analysis.R
+   git status
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+On branch main
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+        new file:   scripts/analysis.R
+```
+:::
+
+   ```bash
+   git commit -m "Add: initial analysis script with dplyr and tidyr"
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+[main 3f2a1b4] Add: initial analysis script with dplyr and tidyr
+ 1 file changed, 2 insertions(+)
+ create mode 100644 scripts/analysis.R
+```
+
+Your hash will differ. The message `create mode 100644` means this is a new file.
+:::
+
+4. Add a second analytical decision — a normalization function:
+
+   ```bash
+   echo "" >> scripts/analysis.R
+   echo "normalize_balance <- function(x) (x - min(x)) / (max(x) - min(x)) * 100" >> scripts/analysis.R
+   git add scripts/analysis.R
+   git commit -m "Add: normalize_balance function for balance index scores"
+   ```
+
+5. Add a third decision — a filtering step:
+
+   ```bash
+   echo "" >> scripts/analysis.R
+   echo "filter_complete_cases <- function(df) dplyr::filter(df, !is.na(grip_strength))" >> scripts/analysis.R
+   git add scripts/analysis.R
+   git commit -m "Add: filter_complete_cases to exclude missing grip strength values"
+   ```
+
+6. View your history:
+
+   ```bash
+   git log --oneline
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+1a5f3b2 (HEAD -> main) Add: filter_complete_cases to exclude missing grip strength values
+9d4c7e1 Add: normalize_balance function for balance index scores
+3f2a1b4 Add: initial analysis script with dplyr and tidyr
+```
+
+Three commits, each documenting one analytical decision. A future collaborator
+can read this log and understand the analysis evolved step by step.
+:::
+
+**What you learned**:
+
+- Each commit should represent one logical change with a meaningful message
+- `git log --oneline` gives a quick summary of history
+- Commit messages are your lab notebook — they document *why* decisions were made
+
+---
+
+### Exercise 2.2 — Read the Diff Between Commits
+
+**Goal**: Use `git diff` to compare different states of your repository.
+
+**Steps**:
+
+1. Modify `analysis.R` without staging:
+
+   ```bash
+   echo "" >> scripts/analysis.R
+   echo "# TODO: add regression model for primary outcome" >> scripts/analysis.R
+   ```
+
+2. See what changed (working directory vs last commit):
+
+   ```bash
+   git diff
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+diff --git a/scripts/analysis.R b/scripts/analysis.R
+index a4f2c1d..b8e3f2a 100644
+--- a/scripts/analysis.R
++++ b/scripts/analysis.R
+@@ -4,3 +4,6 @@ normalize_balance <- function(x) (x - min(x)) / (max(x) - min(x)) * 100
+
+ filter_complete_cases <- function(df) dplyr::filter(df, !is.na(grip_strength))
++
++# TODO: add regression model for primary outcome
+```
+
+The `+` lines are what you added. The context lines (no prefix) show where in the
+file the change occurred.
+:::
+
+3. Stage the change and see how `git diff` output changes:
+
+   ```bash
+   git add scripts/analysis.R
+   git diff          # no output — nothing left unstaged
+   git diff --staged # shows staged changes vs last commit
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output of `git diff --staged`
+
+```text
+diff --git a/scripts/analysis.R b/scripts/analysis.R
+index a4f2c1d..b8e3f2a 100644
+--- a/scripts/analysis.R
++++ b/scripts/analysis.R
+@@ -4,3 +4,6 @@ normalize_balance <- function(x) (x - min(x)) / (max(x) - min(x)) * 100
+
+ filter_complete_cases <- function(df) dplyr::filter(df, !is.na(grip_strength))
++
++# TODO: add regression model for primary outcome
+```
+
+Same content — but now it shows staged vs committed, not working vs staged.
+:::
+
+4. Compare the last two commits:
+
+   ```bash
+   git diff HEAD~1 HEAD
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+diff --git a/scripts/analysis.R b/scripts/analysis.R
+index 9b2c3d1..a4f2c1d 100644
+--- a/scripts/analysis.R
++++ b/scripts/analysis.R
+@@ -2,3 +2,5 @@ library(dplyr)
+ library(tidyr)
+
+ normalize_balance <- function(x) (x - min(x)) / (max(x) - min(x)) * 100
++
++filter_complete_cases <- function(df) dplyr::filter(df, !is.na(grip_strength))
+```
+
+`HEAD~1` means "one commit before the current HEAD". `HEAD` means the current commit.
+:::
+
+**What you learned**:
+
+- `git diff` (no flags) shows unstaged changes
+- `git diff --staged` shows staged changes vs last commit
+- `git diff HEAD~1 HEAD` compares any two points in history
+
+::: {.callout-warning}
+## Common Mistakes
+
+- **`git diff` shows nothing**: Your changes are already staged. Use `git diff --staged` to see them.
+- **`git diff HEAD~1 HEAD` shows nothing**: You have only one commit — there is no `HEAD~1` yet. Make at least 2 commits first.
+:::
+
+---
+
+### Exercise 2.3 — Create a .gitignore
+
+**Goal**: Create a `.gitignore` that prevents data files from being tracked.
+
+**Steps**:
+
+1. Simulate creating a data file:
+
+   ```bash
+   echo "participant_id,grip_strength,balance_score" > data/results.csv
+   echo "001,34.2,78.9" >> data/results.csv
+   git status
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+On branch main
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  ...
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        data/results.csv
+        scripts/analysis.R
+```
+
+The CSV file appears as untracked. We do not want Git to track it.
+:::
+
+2. Create a `.gitignore`:
+
+   ```bash
+   nano .gitignore
+   ```
+
+   Type the following, then press **Ctrl+O**, **Return**, **Ctrl+X**:
+
+   ```text
+   data/
+   *.csv
+   *.RData
+   .env
+   ```
+
+3. Check status again:
+
+   ```bash
+   git status
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+On branch main
+Changes not staged for commit:
+  ...
+        modified:   scripts/analysis.R
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        .gitignore
+```
+
+`data/results.csv` has disappeared from the output — Git is now ignoring it.
+The `.gitignore` file itself is untracked and should be committed.
+:::
+
+4. Commit the `.gitignore`:
+
+   ```bash
+   git add .gitignore
+   git commit -m "Add: .gitignore to exclude data files and credentials"
+   git log --oneline
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+b3a2c1d (HEAD -> main) Add: .gitignore to exclude data files and credentials
+1a5f3b2 Add: filter_complete_cases to exclude missing grip strength values
+9d4c7e1 Add: normalize_balance function for balance index scores
+3f2a1b4 Add: initial analysis script with dplyr and tidyr
+```
+:::
+
+**What you learned**:
+
+- `.gitignore` prevents files matching the patterns from being tracked
+- `data/` (with trailing slash) ignores the entire directory and its contents
+- The `.gitignore` file itself should be committed so collaborators get the same exclusions
+
+---
+
+## Summary
+
+You can now:
+
+- Stage specific files with `git add`
+- Commit with research-grade messages
+- Read history with `git log --oneline`
+- Compare states with `git diff` and `git diff --staged`
+- Protect data files with `.gitignore`
+
+**You are ready for [Module 03 — Remote Repositories](../modules/03-remotes.qmd).**
+
+**Before proceeding**: re-read the "Data Safety Before You Push" section at the
+end of [Module 02](../modules/02-basic-workflow.qmd). Those four rules apply to
+every push you will make.
