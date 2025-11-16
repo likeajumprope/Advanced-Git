@@ -1,0 +1,246 @@
+---
+title: "Module 04: Branching in the Terminal"
+description: "Understand what branches really are, create them from the command line, and visualise history as a graph."
+module: 4
+prerequisites:
+  - 0
+  - 1
+  - 2
+  - 3
+learning_objectives:
+  - "Learner can explain that a branch is a file containing a commit hash"
+  - "Learner can create, switch, and list branches using modern git switch syntax"
+  - "Learner can describe what happens in .git when you create a branch"
+  - "Learner can visualise branching history with git log --graph"
+  - "Learner can apply branch naming conventions for research workflows"
+platform_coverage:
+  - macos
+  - linux
+  - windows-gitbash
+  - windows-wsl2
+---
+
+## Overview
+
+Branching is Git's superpower — it lets you develop a new analysis approach,
+fix a bug, or write documentation without touching your working main branch.
+In this module, you will see exactly how branches work under the hood, then
+create and switch between branches entirely in the terminal.
+
+## Prerequisites
+
+- [Module 01 — Git Concepts](01-git-concepts.qmd) (for understanding `.git/refs/`)
+- [Module 03 — Remote Repositories](03-remotes.qmd)
+
+---
+
+### What Branches Really Are
+
+Open a terminal in your repository and look at the branch files directly:
+
+```bash
+cd ~/rehab-research
+cat .git/refs/heads/main
+```
+
+```text
+1a5f3b2c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a
+```
+
+That is the entire branch. **A branch is a file containing one commit hash.**
+Nothing more. When you make a new commit, Git rewrites that file with the new hash.
+
+```{mermaid}
+%%{init: {'theme': 'dark'}}%%
+flowchart LR
+    C1["3f2a1b4\nInitial script"] --> C2["9d4c7e1\nAdd normalize"]
+    C2 --> C3["1a5f3b2\nFix baseline"]
+
+    MAIN["refs/heads/main\n= 1a5f3b2"] --> C3
+    HEAD["HEAD\n= ref: refs/heads/main"] --> MAIN
+
+    style MAIN fill:#50fa7b,color:#000
+    style HEAD fill:#bd93f9,color:#000
+```
+
+When you create a new branch, Git creates a new file in `refs/heads/` pointing
+to the same commit as your current branch. Branches are cheap because they are
+just a 41-byte text file.
+
+---
+
+### Creating Branches
+
+Three equivalent ways to create and switch to a new branch:
+
+**Modern syntax (recommended — Git ≥ 2.23)**:
+```bash
+git switch -c feature/add-grip-strength-measure
+```
+
+**Legacy syntax (still widely used)**:
+```bash
+git checkout -b feature/add-grip-strength-measure
+```
+
+**Two steps (create, then switch)**:
+```bash
+git branch feature/add-grip-strength-measure
+git switch feature/add-grip-strength-measure
+```
+
+All three produce the same result. This course uses `git switch` (modern).
+
+After creating:
+```bash
+cat .git/HEAD
+```
+
+```text
+ref: refs/heads/feature/add-grip-strength-measure
+```
+
+```bash
+ls .git/refs/heads/
+```
+
+```text
+feature/  main
+```
+
+```bash
+ls .git/refs/heads/feature/
+```
+
+```text
+add-grip-strength-measure
+```
+
+A new file appeared. It contains the same hash as `main` — branches start
+at the same point and diverge as you make new commits.
+
+---
+
+### Switching Branches
+
+**Modern syntax**:
+```bash
+git switch main           # switch back to main
+git switch feature/add-grip-strength-measure   # switch to feature branch
+```
+
+**Legacy syntax** (still works):
+```bash
+git checkout main
+```
+
+When you switch branches, Git:
+1. Updates `HEAD` to point to the new branch
+2. Updates your working directory files to match the new branch's latest commit
+
+::: {.callout-warning}
+## Uncommitted Changes Block Switching
+If you have uncommitted changes when switching, Git will warn you:
+```text
+error: Your local changes to the following files would be overwritten by checkout:
+        scripts/analysis.R
+```
+Either commit your changes first, or stash them (see Module 07 — Stashing).
+:::
+
+---
+
+### Viewing Branches
+
+```bash
+git branch              # list local branches (* = current)
+```
+
+```text
+  feature/add-grip-strength-measure
+* main
+```
+
+```bash
+git branch -v           # show last commit on each branch
+```
+
+```text
+  feature/add-grip-strength-measure 1a5f3b2 Fix: correct normalization formula
+* main                               1a5f3b2 Fix: correct normalization formula
+```
+
+```bash
+git branch -a           # include remote-tracking branches
+```
+
+```text
+  feature/add-grip-strength-measure
+* main
+  remotes/origin/main
+```
+
+---
+
+### Branch Naming Conventions for Research
+
+Good branch names are short, lower-case, hyphen-separated, and categorised:
+
+| Prefix | Use case | Example |
+|--------|----------|---------|
+| `feature/` | New analysis feature or measure | `feature/add-grip-strength-measure` |
+| `fix/` | Correcting a bug or error | `fix/normalize-balance-scores` |
+| `docs/` | Documentation changes | `docs/update-wave-2-protocol` |
+| `data/` | Data management work | `data/exclude-incomplete-cases` |
+| `refactor/` | Code restructuring | `refactor/modularize-analysis-functions` |
+| `wip/` | Early exploration | `wip/anova-exploration` |
+
+**Avoid**: spaces (use `-`), capitals (case-sensitive on Linux), very long names,
+and generic names like `test` or `new`.
+
+---
+
+### Visualising Branch History
+
+```bash
+git log --oneline --graph --all --decorate
+```
+
+```text
+* 3c4d5e6 (HEAD -> feature/add-grip-strength-measure) Add: grip strength baseline function
+* 1a5f3b2 (main, origin/main) Fix: correct normalization formula
+* 9d4c7e1 Add: normalize_balance function for balance index scores
+* 3f2a1b4 Add: initial analysis script with dplyr and tidyr
+```
+
+After the feature branch diverges:
+
+```text
+* 3c4d5e6 (HEAD -> feature/add-grip-strength-measure) Add: grip strength baseline function
+| * 7e8f9a0 (main) Docs: update protocol for Wave 2
+|/
+* 1a5f3b2 Fix: correct normalization formula
+* 9d4c7e1 Add: normalize_balance function
+* 3f2a1b4 Add initial script
+```
+
+The `|` and `/` characters show the branch diverging and the `*` shows each commit.
+
+---
+
+## Hands-on Exercise
+
+**[Exercises 04 →](../exercises/04-exercises.qmd)**
+
+**Quick check**: After creating a branch:
+
+```bash
+git branch -v
+```
+
+You should see two branches listed, with `*` on your current one.
+
+## What's Next
+
+In **[Module 05 — Merging & Conflicts](05-merging.qmd)**, you will combine branches,
+encounter merge conflicts, and resolve them entirely from the terminal using `nano`.

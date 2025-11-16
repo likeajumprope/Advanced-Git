@@ -1,0 +1,223 @@
+---
+title: "Exercises: Module 04 — Branching"
+module: 4
+exercise_count: 2
+estimated_minutes: 20
+platform_tested:
+  - macos-14
+  - ubuntu-24.04
+  - windows-gitbash-2.44
+---
+
+## Before You Begin
+
+Complete [Module 04](../modules/04-branching.qmd) and [Exercises 03](03-exercises.qmd).
+
+---
+
+### Exercise 4.1 — Create and Switch Branches
+
+**Goal**: Create a feature branch, make a commit on it, switch back to main, and visualise
+the diverging history.
+
+**Steps**:
+
+1. Confirm you are on `main` with a clean state:
+
+   ```bash
+   cd ~/rehab-research
+   git switch main
+   git status
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+On branch main
+nothing to commit, working tree clean
+```
+:::
+
+2. Create and switch to a new feature branch:
+
+   ```bash
+   git switch -c feature/add-grip-strength-measure
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+Switched to a new branch 'feature/add-grip-strength-measure'
+```
+:::
+
+3. Verify the new branch file in `.git`:
+
+   ```bash
+   ls .git/refs/heads/feature/
+   cat .git/refs/heads/feature/add-grip-strength-measure
+   cat .git/refs/heads/main
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+add-grip-strength-measure
+1a5f3b2c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a
+1a5f3b2c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a
+```
+
+Both files contain the same hash — the branch just created points to the same
+commit as main. They will diverge as you make commits.
+:::
+
+4. Add a function to `analysis.R`:
+
+   ```bash
+   echo "" >> scripts/analysis.R
+   echo "measure_grip_strength <- function(hand, trials) mean(trials[hand])" >> scripts/analysis.R
+   git add scripts/analysis.R
+   git commit -m "Add: measure_grip_strength function for dominant/non-dominant hand"
+   ```
+
+5. Switch back to `main` and confirm the function is NOT there:
+
+   ```bash
+   git switch main
+   cat scripts/analysis.R
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+The file should NOT contain `measure_grip_strength`. That function only exists on the
+feature branch. The working directory reflects whichever branch you are on.
+:::
+
+6. Visualise the history:
+
+   ```bash
+   git log --oneline --graph --all --decorate
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+* 3c4d5e6 (feature/add-grip-strength-measure) Add: measure_grip_strength function
+* 1a5f3b2 (HEAD -> main, origin/main) Fix: correct normalization formula
+* 9d4c7e1 Add: normalize_balance function for balance index scores
+* 3f2a1b4 Add: initial analysis script with dplyr and tidyr
+```
+
+The feature branch is one commit ahead of main. HEAD is on main.
+:::
+
+**What you learned**:
+
+- `git switch -c` creates and switches in one step
+- A branch is a file in `.git/refs/heads/` containing a commit hash
+- Switching branches changes your working directory — files appear and disappear
+- `git log --all` shows all branches, not just the current one
+
+---
+
+### Exercise 4.2 — Explore the .git Branch Files
+
+**Goal**: Create a second branch and inspect the branch files directly.
+
+**Steps**:
+
+1. Create a second branch (stay on main):
+
+   ```bash
+   git switch -c fix/normalize-balance-scores
+   ```
+
+2. List all branch files:
+
+   ```bash
+   ls .git/refs/heads/
+   ls .git/refs/heads/feature/
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+feature/  fix/  main
+
+add-grip-strength-measure
+```
+
+Three branch directories/files now exist.
+:::
+
+3. Read each branch file:
+
+   ```bash
+   cat .git/refs/heads/main
+   cat .git/refs/heads/fix/normalize-balance-scores
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+Both files contain the same commit hash — `fix/normalize-balance-scores` was
+created from `main` and has not diverged yet.
+:::
+
+4. Read `HEAD` to confirm your current branch:
+
+   ```bash
+   cat .git/HEAD
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+ref: refs/heads/fix/normalize-balance-scores
+```
+:::
+
+5. Switch back to main:
+
+   ```bash
+   git switch main
+   git branch -v
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+  feature/add-grip-strength-measure 3c4d5e6 Add: measure_grip_strength function
+  fix/normalize-balance-scores       1a5f3b2 Fix: correct normalization formula
+* main                               1a5f3b2 Fix: correct normalization formula
+```
+
+The `*` shows your current branch. The feature branch is one commit ahead.
+:::
+
+**What you learned**:
+
+- Creating a branch creates a file in `.git/refs/heads/`
+- All branches on the same commit show the same hash until commits diverge
+- `git branch -v` shows the latest commit on each branch at a glance
+
+---
+
+## Summary
+
+You can now:
+
+- Create branches with `git switch -c`
+- Switch between branches and observe working directory changes
+- Inspect branch files directly in `.git/refs/heads/`
+- Visualise branch history with `git log --oneline --graph --all`
+
+**You are ready for [Module 05 — Merging & Conflicts](../modules/05-merging.qmd).**
