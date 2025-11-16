@@ -1,0 +1,289 @@
+---
+title: "Module 03: Remote Repositories via Terminal"
+description: "Push your work to GitHub using SSH, fetch changes from collaborators, and troubleshoot rejected pushes."
+module: 3
+prerequisites:
+  - 0
+  - 1
+  - 2
+learning_objectives:
+  - "Learner can clone a remote repository from the terminal"
+  - "Learner can add a remote and push commits via SSH"
+  - "Learner can explain the difference between git fetch and git pull"
+  - "Learner can generate SSH keys and authenticate with GitHub"
+  - "Learner can diagnose and fix a rejected push"
+platform_coverage:
+  - macos
+  - linux
+  - windows-gitbash
+  - windows-wsl2
+---
+
+## Overview
+
+In Module 02 you learned to commit locally. Now you will connect to GitHub and
+push your work to a remote repository — creating a backup, enabling collaboration,
+and making your research reproducible across machines.
+
+## Prerequisites
+
+- [Module 02 — Basic Git Workflow](02-basic-workflow.qmd)
+- SSH keys generated and added to GitHub (see your [setup guide](../resources/setup-guides/macos.qmd))
+- **Read the Data Safety section at the end of Module 02 before any exercises here**
+
+---
+
+### git clone: Copying a Remote Repository
+
+**`git clone`**: downloads an entire repository (all commits, all branches) to your machine.
+
+```bash
+git clone git@github.com:username/repository-name.git
+```
+
+```text
+Cloning into 'repository-name'...
+remote: Enumerating objects: 47, done.
+remote: Counting objects: 100% (47/47), done.
+remote: Compressing objects: 100% (32/32), done.
+Receiving objects: 100% (47/47), 12.54 KiB | 4.18 MiB/s, done.
+Resolving deltas: 100% (8/8), done.
+```
+
+After cloning, `cd` into the new directory:
+
+```bash
+cd repository-name
+git log --oneline
+```
+
+Clone creates a remote named `origin` pointing back to the source automatically.
+
+---
+
+### Understanding Remotes: git remote -v
+
+**`git remote -v`**: lists all configured remote connections for this repository.
+
+```bash
+git remote -v
+```
+
+```text
+origin	git@github.com:username/rehab-research.git (fetch)
+origin	git@github.com:username/rehab-research.git (push)
+```
+
+- `origin` — the conventional name for the primary remote (set by `git clone` automatically)
+- Two lines per remote: one for fetching (downloading), one for pushing (uploading)
+
+To add a remote manually (when you used `git init` locally instead of cloning):
+
+```bash
+git remote add origin git@github.com:username/rehab-research.git
+```
+
+---
+
+### git push: Uploading Commits
+
+**`git push`**: sends your local commits to the remote repository.
+
+```bash
+git push origin main
+```
+
+```text
+Enumerating objects: 8, done.
+Counting objects: 100% (8/8), done.
+Delta compression using up to 8 threads
+Compressing objects: 100% (5/5), done.
+Writing objects: 100% (6/6), 712 bytes | 712.00 KiB/s, done.
+Total 6 (delta 1), reused 0 (delta 0), pack-reused 0
+To git@github.com:username/rehab-research.git
+   3f2a1b4..1a5f3b2  main -> main
+```
+
+Reading the output:
+
+- `3f2a1b4..1a5f3b2` — the range of commits pushed (from → to)
+- `main -> main` — local branch `main` pushed to remote branch `main`
+
+Use `-u` on the first push to set the upstream tracking branch:
+
+```bash
+git push -u origin main   # first push
+git push                  # all subsequent pushes (upstream is remembered)
+```
+
+---
+
+### git pull: Downloading Changes
+
+**`git pull`**: fetches remote changes and merges them into your current branch.
+
+```bash
+git pull origin main
+```
+
+```text
+remote: Enumerating objects: 5, done.
+remote: Counting objects: 100% (5/5), done.
+remote: Compressing objects: 100% (2/2), done.
+remote: Total 3 (delta 1), reused 0 (delta 0), pack-reused 0
+Unpacking objects: 100% (3/3), done.
+From github.com:username/rehab-research
+   1a5f3b2..9d4c7e1  main       -> origin/main
+Updating 1a5f3b2..9d4c7e1
+Fast-forward
+ docs/protocol.md | 5 +++++
+ 1 file changed, 5 insertions(+)
+```
+
+---
+
+### Fetch vs Pull
+
+`git pull` is actually two commands in one:
+
+```{mermaid}
+%%{init: {'theme': 'dark'}}%%
+flowchart LR
+    R["Remote\n(GitHub)"]
+    L["Local\nrepository"]
+    W["Working\ndirectory"]
+
+    R -->|"git fetch\n(download only)"| L
+    L -->|"git merge"| W
+    R -->|"git pull\n(fetch + merge)"| W
+```
+
+**`git fetch`**: downloads changes from the remote but does NOT merge them.
+Lets you inspect changes before integrating them.
+
+```bash
+git fetch origin
+git log --oneline origin/main   # see what's on the remote
+git diff main origin/main        # compare your branch to the remote
+git merge origin/main            # merge when ready
+```
+
+**Rule of thumb**: Use `git pull` when you trust the remote. Use `git fetch` +
+inspect + `git merge` when working on a branch that others are also modifying.
+
+---
+
+### Authentication: SSH Keys
+
+SSH keys are the recommended authentication method for terminal Git users.
+They authenticate you automatically without typing a password each time.
+
+::: {.callout-tip}
+If you completed your platform setup guide, you already have SSH keys. Skip ahead
+to the verification step.
+:::
+
+**Generate an SSH key** (if you have not already):
+
+```bash
+ssh-keygen -t ed25519 -C "your@institution.edu"
+```
+
+Accept the default location. Set a passphrase (recommended).
+
+**Copy your public key**:
+
+::: {.panel-tabset}
+## macOS / Linux
+
+```bash
+cat ~/.ssh/id_ed25519.pub
+```
+
+## Windows (Git Bash)
+
+```bash
+cat ~/.ssh/id_ed25519.pub
+```
+
+## Windows (WSL2)
+
+```bash
+cat ~/.ssh/id_ed25519.pub
+```
+:::
+
+Add the output to **GitHub → Settings → SSH and GPG keys → New SSH key**.
+
+**Verify SSH works**:
+
+```bash
+ssh -T git@github.com
+```
+
+```text
+Hi username! You've successfully authenticated, but GitHub does not provide shell access.
+```
+
+---
+
+### Troubleshooting Remote Operations
+
+#### Rejected Push (non-fast-forward)
+
+```text
+! [rejected]        main -> main (non-fast-forward)
+error: failed to push some refs to 'git@github.com:username/repo.git'
+hint: Updates were rejected because the remote contains work that you do not
+hint: have locally. Integrate the remote changes before pushing again.
+```
+
+**What it means**: The remote has commits you do not have locally.
+Someone else pushed while you were working.
+
+**Fix**:
+
+```bash
+git pull --rebase origin main   # fetch remote commits, replay yours on top
+git push origin main             # now push should succeed
+```
+
+#### Authentication Failure
+
+```text
+git@github.com: Permission denied (publickey).
+fatal: Could not read from remote repository.
+```
+
+**What it means**: GitHub does not recognise your SSH key.
+
+**Fix steps**:
+
+```bash
+ssh-add ~/.ssh/id_ed25519     # add key to the agent
+ssh -T git@github.com         # verify connection works
+git push origin main          # retry
+```
+
+If still failing: confirm the public key in `~/.ssh/id_ed25519.pub` matches
+what is registered in GitHub Settings → SSH keys.
+
+---
+
+## Hands-on Exercise
+
+**[Exercises 03 →](../exercises/03-exercises.qmd)**
+
+**Quick check**: After your first push, run:
+
+```bash
+git log --oneline origin/main
+```
+
+You should see the same commits as your local `main` — they are in sync.
+
+## What's Next
+
+In **[Module 04 — Branching](04-branching.qmd)**, you will learn what branches
+really are under the hood, create feature branches for new analysis steps, and
+visualise your branching history as a graph.

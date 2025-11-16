@@ -1,0 +1,282 @@
+---
+title: "Exercises: Module 03 — Remote Repositories"
+module: 3
+exercise_count: 3
+estimated_minutes: 35
+platform_tested:
+  - macos-14
+  - ubuntu-24.04
+  - windows-gitbash-2.44
+---
+
+## Before You Begin
+
+Complete:
+
+- [Module 03 reading](../modules/03-remotes.qmd)
+- [Exercises 02](02-exercises.qmd) — your local repository has at least 3 commits
+- SSH key generated and added to GitHub (see your setup guide)
+
+::: {.callout-important}
+## Data Safety Reminder
+Before pushing anything: ensure your `.gitignore` excludes `data/`, `.env`,
+and any files with participant data. Run `git status` and check every file listed.
+:::
+
+---
+
+### Exercise 3.1 — Set Up and Verify SSH Authentication
+
+**Goal**: Confirm SSH authentication is working between your terminal and GitHub.
+
+**Steps**:
+
+1. Check if an SSH key exists:
+
+   ```bash
+   ls ~/.ssh/
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output (if key exists)
+
+```text
+id_ed25519      id_ed25519.pub      known_hosts
+```
+
+If you only see `known_hosts` or the directory is empty, generate a key first.
+:::
+
+2. If no key exists, generate one:
+
+   ```bash
+   ssh-keygen -t ed25519 -C "your@institution.edu"
+   ```
+
+   Press **Return** to accept defaults. Set a passphrase when prompted.
+
+3. Display your public key:
+
+   ```bash
+   cat ~/.ssh/id_ed25519.pub
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI... your@institution.edu
+```
+
+Copy this entire line. Add it to GitHub → Settings → SSH and GPG keys → New SSH key.
+:::
+
+4. Test the connection:
+
+   ```bash
+   ssh -T git@github.com
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output (success)
+
+```text
+Hi username! You've successfully authenticated, but GitHub does not provide shell access.
+```
+
+If you see this, SSH is working. The "no shell access" part is expected and normal.
+:::
+
+::: {.callout-tip}
+**If you get "Permission denied (publickey)"**: Run `ssh-add ~/.ssh/id_ed25519` to
+load your key into the SSH agent, then try again. If still failing, confirm the
+key in GitHub Settings matches the output of `cat ~/.ssh/id_ed25519.pub`.
+:::
+
+---
+
+### Exercise 3.2 — Push Your Repository to GitHub
+
+**Goal**: Create a remote repository and push your local commits to it.
+
+**Setup**: Create an empty repository on GitHub first:
+1. Go to github.com → **+** → **New repository**
+2. Name: `rehab-research`
+3. Leave it **completely empty** (no README, no .gitignore, no license)
+4. Copy the SSH URL: `git@github.com:yourusername/rehab-research.git`
+
+**Steps**:
+
+1. Navigate to your local repository:
+
+   ```bash
+   cd ~/rehab-research
+   git status
+   ```
+
+2. Add the remote:
+
+   ```bash
+   git remote add origin git@github.com:yourusername/rehab-research.git
+   git remote -v
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+origin	git@github.com:yourusername/rehab-research.git (fetch)
+origin	git@github.com:yourusername/rehab-research.git (push)
+```
+:::
+
+3. Push your commits:
+
+   ```bash
+   git push -u origin main
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+Enumerating objects: 12, done.
+Counting objects: 100% (12/12), done.
+Delta compression using up to 8 threads
+Compressing objects: 100% (8/8), done.
+Writing objects: 100% (12/12), 1.02 KiB | 1.02 MiB/s, done.
+Total 12 (delta 2), reused 0 (delta 0), pack-reused 0
+To git@github.com:yourusername/rehab-research.git
+ * [new branch]      main -> main
+Branch 'main' set up to track remote branch 'main' from 'origin'.
+```
+
+`[new branch]` confirms the remote branch was created. "set up to track" means
+future `git push` and `git pull` will use this remote automatically.
+:::
+
+4. Verify the push worked:
+
+   ```bash
+   git log --oneline origin/main
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+b3a2c1d (HEAD -> main, origin/main) Add: .gitignore to exclude data files
+1a5f3b2 Add: filter_complete_cases to exclude missing grip strength values
+9d4c7e1 Add: normalize_balance function for balance index scores
+3f2a1b4 Add: initial analysis script with dplyr and tidyr
+```
+
+`origin/main` now appears in the log alongside `main` — they are in sync.
+:::
+
+---
+
+### Exercise 3.3 — Trigger and Fix a Rejected Push
+
+**Goal**: Deliberately create a diverged history, encounter the "rejected" error, and fix it.
+
+**Context**: This simulates what happens when a collaborator pushes while you are working.
+
+**Steps**:
+
+1. Make a local commit:
+
+   ```bash
+   echo "# Wave 2 analysis placeholder" >> docs/protocol.md
+   git add docs/protocol.md
+   git commit -m "Docs: add Wave 2 placeholder to protocol"
+   ```
+
+2. Use `git commit --amend` to change the commit (this rewrites its hash, creating divergence):
+
+   ```bash
+   git commit --amend -m "Docs: Wave 2 data collection protocol placeholder"
+   ```
+
+3. Attempt to push:
+
+   ```bash
+   git push origin main
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output (the rejected error)
+
+```text
+ ! [rejected]        main -> main (non-fast-forward)
+error: failed to push some refs to 'git@github.com:yourusername/rehab-research.git'
+hint: Updates were rejected because the remote contains work that you do not
+hint: have locally. Integrate the remote changes (e.g.
+hint: 'git pull --rebase ...') before pushing again.
+```
+
+Git is telling you: the remote has commits your local branch does not have.
+The hint even tells you the fix: `git pull --rebase`.
+:::
+
+4. Fix it with rebase-pull:
+
+   ```bash
+   git pull --rebase origin main
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+Successfully rebased and updated refs/heads/main.
+```
+
+Or if there is a conflict, it will show the conflicting files. For this exercise
+there should be none.
+:::
+
+5. Push again:
+
+   ```bash
+   git push origin main
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+Enumerating objects: 5, done.
+...
+To git@github.com:yourusername/rehab-research.git
+   b3a2c1d..c4d5e6f  main -> main
+```
+
+Success. The push went through.
+:::
+
+**What you learned**:
+
+- Rejected push = remote has commits you do not have locally
+- `git pull --rebase origin main` is the standard fix
+- `--rebase` replays your commits on top of the fetched commits (cleaner than merge)
+
+::: {.callout-warning}
+## Common Mistakes
+
+- **Using `git push --force`**: This overwrites the remote history and can delete collaborators' work. Never use `--force` on a shared branch. Use `--rebase` instead.
+- **`git pull` without `--rebase`**: Creates an unnecessary merge commit. Prefer `--rebase` for keeping history clean.
+:::
+
+---
+
+## Summary
+
+You can now:
+
+- Generate SSH keys and authenticate with GitHub
+- Add a remote and push with `git push -u origin main`
+- Verify remote sync with `git log --oneline origin/main`
+- Diagnose and fix a rejected push with `git pull --rebase`
+
+**You are ready for [Module 04 — Branching](../modules/04-branching.qmd).**
