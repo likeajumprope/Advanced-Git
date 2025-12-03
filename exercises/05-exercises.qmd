@@ -1,0 +1,316 @@
+---
+title: "Exercises: Module 05 — Merging and Conflicts"
+module: 5
+exercise_count: 2
+estimated_minutes: 30
+platform_tested:
+  - macos-14
+  - ubuntu-24.04
+  - windows-gitbash-2.44
+---
+
+## Before You Begin
+
+Complete [Module 05](../modules/05-merging.qmd) and [Exercises 04](04-exercises.qmd).
+You should have at least two branches in `~/rehab-research/`.
+
+---
+
+### Exercise 5.1 — Create and Resolve a Merge Conflict
+
+**Goal**: Deliberately create a conflict between two branches, then resolve it using nano.
+
+**Setup**:
+
+1. Make sure you are on `main`:
+
+   ```bash
+   cd ~/rehab-research
+   git switch main
+   ```
+
+2. Modify line 3 of `analysis.R` on `main`:
+
+   ```bash
+   # View current content
+   cat -n scripts/analysis.R
+   ```
+
+   Edit with nano and change the `normalize_balance` function body:
+
+   ```bash
+   nano scripts/analysis.R
+   ```
+
+   Change the normalize function to:
+   ```text
+   normalize_balance <- function(x) (x - mean(x)) / sd(x)
+   ```
+
+   Save: **Ctrl+O**, **Return**, **Ctrl+X**
+
+   ```bash
+   git add scripts/analysis.R
+   git commit -m "Fix: use z-score normalization for balance index"
+   ```
+
+3. Switch to `feature/add-grip-strength-measure` and make a DIFFERENT change to the same line:
+
+   ```bash
+   git switch feature/add-grip-strength-measure
+   nano scripts/analysis.R
+   ```
+
+   Change the normalize function to:
+   ```text
+   normalize_balance <- function(x) (x - min(x)) / (max(x) - min(x)) * 100
+   ```
+
+   Save and commit:
+
+   ```bash
+   git add scripts/analysis.R
+   git commit -m "Fix: use min-max normalization (0-100 range) for balance"
+   ```
+
+**Now create the conflict**:
+
+4. Switch to `main` and attempt to merge:
+
+   ```bash
+   git switch main
+   git merge feature/add-grip-strength-measure
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output (conflict)
+
+```text
+Auto-merging scripts/analysis.R
+CONFLICT (content): Merge conflict in scripts/analysis.R
+Automatic merge failed; fix conflicts and then commit the result.
+```
+:::
+
+5. Check the conflict status:
+
+   ```bash
+   git status
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+On branch main
+You have unmerged paths.
+  (fix conflicts and run "git merge --continue")
+  (use "git merge --abort" to abort the merge)
+
+Unmerged paths:
+  (use "git add <file>..." to mark resolution)
+        both modified:   scripts/analysis.R
+```
+:::
+
+6. View the conflict markers:
+
+   ```bash
+   cat scripts/analysis.R
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+library(dplyr)
+library(tidyr)
+
+<<<<<<< HEAD
+normalize_balance <- function(x) (x - mean(x)) / sd(x)
+=======
+normalize_balance <- function(x) (x - min(x)) / (max(x) - min(x)) * 100
+>>>>>>> feature/add-grip-strength-measure
+
+filter_complete_cases <- function(df) dplyr::filter(df, !is.na(grip_strength))
+measure_grip_strength <- function(hand, trials) mean(trials[hand])
+```
+
+HEAD version = z-score (your main branch).
+Feature version = min-max (incoming branch).
+:::
+
+7. Resolve the conflict using nano:
+
+   ```bash
+   nano scripts/analysis.R
+   ```
+
+   Delete the three marker lines and the z-score version, keeping the min-max version:
+
+   ```text
+   normalize_balance <- function(x) (x - min(x)) / (max(x) - min(x)) * 100
+   ```
+
+   Save and exit.
+
+8. Verify no conflict markers remain:
+
+   ```bash
+   cat scripts/analysis.R
+   ```
+
+   Confirm: no `<<<<<<<`, `=======`, or `>>>>>>>` in the file.
+
+9. Complete the merge:
+
+   ```bash
+   git add scripts/analysis.R
+   git status
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+On branch main
+All conflicts fixed but you are still merging.
+  (use "git merge --continue" to continue)
+  (use "git merge --abort" to abort the merge)
+
+Changes to be committed:
+        modified:   scripts/analysis.R
+```
+:::
+
+   ```bash
+   git merge --continue
+   ```
+
+   Nano opens for the merge commit message — save the default and exit.
+
+10. Verify the merge:
+
+    ```bash
+    git log --oneline --graph --all
+    ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+*   a7b8c9d (HEAD -> main) Merge branch 'feature/add-grip-strength-measure'
+|\
+| * 3c4d5e6 Fix: use min-max normalization for balance
+* | 9f0a1b2 Fix: use z-score normalization for balance index
+|/
+* 1a5f3b2 Add: filter_complete_cases to exclude missing values
+```
+
+The diamond shape shows the divergence and merge. Both lines of work combined.
+:::
+
+**What you learned**:
+
+- Conflict markers (`<<<<<<<`, `=======`, `>>>>>>>`) show both versions
+- You must delete ALL three markers and choose the content you want
+- `git add` after editing marks the conflict as resolved
+- `git merge --continue` completes the merge
+
+::: {.callout-warning}
+## Common Mistakes
+
+- **Left conflict markers in the file**: `git add` will succeed, but the file will be broken. Always `cat` the file to verify before staging.
+- **Used `git commit` instead of `git merge --continue`**: Both work when in a merge state, but `git merge --continue` is more explicit about your intent.
+:::
+
+---
+
+### Exercise 5.2 — Abort a Merge
+
+**Goal**: Practice aborting a merge and returning to a clean state.
+
+**Setup**: Create another conflict situation.
+
+**Steps**:
+
+1. Create a new branch and modify `analysis.R`:
+
+   ```bash
+   git switch -c fix/alternative-filter
+   echo "" >> scripts/analysis.R
+   echo "filter_by_age <- function(df, min_age) dplyr::filter(df, age >= min_age)" >> scripts/analysis.R
+   git add scripts/analysis.R
+   git commit -m "Add: filter_by_age function for age-based inclusion criteria"
+   ```
+
+2. Modify the same lines on `main`:
+
+   ```bash
+   git switch main
+   echo "" >> scripts/analysis.R
+   echo "filter_by_age <- function(df, max_age) dplyr::filter(df, age <= max_age)" >> scripts/analysis.R
+   git add scripts/analysis.R
+   git commit -m "Add: filter_by_age with upper age limit for exclusion"
+   ```
+
+3. Attempt the merge:
+
+   ```bash
+   git merge fix/alternative-filter
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+Auto-merging scripts/analysis.R
+CONFLICT (content): Merge conflict in scripts/analysis.R
+Automatic merge failed; fix conflicts and then commit the result.
+```
+:::
+
+4. Decide you are not ready — abort:
+
+   ```bash
+   git merge --abort
+   ```
+
+5. Verify the working directory is clean:
+
+   ```bash
+   git status
+   cat scripts/analysis.R
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output of `git status`
+
+```text
+On branch main
+nothing to commit, working tree clean
+```
+
+The file shows your `main` version with no conflict markers.
+The merge never happened — you are back where you started.
+:::
+
+**What you learned**:
+
+- `git merge --abort` completely reverses the merge attempt
+- You can safely abort at any point before `git merge --continue`
+- Aborting does not affect any commits — only the in-progress merge
+
+---
+
+## Summary
+
+You can now:
+
+- Merge branches with `git merge`
+- Identify conflict markers in a conflicted file
+- Resolve conflicts using nano and `git add`
+- Complete a merge with `git merge --continue`
+- Abort a merge with `git merge --abort`
+
+**You are ready for [Module 06 — Rebase](../modules/06-rebase.qmd).**

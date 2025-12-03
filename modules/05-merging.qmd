@@ -1,0 +1,280 @@
+---
+title: "Module 05: Merging and Conflicts via Terminal"
+description: "Combine branches and resolve merge conflicts using terminal tools only."
+module: 5
+prerequisites:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+learning_objectives:
+  - "Learner can explain the difference between fast-forward and three-way merge"
+  - "Learner can merge a branch using git merge"
+  - "Learner can identify and interpret conflict markers"
+  - "Learner can resolve a merge conflict using nano"
+  - "Learner can abort a merge and return to a clean state"
+platform_coverage:
+  - macos
+  - linux
+  - windows-gitbash
+  - windows-wsl2
+---
+
+## Overview
+
+Branching creates parallel lines of work. Merging brings them back together.
+Sometimes Git can merge automatically; sometimes the same lines were changed in
+both branches and you must choose which version to keep. This module teaches you
+to handle both cases entirely from the terminal.
+
+## Prerequisites
+
+- [Module 04 — Branching](04-branching.qmd)
+- Your `~/rehab-research/` repository has at least one feature branch
+
+---
+
+### Fast-Forward vs Three-Way Merge
+
+Git chooses the merge strategy automatically based on the history.
+
+**Fast-forward merge**: The feature branch is ahead of main with no divergence.
+Git just moves the `main` pointer forward — no merge commit needed.
+
+```{mermaid}
+%%{init: {'gitGraph': {'theme': 'dark'}} }%%
+gitGraph
+   commit id: "Initial"
+   commit id: "Add normalize"
+   branch feature/grip
+   commit id: "Add grip fn"
+   commit id: "Add tests"
+   checkout main
+   merge feature/grip id: "Fast-forward"
+```
+
+**Three-way merge**: Both branches have commits the other does not.
+Git finds the common ancestor and creates a new merge commit.
+
+```{mermaid}
+%%{init: {'gitGraph': {'theme': 'dark'}} }%%
+gitGraph
+   commit id: "Initial"
+   commit id: "Add normalize"
+   branch feature/grip
+   commit id: "Add grip fn"
+   checkout main
+   commit id: "Fix protocol"
+   merge feature/grip id: "Merge commit"
+```
+
+---
+
+### git merge: Combining Branches
+
+To merge a feature branch into `main`:
+
+```bash
+git switch main                             # be on the branch you are merging INTO
+git merge feature/add-grip-strength-measure
+```
+
+**Fast-forward output**:
+```text
+Updating 1a5f3b2..3c4d5e6
+Fast-forward
+ scripts/analysis.R | 4 ++++
+ 1 file changed, 4 insertions(+)
+```
+
+**Three-way merge output**:
+```text
+Merge made by the 'ort' strategy.
+ scripts/analysis.R | 4 ++++
+ 1 file changed, 4 insertions(+)
+```
+
+A merge commit is created automatically. Git opens your configured editor
+for the merge commit message — press **Ctrl+O**, **Return**, **Ctrl+X** in
+nano to save the default message.
+
+---
+
+### Understanding Merge Conflicts
+
+A conflict occurs when both branches modified the same lines of the same file.
+Git cannot choose automatically — it needs your decision.
+
+When does it happen:
+- Branch A changes line 5 of `analysis.R`
+- Branch B also changes line 5 of `analysis.R`
+- Git merges them → conflict on line 5
+
+During a conflict, `git status` shows:
+
+```bash
+git status
+```
+
+```text
+On branch main
+You have unmerged paths.
+  (fix conflicts and run "git merge --continue")
+  (use "git merge --abort" to abort the merge)
+
+Unmerged paths:
+  (use "git add <file>..." to mark resolution)
+        both modified:   scripts/analysis.R
+```
+
+---
+
+### Conflict Markers Explained
+
+Open the conflicting file with `cat`:
+
+```bash
+cat scripts/analysis.R
+```
+
+```text
+library(dplyr)
+library(tidyr)
+
+<<<<<<< HEAD
+normalize_balance <- function(x) (x - min(x)) / (max(x) - min(x)) * 100
+=======
+normalize_balance <- function(x) scale(x, center = TRUE, scale = TRUE)
+>>>>>>> feature/alternative-normalization
+
+filter_complete_cases <- function(df) dplyr::filter(df, !is.na(grip_strength))
+```
+
+Reading the markers:
+
+| Marker | Meaning |
+|--------|---------|
+| `<<<<<<< HEAD` | Start of YOUR version (current branch) |
+| `=======` | Divider between the two versions |
+| `>>>>>>> branch-name` | End of THEIR version (branch being merged in) |
+
+Everything between `<<<<<<<` and `=======` is your version.
+Everything between `=======` and `>>>>>>>` is the incoming version.
+
+---
+
+### Resolving Conflicts with nano
+
+1. Open the file in nano:
+
+   ```bash
+   nano scripts/analysis.R
+   ```
+
+2. Navigate to the conflict markers using arrow keys.
+
+3. Delete the three marker lines AND one of the two versions, keeping only
+   the content you want. For example, to keep the incoming version:
+
+   Before:
+   ```text
+   <<<<<<< HEAD
+   normalize_balance <- function(x) (x - min(x)) / (max(x) - min(x)) * 100
+   =======
+   normalize_balance <- function(x) scale(x, center = TRUE, scale = TRUE)
+   >>>>>>> feature/alternative-normalization
+   ```
+
+   After (keeping the incoming version):
+   ```text
+   normalize_balance <- function(x) scale(x, center = TRUE, scale = TRUE)
+   ```
+
+4. Save and exit: **Ctrl+O**, **Return**, **Ctrl+X**
+
+5. Verify the file looks correct:
+
+   ```bash
+   cat scripts/analysis.R
+   ```
+
+   No `<<<<<<<`, `=======`, or `>>>>>>>` should remain.
+
+---
+
+### Completing the Merge
+
+After resolving all conflicts:
+
+```bash
+git add scripts/analysis.R     # mark the file as resolved
+git status                     # should show "All conflicts fixed but you are still merging"
+git merge --continue           # complete the merge (opens editor for merge commit message)
+```
+
+Or in one step after staging all resolved files:
+
+```bash
+git commit                     # equivalent to merge --continue when in a merge state
+```
+
+Verify:
+
+```bash
+git log --oneline --graph --all
+```
+
+```text
+*   a1b2c3d (HEAD -> main) Merge branch 'feature/alternative-normalization'
+|\
+| * 8e9f0a1 (feature/alternative-normalization) Try scale() for normalization
+* | 3c4d5e6 Fix: correct normalize baseline reference
+|/
+* 1a5f3b2 Add: normalize_balance function
+```
+
+---
+
+### Aborting a Merge
+
+If you want to undo the merge attempt and return to the pre-merge state:
+
+```bash
+git merge --abort
+```
+
+```text
+(no output — silence means success)
+```
+
+```bash
+git status
+```
+
+```text
+On branch main
+nothing to commit, working tree clean
+```
+
+The working directory is restored exactly as it was before the merge started.
+Use `--abort` any time you want to reconsider your approach before completing.
+
+---
+
+## Hands-on Exercise
+
+**[Exercises 05 →](../exercises/05-exercises.qmd)**
+
+**Quick check**: After a successful merge:
+
+```bash
+git log --oneline --graph --all
+```
+
+You should see either a straight line (fast-forward) or a diamond shape (three-way).
+
+## What's Next
+
+In **[Module 06 — Rebase](06-rebase.qmd)**, you will learn a cleaner alternative
+to merge for certain situations — rewriting history to make it linear and readable.
