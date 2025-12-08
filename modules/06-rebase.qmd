@@ -1,0 +1,380 @@
+---
+title: "Module 06: Rebase via Terminal"
+description: "Create a clean, linear history by replaying commits onto a new base and squashing exploratory work."
+module: 6
+prerequisites:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+learning_objectives:
+  - "Learner can explain the difference between merge and rebase"
+  - "Learner can rebase a feature branch onto an updated main"
+  - "Learner can use interactive rebase to squash and reword commits"
+  - "Learner can apply the golden rule: never rebase shared history"
+  - "Learner can resolve a rebase conflict and continue or abort"
+platform_coverage:
+  - macos
+  - linux
+  - windows-gitbash
+  - windows-wsl2
+---
+
+## Overview
+
+Rebase is an alternative to merge that rewrites history to be linear. Instead of
+creating a merge commit, rebase "replays" your commits on top of another branch's
+tip. The result looks as if you had started your work from the latest point in the
+target branch — no diamond shapes, no merge commits.
+
+## Prerequisites
+
+- [Module 05 — Merging and Conflicts](05-merging.qmd)
+- At least one feature branch in `~/rehab-research/`
+
+---
+
+### git rebase: Moving Branch History
+
+When you rebase `feature` onto `main`, Git:
+
+1. Finds the common ancestor of both branches
+2. Saves each commit on `feature` as a patch
+3. Resets `feature` to point at `main`'s tip
+4. Re-applies each patch in order
+
+**Before rebase**:
+
+```{mermaid}
+%%{init: {'gitGraph': {'theme': 'dark'}} }%%
+gitGraph
+   commit id: "Initial"
+   commit id: "Add normalize"
+   branch feature/grip
+   commit id: "Add grip fn"
+   commit id: "Add tests"
+   checkout main
+   commit id: "Fix protocol"
+```
+
+**After `git rebase main` on the feature branch**:
+
+```{mermaid}
+%%{init: {'gitGraph': {'theme': 'dark'}} }%%
+gitGraph
+   commit id: "Initial"
+   commit id: "Add normalize"
+   commit id: "Fix protocol"
+   branch feature/grip
+   commit id: "Add grip fn (rebased)"
+   commit id: "Add tests (rebased)"
+```
+
+The feature commits have new hashes (because their parent changed) but contain
+identical changes.
+
+---
+
+### Merge vs Rebase: When to Use Each
+
+| Situation | Recommended | Reason |
+|-----------|-------------|--------|
+| Bringing a **personal** feature branch up to date | `git rebase main` | Creates linear, readable history |
+| Merging a **completed feature** into `main` | `git merge` (or PR) | Preserves the context of when feature was developed |
+| **Shared branch** that others have pulled | **Never rebase** | Rewrites hashes — breaks teammates' history |
+| Cleaning up **local WIP commits** before sharing | `git rebase -i` | Squash into meaningful commits before pushing |
+
+**Research context**: Your personal analysis branches are safe to rebase. The `main`
+branch and any branch you have pushed and shared with a collaborator must never be
+rebased.
+
+---
+
+### Basic Rebase: Updating a Feature Branch
+
+To bring your feature branch up to date with `main`:
+
+```bash
+# Step 1: Update main
+git switch main
+git pull origin main
+
+# Step 2: Switch to your feature branch
+git switch feature/add-grip-strength-measure
+
+# Step 3: Rebase onto main
+git rebase main
+```
+
+**If no conflicts**:
+
+```text
+Successfully rebased and updated refs/heads/feature/add-grip-strength-measure.
+```
+
+**Verify the result**:
+
+```bash
+git log --oneline --graph --all
+```
+
+```text
+* 7e8f9a0 (HEAD -> feature/add-grip-strength-measure) Add: measure_grip_strength function
+* 3c4d5e6 (main) Fix: correct protocol description
+* 1a5f3b2 Add: normalize_balance function
+* 9d4c7e1 Add: initial analysis script
+```
+
+A straight line — no merge commit needed.
+
+---
+
+### Interactive Rebase: git rebase -i
+
+Interactive rebase (`-i`) opens an editor showing the commits you are about to
+replay. You can reorder, edit, squash, or drop them.
+
+```bash
+git rebase -i HEAD~4
+```
+
+Nano (or your configured editor) opens with a todo list:
+
+```text
+pick 3f2a1b4 WIP: starting normalize function
+pick 9d4c7e1 WIP: still working on it
+pick 1a5f3b2 maybe this works
+pick a7b8c9d done with normalize
+
+# Rebase 2e3f4a5..a7b8c9d onto 2e3f4a5 (4 commands)
+#
+# Commands:
+# p, pick <commit> = use commit
+# r, reword <commit> = use commit, but edit the commit message
+# e, edit <commit> = use commit, but stop for amending
+# s, squash <commit> = use commit, but meld into previous commit
+# f, fixup <commit> = like "squash", but discard this commit's log message
+# d, drop <commit> = remove commit
+#
+# If you remove a line, that commit is DROPPED.
+# ...
+```
+
+**Format of each line**: `command hash short-message`
+
+Available commands:
+
+| Command | Alias | What it does |
+|---------|-------|--------------|
+| `pick` | `p` | Keep the commit as-is |
+| `reword` | `r` | Keep the commit but edit its message |
+| `edit` | `e` | Pause rebase here to amend the commit |
+| `squash` | `s` | Combine with previous commit; keep both messages |
+| `fixup` | `f` | Combine with previous commit; discard this message |
+| `drop` | `d` | Remove this commit entirely |
+
+::: {.callout-warning}
+## Line Order = Commit Order
+
+The topmost line = oldest commit (bottom of `git log`).
+The bottommost line = newest commit (top of `git log`).
+Reordering lines in the editor reorders commits in history.
+:::
+
+---
+
+### Squashing Commits
+
+**Goal**: Collapse 6 exploratory WIP commits into 2 meaningful research commits.
+
+**Before**:
+
+```bash
+git log --oneline
+```
+
+```text
+f1e2d3c done
+e2d3c4b getting closer
+d3c4b5a maybe
+c4b5a6d trying this
+b5a6d7e still working
+a6d7e8f WIP: add normalize function
+```
+
+Run interactive rebase:
+
+```bash
+git rebase -i HEAD~6
+```
+
+Editor opens. Change to:
+
+```text
+pick a6d7e8f WIP: add normalize function
+squash b5a6d7e still working
+squash c4b5a6d trying this
+squash d3c4b5a maybe
+pick e2d3c4b getting closer
+squash f1e2d3c done
+```
+
+Save and exit. Git applies the first group, then opens an editor for the combined
+commit message:
+
+```text
+# This is a combination of 4 commits.
+# This is the 1st commit message:
+
+WIP: add normalize function
+
+# This is the commit message #2:
+
+still working
+...
+```
+
+Delete everything and write a clean message:
+
+```text
+Add: normalize_balance function with z-score and min-max implementations
+```
+
+Save. Git applies the second group (commits 5–6), opens another editor:
+
+```text
+Add: validate normalize_balance against reference values
+```
+
+Save. Verify:
+
+```bash
+git log --oneline
+```
+
+```text
+9a8b7c6 Add: validate normalize_balance against reference values
+4d5e6f7 Add: normalize_balance function with z-score and min-max implementations
+```
+
+Six commits became two — history is now lab-notebook quality.
+
+---
+
+### Rewording Commit Messages
+
+To change only the commit message without touching the content:
+
+```bash
+git rebase -i HEAD~3
+```
+
+Change `pick` to `reword` for the commits you want to rename:
+
+```text
+reword 1a2b3c4 fix normalization
+pick   5d6e7f8 Add: filter complete cases
+reword 9a0b1c2 update analysis
+```
+
+Save. Git opens an editor for each `reword` commit separately. Write the improved
+message and save. After all rewording is done:
+
+```bash
+git log --oneline
+```
+
+```text
+3c4d5e6 Fix: use z-score normalization to match published protocol
+5d6e7f8 Add: filter complete cases to exclude missing grip values
+9a0b1c2 Update: refactor analysis script for readability
+```
+
+---
+
+### The Golden Rule of Rebase
+
+::: {.callout-important}
+## Never Rebase Shared History
+
+Once commits are on a remote branch that others have pulled, **do not rebase them**.
+
+**Why**: Rebase creates new commit hashes. If a collaborator has the old hashes
+in their local repository, their history diverges from the rebased history. Git
+sees these as different commits and cannot automatically reconcile them. The result
+is a tangled history far worse than the WIP commits you were trying to clean up.
+
+**Safe to rebase**:
+- Local branches you have never pushed
+- Branches you have pushed but **no one else has pulled**
+
+**Never rebase**:
+- `main` / `master`
+- Any branch a collaborator has cloned or checked out
+- Any branch you have opened a pull request on
+:::
+
+---
+
+### Rebase Conflicts
+
+When replaying commits, a conflict can occur — the same resolution process as merge:
+
+```bash
+git rebase main
+```
+
+```text
+Auto-merging scripts/analysis.R
+CONFLICT (content): Merge conflict in scripts/analysis.R
+error: could not apply 3c4d5e6... Add: normalize function
+hint: Resolve all conflicts manually, mark them as resolved with
+hint: "git add/rm <conflicted_files>", then run "git rebase --continue".
+hint: You can instead skip this commit: run "git rebase --skip".
+hint: To abort and get back to the state before "git rebase", run "git rebase --abort".
+```
+
+Resolve:
+
+```bash
+# 1. Open and fix the conflict markers
+nano scripts/analysis.R
+
+# 2. Stage the resolved file
+git add scripts/analysis.R
+
+# 3. Continue replaying
+git rebase --continue
+```
+
+Or abort to return to the pre-rebase state:
+
+```bash
+git rebase --abort
+```
+
+```text
+(silence = success)
+```
+
+---
+
+## Hands-on Exercise
+
+**[Exercises 06 →](../exercises/06-exercises.qmd)**
+
+**Quick check**: After a successful rebase onto main:
+
+```bash
+git log --oneline --graph --all
+```
+
+You should see a straight line — no diamond merge commit.
+
+## What's Next
+
+In **[Module 07 — Advanced Operations](07-advanced-operations.qmd)**, you will learn
+tools for inspecting history, searching for changes, stashing work-in-progress, and
+tagging analysis versions.

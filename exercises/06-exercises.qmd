@@ -1,0 +1,237 @@
+---
+title: "Exercises: Module 06 — Rebase"
+module: 6
+exercise_count: 2
+estimated_minutes: 30
+platform_tested:
+  - macos-14
+  - ubuntu-24.04
+  - windows-gitbash-2.44
+---
+
+## Before You Begin
+
+Complete [Module 06](../modules/06-rebase.qmd) and [Exercises 05](05-exercises.qmd).
+You should be on `main` in `~/rehab-research/` with a clean working tree.
+
+---
+
+### Exercise 6.1 — Squash Exploratory Commits
+
+**Goal**: Practice using interactive rebase to clean up WIP commits into
+research-quality commit messages before sharing.
+
+**Setup**: Create a branch with exploratory commits that simulate real research
+iteration.
+
+1. Create a new branch for exploratory analysis:
+
+   ```bash
+   cd ~/rehab-research
+   git switch -c feature/exploratory-analysis
+   ```
+
+2. Create 6 small WIP commits:
+
+   ```bash
+   echo "# explore grip" >> scripts/analysis.R
+   git add scripts/analysis.R
+   git commit -m "WIP"
+
+   echo "# try sd" >> scripts/analysis.R
+   git add scripts/analysis.R
+   git commit -m "still working"
+
+   echo "# maybe z-score" >> scripts/analysis.R
+   git add scripts/analysis.R
+   git commit -m "trying this"
+
+   echo "# reference Smith 2024" >> scripts/analysis.R
+   git add scripts/analysis.R
+   git commit -m "maybe"
+
+   echo "# confirmed formula" >> scripts/analysis.R
+   git add scripts/analysis.R
+   git commit -m "getting closer"
+
+   echo "explore_grip <- function(x) scale(x)" >> scripts/analysis.R
+   git add scripts/analysis.R
+   git commit -m "done"
+   ```
+
+3. Verify the messy history:
+
+   ```bash
+   git log --oneline
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+f1e2d3c done
+e2d3c4b getting closer
+d3c4b5a maybe
+c4b5a6d trying this
+b5a6d7e still working
+a6d7e8f WIP
+1a5f3b2 (main) Fix: use z-score normalization for balance index
+...
+```
+
+Six WIP commits sit on top of the last `main` commit.
+:::
+
+4. Start interactive rebase to squash the 6 commits into 2:
+
+   ```bash
+   git rebase -i HEAD~6
+   ```
+
+   Nano opens with the todo list. Change it to:
+
+   ```text
+   pick a6d7e8f WIP
+   squash b5a6d7e still working
+   squash c4b5a6d trying this
+   squash d3c4b5a maybe
+   pick e2d3c4b getting closer
+   squash f1e2d3c done
+   ```
+
+   Save: **Ctrl+O**, **Return**, **Ctrl+X**
+
+5. Git opens an editor for the first combined commit message. Replace all existing
+   lines with:
+
+   ```text
+   Explore: investigate z-score normalization approaches for grip strength
+   ```
+
+   Save and exit.
+
+6. Git opens a second editor for the second combined commit message. Replace with:
+
+   ```text
+   Add: explore_grip function using scale() for z-score normalization
+   ```
+
+   Save and exit.
+
+7. Verify the clean history:
+
+   ```bash
+   git log --oneline
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+9a8b7c6 Add: explore_grip function using scale() for z-score normalization
+4d5e6f7 Explore: investigate z-score normalization approaches for grip strength
+1a5f3b2 (main) Fix: use z-score normalization for balance index
+...
+```
+
+Six commits became two — the history now reads like a lab notebook, not a draft
+of notes.
+:::
+
+::: {.callout-warning}
+## Common Mistakes
+
+- **Accidentally dropping a commit**: If you delete a line from the rebase todo list,
+  that commit's changes are dropped permanently. Use `drop` explicitly when you
+  intend to remove changes.
+- **Exiting the editor without saving**: On nano, **Ctrl+C** cancels without saving.
+  The rebase aborts and asks you to resolve. Run `git rebase --abort` to return to
+  the pre-rebase state.
+- **Confusing squash and fixup**: `squash` keeps both messages (and opens an editor
+  to combine them). `fixup` keeps only the first message silently. Use `fixup` when
+  the later commits are trivial fixes with no useful message.
+:::
+
+---
+
+### Exercise 6.2 — Reword Commit Messages
+
+**Goal**: Fix commit messages that do not follow the research lab format, using
+`reword` in interactive rebase.
+
+**Steps**:
+
+1. Check your current history on `feature/exploratory-analysis`:
+
+   ```bash
+   git log --oneline -5
+   ```
+
+2. Start an interactive rebase to reword the top 2 commits:
+
+   ```bash
+   git rebase -i HEAD~2
+   ```
+
+3. Change both `pick` to `reword`:
+
+   ```text
+   reword 9a8b7c6 Add: explore_grip function using scale() for z-score normalization
+   reword 4d5e6f7 Explore: investigate z-score normalization approaches for grip strength
+   ```
+
+   Save and exit.
+
+4. Git opens an editor for the first commit. Improve the message to include context:
+
+   ```text
+   Add: explore_grip() function using scale() — matches Smith et al. (2024) protocol
+   ```
+
+   Save and exit.
+
+5. Git opens an editor for the second commit. Improve it:
+
+   ```text
+   Explore: compare min-max, z-score, and scale() normalization for grip strength index
+   ```
+
+   Save and exit.
+
+6. Verify the improved messages:
+
+   ```bash
+   git log --oneline -3
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+b3c4d5e Add: explore_grip() function using scale() — matches Smith et al. (2024) protocol
+7e8f9a0 Explore: compare min-max, z-score, and scale() normalization for grip strength index
+1a5f3b2 (main) Fix: use z-score normalization for balance index
+```
+
+Both messages now follow the `Type: description — context` format with research references.
+:::
+
+**What you learned**:
+
+- `git rebase -i HEAD~N` opens an interactive editor for the top N commits
+- `squash` folds a commit into the previous one (combines messages)
+- `fixup` folds a commit silently (discards its message)
+- `reword` lets you edit a message without touching the content
+- Interactive rebase rewrites hashes — only use it on branches you have not shared
+
+---
+
+## Summary
+
+You can now:
+
+- Use `git rebase -i` to squash, fixup, and reword commits
+- Create research-quality commit histories before opening a pull request
+- Abort an in-progress rebase with `git rebase --abort`
+
+**You are ready for [Module 07 — Advanced Operations](../modules/07-advanced-operations.qmd).**
