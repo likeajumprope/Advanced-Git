@@ -1,0 +1,411 @@
+---
+title: "Module 07: Advanced Git Operations"
+description: "Inspect commits in depth, search history, stash work in progress, tag releases, and cherry-pick fixes."
+module: 7
+prerequisites:
+  - 0
+  - 1
+  - 2
+learning_objectives:
+  - "Learner can inspect any commit's full diff with git show"
+  - "Learner can search commit history for added/removed code with git log -S"
+  - "Learner can use git blame to trace when a line of code was introduced"
+  - "Learner can stash and restore work in progress with git stash"
+  - "Learner can tag analysis versions with annotated tags"
+  - "Learner can cherry-pick a specific commit onto another branch"
+platform_coverage:
+  - macos
+  - linux
+  - windows-gitbash
+  - windows-wsl2
+---
+
+## Overview
+
+The commands you have learned so far cover 90% of daily Git use. This module covers
+the remaining operations researchers reach for when auditing their analysis history,
+recovering interrupted work, and preparing code for publication.
+
+## Prerequisites
+
+- [Module 02 — Basic Workflow](02-basic-workflow.qmd) (git log, git diff)
+- Familiarity with branches helps but is not required for most sections
+
+---
+
+### git show: Inspect a Commit
+
+`git show` displays the full detail of any commit: author, date, message, and the
+complete diff of changes.
+
+```bash
+git show HEAD
+```
+
+```text
+commit 3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2
+Author: Dr. J. Bayer <j.bayer@rehab-institute.edu>
+Date:   Mon Feb 28 14:23:11 2026 +0100
+
+    Fix: use z-score normalization for balance index
+
+    Changed from min-max to z-score normalization to match the
+    published protocol (Smith et al., 2024, Table 2).
+
+diff --git a/scripts/analysis.R b/scripts/analysis.R
+index a1b2c3d..4e5f6a7 100644
+--- a/scripts/analysis.R
++++ b/scripts/analysis.R
+@@ -3,4 +3,4 @@ library(tidyr)
+-normalize_balance <- function(x) (x - min(x)) / (max(x) - min(x)) * 100
++normalize_balance <- function(x) (x - mean(x)) / sd(x)
+```
+
+Show a specific commit by hash:
+
+```bash
+git show 1a5f3b2
+```
+
+Show only the metadata (no diff):
+
+```bash
+git show --stat HEAD
+```
+
+```text
+commit 3c4d5e6...
+Author: Dr. J. Bayer <j.bayer@rehab-institute.edu>
+Date:   Mon Feb 28 14:23:11 2026 +0100
+
+    Fix: use z-score normalization for balance index
+
+ scripts/analysis.R | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+```
+
+---
+
+### Searching History: git log -S and --grep
+
+**Find commits that added or removed a specific string**:
+
+```bash
+git log -S "normalize_balance"
+```
+
+```text
+commit 9d4c7e1a8b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9
+Author: Dr. J. Bayer <j.bayer@rehab-institute.edu>
+Date:   Sat Feb 22 10:15:33 2026 +0100
+
+    Add: normalize_balance function for balance index scores
+```
+
+`-S` (pickaxe search) finds commits where the string count changed — meaning it was
+added or removed. This answers: "when was this function introduced?"
+
+**Research use**: Your balance scores are wrong. When was the normalization formula
+last changed?
+
+```bash
+git log -S "normalize_balance" --oneline
+```
+
+```text
+3c4d5e6 Fix: use z-score normalization for balance index
+9d4c7e1 Add: normalize_balance function for balance index scores
+```
+
+Two commits touched `normalize_balance`. Inspect both with `git show` to understand
+the full chain of changes.
+
+**Find commits by message pattern**:
+
+```bash
+git log --grep "Fix:" --oneline
+```
+
+```text
+3c4d5e6 Fix: use z-score normalization for balance index
+b2a3c4d Fix: correct normalization formula
+```
+
+`--grep` searches the commit message (not the code). Combine with `-i` for
+case-insensitive search:
+
+```bash
+git log --grep "normalization" -i --oneline
+```
+
+**Combine search flags**:
+
+```bash
+git log -S "normalize_balance" --grep "Fix:" --oneline
+```
+
+When multiple flags are given, Git returns commits matching ALL conditions (AND logic).
+Use `--all-match` explicitly if combining `--grep` multiple times.
+
+---
+
+### git blame: Line-by-Line History
+
+`git blame` shows the last commit to modify each line of a file:
+
+```bash
+git blame scripts/analysis.R
+```
+
+```text
+9d4c7e1a (Dr. J. Bayer     2026-02-22 10:15:33 +0100  1) library(dplyr)
+9d4c7e1a (Dr. J. Bayer     2026-02-22 10:15:33 +0100  2) library(tidyr)
+9d4c7e1a (Dr. J. Bayer     2026-02-22 10:15:33 +0100  3)
+3c4d5e6f (Dr. J. Bayer     2026-02-28 14:23:11 +0100  4) normalize_balance <- function(x) (x - mean(x)) / sd(x)
+1a5f3b2c (M. Kwame          2026-02-25 09:42:07 +0100  5) filter_complete_cases <- function(df) dplyr::filter(df, !is.na(grip_strength))
+```
+
+Each line shows: `hash (Author Date Time Zone LineNo) content`
+
+**Research use**: A statistical reviewer asks "who introduced the grip strength filter
+and when?" — `git blame` answers in seconds.
+
+Show only a line range:
+
+```bash
+git blame -L 4,6 scripts/analysis.R
+```
+
+Show the original commit information (ignoring whitespace moves):
+
+```bash
+git blame -w scripts/analysis.R
+```
+
+---
+
+### Stashing: Save Work in Progress
+
+Stash lets you save uncommitted changes temporarily — useful when you need to switch
+tasks without committing incomplete work.
+
+**Save current work**:
+
+```bash
+# You are in the middle of editing analysis.R
+git stash save "WIP: adding grip measure normalization"
+```
+
+```text
+Saved working directory and index state On feature/grip: WIP: adding grip measure normalization
+```
+
+Your working directory is now clean — the changes are stored in the stash stack.
+
+**List stashes**:
+
+```bash
+git stash list
+```
+
+```text
+stash@{0}: On feature/grip: WIP: adding grip measure normalization
+stash@{1}: On main: WIP: protocol section draft
+```
+
+Stashes are numbered from 0 (most recent).
+
+**Restore the most recent stash**:
+
+```bash
+git stash pop
+```
+
+```text
+On branch feature/grip
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   scripts/analysis.R
+
+Dropped stash@{0} (3f2a1b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a)
+```
+
+`pop` restores and removes the stash. Use `apply` to restore without removing:
+
+```bash
+git stash apply stash@{1}   # restore a specific stash without removing it
+```
+
+**Remove a stash without applying**:
+
+```bash
+git stash drop stash@{0}
+```
+
+**Clear all stashes**:
+
+```bash
+git stash clear
+```
+
+::: {.callout-note}
+## Stash Is Not a Backup
+
+Stashes are stored locally in `.git/refs/stash`. They do not push to a remote.
+If you delete the repository, stashes are lost. For longer-term storage of
+experimental work, commit to a `wip/` branch instead.
+:::
+
+---
+
+### Tagging Releases: git tag
+
+Tags mark specific commits as significant — typically version releases or manuscript
+submission points.
+
+**Create an annotated tag** (recommended — stores author, date, and message):
+
+```bash
+git tag -a v1.0.0 -m "Analysis for Wave 1 manuscript submission"
+```
+
+**List all tags**:
+
+```bash
+git tag
+```
+
+```text
+v1.0.0
+```
+
+**Inspect a tag**:
+
+```bash
+git show v1.0.0
+```
+
+```text
+tag v1.0.0
+Tagger: Dr. J. Bayer <j.bayer@rehab-institute.edu>
+Date:   Fri Feb 28 16:00:00 2026 +0100
+
+Analysis for Wave 1 manuscript submission
+
+commit 3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2
+Author: Dr. J. Bayer <j.bayer@rehab-institute.edu>
+Date:   Fri Feb 28 15:45:00 2026 +0100
+
+    Polish: final cleanup before manuscript submission
+...
+```
+
+**Push tags to remote** (tags do not push automatically):
+
+```bash
+git push origin v1.0.0        # push a single tag
+git push origin --tags        # push all tags
+```
+
+**Tag an older commit**:
+
+```bash
+git tag -a v0.9.0 1a5f3b2 -m "Pre-submission analysis checkpoint"
+```
+
+---
+
+### Cherry-Picking: git cherry-pick
+
+Cherry-pick copies a specific commit from one branch to another — useful when you
+need one fix without merging an entire branch.
+
+**Scenario**: You fixed a bug on `fix/normalize-balance-scores` but `main` needs
+that fix now, before the entire fix branch is ready to merge.
+
+```bash
+# Find the commit hash of the fix
+git log fix/normalize-balance-scores --oneline
+```
+
+```text
+7e8f9a0 Fix: correct sd() usage in normalize_balance
+3c4d5e6 Add: initial normalize function
+```
+
+```bash
+# Switch to the branch that needs the fix
+git switch main
+
+# Apply only that one commit
+git cherry-pick 7e8f9a0
+```
+
+```text
+[main 9f0a1b2] Fix: correct sd() usage in normalize_balance
+ Date: Mon Feb 28 11:22:33 2026 +0100
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+```
+
+The fix is now on `main` with a new hash (same content, new parent). The original
+commit on `fix/normalize-balance-scores` is unchanged.
+
+::: {.callout-warning}
+## Cherry-pick Creates Duplicate Commits
+
+When you eventually merge `fix/normalize-balance-scores` into `main`, the cherry-picked
+commit will appear twice in history with different hashes but identical content. This
+is cosmetically messy but functionally harmless. Prefer merging or rebasing when
+possible; use cherry-pick only for urgent targeted fixes.
+:::
+
+---
+
+### Viewing File History: git log -- filename
+
+Show only commits that touched a specific file:
+
+```bash
+git log --oneline -- scripts/analysis.R
+```
+
+```text
+3c4d5e6 Fix: use z-score normalization for balance index
+9d4c7e1 Add: normalize_balance function for balance index scores
+3f2a1b4 Add: initial analysis script with dplyr and tidyr
+```
+
+Combine with `-p` to see the diff at each point:
+
+```bash
+git log -p -- scripts/analysis.R
+```
+
+Show renames (if the file was moved):
+
+```bash
+git log --follow --oneline -- scripts/analysis.R
+```
+
+`--follow` tracks renames across `git mv` operations.
+
+---
+
+## Hands-on Exercise
+
+**[Exercises 07 →](../exercises/07-exercises.qmd)**
+
+**Quick check**: After stashing and popping:
+
+```bash
+git stash list
+```
+
+If the stash was successfully popped, it no longer appears in the list.
+
+## What's Next
+
+In **[Module 08 — Data Management](08-data-management.qmd)**, you will configure
+`.gitignore` for research data, remove accidentally committed files, and audit your
+repository before publication.

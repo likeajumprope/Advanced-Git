@@ -1,0 +1,282 @@
+---
+title: "Exercises: Module 07 — Advanced Operations"
+module: 7
+exercise_count: 2
+estimated_minutes: 25
+platform_tested:
+  - macos-14
+  - ubuntu-24.04
+  - windows-gitbash-2.44
+---
+
+## Before You Begin
+
+Complete [Module 07](../modules/07-advanced-operations.qmd) and [Exercises 06](06-exercises.qmd).
+You should have `~/rehab-research/` with several commits in history.
+
+---
+
+### Exercise 7.1 — Track Down a Change with git log -S
+
+**Goal**: Simulate a real research scenario — your balance scores changed unexpectedly —
+and use `git log -S` to find the exact commit where the normalization formula was modified.
+
+**Setup**: Ensure you have commits that added and modified the `normalize_balance` function.
+If you followed earlier exercises, you already do. If not, create them now:
+
+```bash
+cd ~/rehab-research
+git switch main
+
+# Commit 1: add the function
+echo "normalize_balance <- function(x) (x - min(x)) / (max(x) - min(x)) * 100" >> scripts/analysis.R
+git add scripts/analysis.R
+git commit -m "Add: normalize_balance with min-max scaling"
+
+# Commit 2: change the function
+sed -i.bak 's/normalize_balance <- function(x) (x - min(x)) \/ (max(x) - min(x)) \* 100/normalize_balance <- function(x) (x - mean(x)) \/ sd(x)/' scripts/analysis.R
+git add scripts/analysis.R
+git commit -m "Fix: switch to z-score normalization per Smith et al. (2024)"
+```
+
+**Steps**:
+
+1. Search for all commits that added or removed `normalize_balance`:
+
+   ```bash
+   git log -S "normalize_balance" --oneline
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+3c4d5e6 Fix: switch to z-score normalization per Smith et al. (2024)
+9d4c7e1 Add: normalize_balance with min-max scaling
+```
+
+Two commits appear — the original addition and the modification.
+:::
+
+2. Inspect the most recent change to see exactly what changed:
+
+   ```bash
+   git show 3c4d5e6
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+commit 3c4d5e6...
+Author: Dr. J. Bayer <j.bayer@rehab-institute.edu>
+Date:   ...
+
+    Fix: switch to z-score normalization per Smith et al. (2024)
+
+diff --git a/scripts/analysis.R b/scripts/analysis.R
+index a1b2c3d..4e5f6a7 100644
+--- a/scripts/analysis.R
++++ b/scripts/analysis.R
+@@ -4,4 +4,4 @@ library(tidyr)
+-normalize_balance <- function(x) (x - min(x)) / (max(x) - min(x)) * 100
++normalize_balance <- function(x) (x - mean(x)) / sd(x)
+```
+
+The `-` line shows what was removed, the `+` line shows what replaced it. You can
+now trace exactly when and why the formula changed.
+:::
+
+3. Search by commit message pattern to find all "Fix" commits:
+
+   ```bash
+   git log --grep "Fix:" --oneline
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+3c4d5e6 Fix: switch to z-score normalization per Smith et al. (2024)
+1a5f3b2 Fix: correct normalization formula
+```
+
+All commits whose messages begin with "Fix:" are listed. Useful for extracting
+an audit trail of all corrections made to your analysis.
+:::
+
+4. Use git blame to see who last modified each line of analysis.R:
+
+   ```bash
+   git blame scripts/analysis.R
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+9d4c7e1a (Dr. J. Bayer  2026-02-22  1) library(dplyr)
+9d4c7e1a (Dr. J. Bayer  2026-02-22  2) library(tidyr)
+9d4c7e1a (Dr. J. Bayer  2026-02-22  3)
+3c4d5e6f (Dr. J. Bayer  2026-02-28  4) normalize_balance <- function(x) (x - mean(x)) / sd(x)
+```
+
+Each line shows: hash, author, date, line number, and content. Line 4 (the
+normalize function) was last modified in commit `3c4d5e6f`.
+:::
+
+**What you learned**:
+
+- `git log -S "string"` finds commits where a specific string was added or removed
+- `git show HASH` reveals the complete diff of any commit
+- `git blame FILE` shows line-by-line attribution — who changed what and when
+- Combine these tools to answer "when did this change and why?" in seconds
+
+---
+
+### Exercise 7.2 — Stash Work and Apply It Elsewhere
+
+**Goal**: Simulate an interruption mid-analysis — an urgent fix on another branch —
+and use `git stash` to preserve your work without committing.
+
+**Steps**:
+
+1. Start editing `analysis.R` without finishing or committing:
+
+   ```bash
+   cd ~/rehab-research
+   git switch main
+   echo "# TODO: add grip asymmetry index calculation" >> scripts/analysis.R
+   echo "grip_asymmetry <- function(d, nd) abs(d - nd) / ((d + nd) / 2)" >> scripts/analysis.R
+   ```
+
+2. Check status — you have uncommitted changes:
+
+   ```bash
+   git status
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+On branch main
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   scripts/analysis.R
+```
+:::
+
+3. An urgent fix is needed on `fix/normalize-balance-scores`. Stash your current work:
+
+   ```bash
+   git stash save "WIP: grip asymmetry index — not ready to commit"
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+Saved working directory and index state On main: WIP: grip asymmetry index — not ready to commit
+```
+
+Your working directory is now clean.
+:::
+
+4. Verify the working directory is clean and your changes are saved:
+
+   ```bash
+   git status
+   git stash list
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+On branch main
+nothing to commit, working tree clean
+
+stash@{0}: On main: WIP: grip asymmetry index — not ready to commit
+```
+:::
+
+5. Switch to the fix branch, make an urgent correction, and commit:
+
+   ```bash
+   git switch -c fix/normalize-balance-scores
+   # Simulate an urgent fix
+   echo "# Corrected sd() usage" >> scripts/analysis.R
+   git add scripts/analysis.R
+   git commit -m "Fix: ensure sd() not var() used in normalize_balance"
+   ```
+
+6. Switch back to main and restore your stashed work:
+
+   ```bash
+   git switch main
+   git stash pop
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+On branch main
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   scripts/analysis.R
+
+Dropped stash@{0} (7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a)
+```
+
+Your work-in-progress edits are restored. The stash is removed from the list.
+:::
+
+7. Verify your changes are back:
+
+   ```bash
+   tail -3 scripts/analysis.R
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+# TODO: add grip asymmetry index calculation
+grip_asymmetry <- function(d, nd) abs(d - nd) / ((d + nd) / 2)
+```
+
+Your asymmetry index work is back exactly as you left it.
+:::
+
+**What you learned**:
+
+- `git stash save "message"` saves uncommitted work to a stack
+- `git stash list` shows all saved stashes
+- `git stash pop` restores the most recent stash and removes it from the stack
+- Stash lets you switch branches without committing incomplete work
+
+::: {.callout-warning}
+## Common Mistakes
+
+- **Popping the wrong stash**: `git stash pop` always pops `stash@{0}` (most recent).
+  Use `git stash apply stash@{1}` to apply a specific stash by index.
+- **Forgetting about old stashes**: Run `git stash list` regularly. Old stashes
+  are not pushed to remotes and will be lost if you delete the repository.
+:::
+
+---
+
+## Summary
+
+You can now:
+
+- Search commit history for specific code changes with `git log -S`
+- Find commits by message pattern with `git log --grep`
+- Identify when lines were introduced with `git blame`
+- Save and restore in-progress work with `git stash`
+
+**You are ready for [Module 08 — Data Management](../modules/08-data-management.qmd).**
