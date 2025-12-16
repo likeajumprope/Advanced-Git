@@ -1,0 +1,409 @@
+---
+title: "Exercises: Module 08 — Data Management"
+module: 8
+exercise_count: 3
+estimated_minutes: 25
+platform_tested:
+  - macos-14
+  - ubuntu-24.04
+  - windows-gitbash-2.44
+---
+
+## Before You Begin
+
+Complete [Module 08](../modules/08-data-management.qmd) and [Exercises 02](02-exercises.qmd).
+You should have a `~/rehab-research/` repository with a clean working tree.
+
+::: {.callout-important}
+## Data Safety Checkpoint
+
+Before proceeding: run `git status` and confirm you have no uncommitted data files.
+These exercises create files that simulate participant data — they will be cleaned
+up by `.gitignore` configurations you write.
+:::
+
+---
+
+### Exercise 8.1 — Configure .gitignore for a Research Project
+
+**Goal**: Create realistic research data files and configure `.gitignore` to exclude them.
+
+**Steps**:
+
+1. Navigate to your repository and create simulated data files:
+
+   ```bash
+   cd ~/rehab-research
+   mkdir -p data
+   echo "id,grip_kg,balance_score" > data/results.csv
+   echo "1001,28.4,72.3" >> data/results.csv
+   echo "SECRET_KEY=abc123" > .env
+   echo ".RData" > .RData
+   ```
+
+2. Check the current status — all three files appear as untracked:
+
+   ```bash
+   git status
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+On branch main
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        .RData
+        .env
+        data/
+
+nothing added to commit but untracked files present (use "git add" to track)
+```
+
+All three are visible — Git does not know to exclude them yet.
+:::
+
+3. Create `.gitignore` with research-appropriate patterns:
+
+   ```bash
+   nano .gitignore
+   ```
+
+   Add the following lines:
+   ```text
+   data/
+   .env
+   *.RData
+   ```
+
+   Save: **Ctrl+O**, **Return**, **Ctrl+X**
+
+4. Check status again:
+
+   ```bash
+   git status
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+On branch main
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        .gitignore
+
+nothing added to commit but untracked files present (use "git add" to track)
+```
+
+`data/`, `.env`, and `.RData` no longer appear. Only `.gitignore` itself is untracked.
+:::
+
+5. Commit the `.gitignore`:
+
+   ```bash
+   git add .gitignore
+   git commit -m "Data: add .gitignore to protect participant data and credentials"
+   ```
+
+::: {.callout-warning}
+## Common Mistakes
+
+- **Forgetting the trailing `/` on directory names**: `data` (no slash) matches a file
+  named `data` OR a directory. `data/` explicitly targets the directory. Both work, but
+  `data/` is clearer.
+- **Path separator on Windows**: `.gitignore` uses forward slashes (`data/`) even on Windows
+  with Git Bash. Backslashes (`data\`) do not work in `.gitignore`.
+- **Quoting the pattern**: `echo "data/" >> .gitignore` is correct. Do not add quotes
+  inside the file itself — `"data/"` (with quotes) would match a directory literally
+  named `"data/"` (including quote characters).
+:::
+
+---
+
+### Exercise 8.2 — Remove an Accidentally Committed File
+
+**Goal**: Simulate the common mistake of committing data before `.gitignore` is configured,
+then correctly remove it from version control while keeping it on disk.
+
+**Setup**: First, create a situation where data was committed accidentally.
+
+1. Temporarily remove `.gitignore` for this simulation:
+
+   ```bash
+   git rm .gitignore
+   git commit -m "Temp: remove gitignore (simulation only)"
+   ```
+
+2. Now commit a data file (simulating the mistake):
+
+   ```bash
+   echo "id,name,dob" > data/participants.csv
+   echo "1001,Smith,1985-03-14" >> data/participants.csv
+   git add data/participants.csv
+   git commit -m "Add: participant data file"
+   ```
+
+3. Verify the file is tracked:
+
+   ```bash
+   git log --oneline -- data/participants.csv
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+a1b2c3d Add: participant data file
+```
+
+The file appears in history — this is the problem we are solving.
+:::
+
+4. Remove from version control (but keep on disk):
+
+   ```bash
+   git rm --cached data/participants.csv
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+rm 'data/participants.csv'
+```
+:::
+
+5. Verify the file still exists on disk:
+
+   ```bash
+   ls data/
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+participants.csv
+```
+
+The file is still there — `--cached` only removed it from Git's index.
+:::
+
+6. Re-add `.gitignore` with `data/` pattern:
+
+   ```bash
+   nano .gitignore
+   ```
+
+   Add:
+   ```text
+   data/
+   .env
+   *.RData
+   ```
+
+   Save and exit.
+
+7. Check status and commit:
+
+   ```bash
+   git status
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+On branch main
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+        deleted:    data/participants.csv
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        .gitignore
+```
+
+`data/participants.csv` is staged for deletion from version control.
+`.gitignore` is new and untracked.
+:::
+
+   ```bash
+   git add .gitignore
+   git commit -m "Data: remove participant data from version control tracking"
+   ```
+
+8. Confirm the file is gone from current tracking but still on disk:
+
+   ```bash
+   git ls-files data/
+   ls data/
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+(empty — git ls-files shows nothing in data/)
+
+participants.csv
+```
+
+`git ls-files` lists only files Git is tracking — `data/participants.csv` is no longer
+tracked. The `ls data/` confirms it is still physically present on disk.
+:::
+
+::: {.callout-important}
+## The Commit Is Still in History
+
+Even after this exercise, `data/participants.csv` exists in the commit `"Add: participant
+data file"`. Anyone with access to this repository can run `git show` on that hash and
+read the file content.
+
+In a real scenario with actual PHI: immediately contact your institution's data security
+office. Removing from history requires `git filter-repo` and force-pushing — actions that
+affect every collaborator and require coordination.
+:::
+
+---
+
+### Exercise 8.3 — Audit Repository Size and Content
+
+**Goal**: Use Git inspection commands to understand what is stored in your repository
+and identify potential problems before publication.
+
+**Steps**:
+
+1. Check the repository size:
+
+   ```bash
+   cd ~/rehab-research
+   git count-objects -vH
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+count: 28
+size: 89.50 KiB
+in-pack: 0
+packs: 0
+size-pack: 0 bytes
+prune-packable: 0
+garbage: 0
+size-garbage: 0 bytes
+```
+
+`count` is the number of loose objects. `size` is their total disk usage. Your numbers
+will differ depending on how many commits you have made. For a code-only research
+repository, this should stay under a few hundred KiB.
+:::
+
+2. Search history for any CSV files that were ever committed:
+
+   ```bash
+   git log --all --full-history -- "*.csv"
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output (if you followed Exercise 8.2)
+
+```text
+a1b2c3d Add: participant data file
+```
+
+This shows the commit where `data/participants.csv` was accidentally committed.
+Even though it is no longer tracked, it remains in history.
+
+If this output is empty, no CSV was ever committed — your repository is clean.
+:::
+
+3. List all currently tracked files:
+
+   ```bash
+   git ls-files
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+.gitignore
+scripts/analysis.R
+```
+
+Only files that Git is actively tracking appear. If you see anything in `data/`, that
+file is still tracked and needs `git rm --cached` treatment.
+:::
+
+4. Check for common PHI-related filename patterns in tracked files:
+
+   ```bash
+   git ls-files | grep -iE "participant|subject|patient|dob|phi" && echo "FOUND potential PHI filenames" || echo "No PHI-related filenames found"
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output (after Exercise 8.2)
+
+```text
+No PHI-related filenames found
+```
+
+The grep returns nothing because `participants.csv` is no longer tracked. The `||`
+(OR operator) runs the `echo` when grep finds no matches.
+:::
+
+5. Verify `.gitignore` is correctly excluding the data directory:
+
+   ```bash
+   git check-ignore -v data/participants.csv
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+.gitignore:1:data/	data/participants.csv
+```
+
+This shows: file `.gitignore`, line `1`, pattern `data/` is ignoring `data/participants.csv`.
+The `git check-ignore -v` command explains exactly which `.gitignore` rule is responsible
+for ignoring a file — useful for debugging unexpected ignore behavior.
+:::
+
+**What you learned**:
+
+- `.gitignore` prevents files from being staged — but only if they are not already tracked
+- `git rm --cached` removes a file from tracking while keeping it on disk
+- Past commits retain file content even after `.gitignore` is configured
+- `git count-objects -vH`, `git ls-files`, and `git log --all -- pattern` give you a
+  complete picture of what is stored in your repository
+
+::: {.callout-warning}
+## Common Mistakes
+
+- **Using `git rm` without `--cached`**: This deletes the file from disk AND stops tracking
+  it. Always use `--cached` when you want to keep the file.
+- **Running `git add .` after setting up `.gitignore`**: Generally safe once `.gitignore`
+  is in place, but double-check `git status` output before committing to confirm no
+  sensitive files slipped through.
+- **Assuming `.gitignore` fixes past commits**: It does not. History is permanent until
+  you take explicit destructive action with `git filter-repo`.
+:::
+
+---
+
+## Summary
+
+You can now:
+
+- Create `.gitignore` files from the terminal using nano, echo, or heredoc
+- Identify and use research-specific exclusion patterns
+- Remove accidentally committed files with `git rm --cached`
+- Audit repository content and size with `git ls-files`, `git log --all`, and `git count-objects`
+- Explain why `.gitignore` does not retroactively protect past commits
+
+**Return to the module sequence: [Module 06 — Rebase](../modules/06-rebase.qmd).**

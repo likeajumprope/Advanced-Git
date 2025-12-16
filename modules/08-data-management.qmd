@@ -1,0 +1,463 @@
+---
+title: "Module 08: Data Management and .gitignore"
+description: "Protect sensitive research data, prevent accidental commits, and keep your repository size manageable."
+module: 8
+prerequisites:
+  - 0
+  - 1
+  - 2
+learning_objectives:
+  - "Learner can explain why research repositories require strict .gitignore configuration"
+  - "Learner can create and verify a .gitignore file from the terminal"
+  - "Learner can remove an accidentally committed file with git rm --cached"
+  - "Learner can audit a repository for PHI risk and file size problems"
+  - "Learner can describe when Git LFS is appropriate for research data"
+platform_coverage:
+  - macos
+  - linux
+  - windows-gitbash
+  - windows-wsl2
+---
+
+## Overview
+
+In rehabilitation research, version-controlled code sits alongside participant data,
+credential files, and large binary outputs. Git does not know which files are sensitive
+— you must tell it. This module covers `.gitignore` configuration, removing files that
+were committed accidentally, and auditing your repository before making it public.
+
+::: {.callout-important}
+## Data Safety is Non-Negotiable
+
+Every repository containing research code must have `.gitignore` configured before
+the first push. The cost of a mistake — accidentally committing participant IDs or
+API credentials — is irreversible once pushed to a public remote.
+:::
+
+## Prerequisites
+
+- [Module 00 — Terminal Fundamentals](00-terminal-fundamentals.qmd)
+- [Module 01 — Git Concepts](01-git-concepts.qmd)
+- [Module 02 — Basic Workflow](02-basic-workflow.qmd)
+
+---
+
+### Why .gitignore Matters for Research
+
+Three scenarios where a missing or misconfigured `.gitignore` causes harm:
+
+**Scenario 1: Participant ID Exposure (PHI)**
+
+```text
+~/rehab-research/
+├── scripts/
+│   └── analysis.R
+└── data/
+    └── participants.csv    ← contains name, DOB, diagnosis codes
+```
+
+Without a `data/` pattern in `.gitignore`, a `git add .` stages `participants.csv`.
+One `git push` to a public GitHub repository exposes protected health information.
+GitHub retains this in history even after deletion — a HIPAA breach that requires
+breach notification.
+
+**Scenario 2: Credential Leak**
+
+```text
+.env
+```
+
+`.env` files store API keys, database passwords, and OAuth tokens. A committed `.env`
+pushed to any remote (even private) creates a permanent record. Bots scan GitHub
+continuously for credential patterns and exploit leaked keys within minutes.
+
+**Scenario 3: Large File Bloat**
+
+```text
+data/wave1_mri_scans.nii.gz    ← 2.4 GB
+```
+
+Git stores every version of every file. A 2 GB file committed once inflates `.git/objects/`
+permanently. Even after deletion, the file remains in history until a destructive
+`git filter-repo` run. The repository becomes impossible to clone over slow connections.
+
+---
+
+### Creating .gitignore from the Terminal
+
+Three methods — use whichever fits your workflow:
+
+**Method 1: nano (recommended for beginners)**
+
+```bash
+nano .gitignore
+```
+
+Type patterns, one per line. Save: **Ctrl+O**, **Return**, **Ctrl+X**.
+
+**Method 2: Append a single pattern**
+
+```bash
+echo 'data/' >> .gitignore
+echo '*.RData' >> .gitignore
+echo '.env' >> .gitignore
+```
+
+The `>>` operator appends to an existing file (or creates it). Safe to run
+multiple times — duplicates in `.gitignore` are harmless.
+
+**Method 3: Heredoc for multiple patterns at once**
+
+```bash
+cat >> .gitignore << 'EOF'
+data/
+*.RData
+*.csv
+.env
+.Rhistory
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+*.log
+.DS_Store
+Thumbs.db
+EOF
+```
+
+Verify the file was written:
+
+```bash
+cat .gitignore
+```
+
+```text
+data/
+*.RData
+*.csv
+.env
+.Rhistory
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+*.log
+.DS_Store
+Thumbs.db
+```
+
+---
+
+### Research-Specific .gitignore Patterns
+
+| Pattern | What it excludes | Why it matters for research |
+|---------|------------------|-----------------------------|
+| `data/` | Entire data directory | Keeps participant data and raw data out of version control |
+| `*.RData` | R workspace snapshots | Can contain arbitrary objects including loaded data frames |
+| `*.csv` | CSV files anywhere | Participant exports, survey data, exported results |
+| `.env` | Environment variable file | API keys, database credentials, cloud storage tokens |
+| `.Rhistory` | R console history | May contain column names, participant IDs typed interactively |
+| `__pycache__/` | Python bytecode directory | Auto-generated, platform-specific, not reproducible across systems |
+| `*.pyc` | Compiled Python files | Same reason as `__pycache__/` |
+| `.ipynb_checkpoints/` | Jupyter notebook checkpoints | Auto-generated backup files with full notebook state including outputs |
+| `*.log` | Log files | Analysis logs may contain participant identifiers or data summaries |
+| `Thumbs.db` | Windows thumbnail cache | Binary, system-generated, no research value |
+| `.DS_Store` | macOS folder metadata | Binary, system-generated, causes spurious diffs on cross-platform teams |
+| `figures/` | Generated figure directory | If figures are generated by code, they should not be committed |
+| `renv/library/` | renv package library | Large, platform-specific; `renv.lock` is sufficient for reproducibility |
+
+::: {.callout-note}
+## Directory vs File Patterns
+
+- `data/` (trailing slash) → matches a directory named `data` and everything inside it
+- `data` (no slash) → matches a file OR directory named `data`
+- `*.csv` (glob) → matches any file ending in `.csv` in any subdirectory
+- `data/*.csv` → matches `.csv` files only inside the `data/` directory
+
+Use the trailing slash for directories to make your intent explicit.
+:::
+
+---
+
+### Verifying .gitignore Works
+
+Before and after comparison:
+
+**Before `.gitignore`**:
+
+```bash
+mkdir -p data
+echo "id,score" > data/results.csv
+git status
+```
+
+```text
+On branch main
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        data/
+        .env
+
+nothing added to commit but untracked files present (use "git add" to track)
+```
+
+**After adding patterns to `.gitignore`**:
+
+```bash
+echo 'data/' >> .gitignore
+echo '.env' >> .gitignore
+git status
+```
+
+```text
+On branch main
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        .gitignore
+
+nothing added to commit but untracked files present (use "git add" to track)
+```
+
+`data/` and `.env` no longer appear. Git is ignoring them. Now commit `.gitignore`:
+
+```bash
+git add .gitignore
+git commit -m "Data: add .gitignore to exclude participant data and credentials"
+```
+
+::: {.callout-warning}
+## .gitignore Only Works on Untracked Files
+
+If a file has already been committed, adding its pattern to `.gitignore` has
+**no effect**. Git continues tracking the file. You must use `git rm --cached`
+to stop tracking it (see below).
+:::
+
+---
+
+### git rm --cached: Removing Tracked Files
+
+**Scenario**: You committed `data/participants.csv` before setting up `.gitignore`.
+Now you need to remove it from version control without deleting it from disk.
+
+```bash
+# Step 1: See the problem
+git log --oneline -- data/participants.csv
+```
+
+```text
+3f2a1b4 Add: initial data file
+```
+
+```bash
+# Step 2: Remove from Git's index (keep file on disk)
+git rm --cached data/participants.csv
+```
+
+```text
+rm 'data/participants.csv'
+```
+
+```bash
+# Step 3: Add the pattern to .gitignore so it won't be re-added
+echo 'data/' >> .gitignore
+
+# Step 4: Verify the file is still on disk
+ls data/
+```
+
+```text
+participants.csv
+```
+
+```bash
+# Step 5: Stage and commit the removal
+git add .gitignore
+git status
+```
+
+```text
+On branch main
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+        deleted:    data/participants.csv
+        modified:   .gitignore
+```
+
+```bash
+git commit -m "Data: remove participant data from version control tracking"
+```
+
+::: {.callout-important}
+## The File Still Exists in History
+
+`git rm --cached` removes the file from the current working tree and future commits.
+It does **not** remove the file from past commits. Anyone who clones the repository
+can access older commits containing the file.
+
+If genuinely sensitive data was committed and pushed to a remote:
+1. Immediately revoke any credentials and rotate API keys
+2. Contact your institution's data security office
+3. Use `git filter-repo` (advanced — requires careful execution) to purge from history
+4. Force-push the cleaned history to all remotes and notify all collaborators
+:::
+
+---
+
+### Git LFS for Large Research Data Files
+
+Git Large File Storage (LFS) is a Git extension for files too large to store in a
+standard Git repository (neuroimaging `.nii.gz`, video recordings, large tabular datasets).
+
+```bash
+# Step 1: Install Git LFS (macOS via Homebrew)
+brew install git-lfs
+
+# Step 2: Initialize LFS in your repository
+git lfs install
+```
+
+```text
+Updated git hooks.
+Git LFS initialized.
+```
+
+```bash
+# Step 3: Track a file type
+git lfs track "*.nii.gz"
+```
+
+```text
+Tracking "*.nii.gz"
+```
+
+This creates a `.gitattributes` file:
+
+```bash
+cat .gitattributes
+```
+
+```text
+*.nii.gz filter=lfs diff=lfs merge=lfs -text
+```
+
+```bash
+# Step 4: Commit the configuration
+git add .gitattributes
+git commit -m "Data: configure Git LFS for neuroimaging files"
+
+# Step 5: Verify tracking
+git lfs ls-files
+```
+
+```text
+(empty — no .nii.gz files staged yet)
+```
+
+::: {.callout-note}
+## LFS Requires Remote Support
+
+Git LFS stores file content on a separate LFS server, not in the standard Git objects.
+GitHub provides LFS storage (free tier: 1 GB, paid beyond). Your institution may have
+a self-hosted LFS server. Without LFS support on the remote, `git push` will fail with
+a message about missing LFS objects.
+
+**Alternative**: Keep large raw data files outside the repository entirely and use
+`data/` in `.gitignore`. Only commit derived outputs that fit within normal Git size limits.
+:::
+
+---
+
+### Checking Repository Size
+
+Monitor repository size before it becomes a problem:
+
+```bash
+git count-objects -vH
+```
+
+```text
+count: 42
+size: 156.00 KiB
+in-pack: 0
+packs: 0
+size-pack: 0 bytes
+prune-packable: 0
+garbage: 0
+size-garbage: 0 bytes
+```
+
+| Field | Meaning |
+|-------|---------|
+| `count` | Number of loose object files in `.git/objects/` |
+| `size` | Total size of loose objects (human-readable with `-H`) |
+| `in-pack` | Number of objects stored in pack files |
+| `packs` | Number of pack files |
+| `size-pack` | Total size of all pack files |
+
+A healthy research repository with only code and config files typically stays under
+10 MB total. Alert thresholds:
+
+- **> 50 MB**: Investigate — likely binary files or data were committed
+- **> 200 MB**: Problematic for cloning; requires cleanup
+- **> 1 GB**: Critical; large files almost certainly in history
+
+Find large objects:
+
+```bash
+git rev-list --objects --all | sort -k 2 > /tmp/git-objects.txt
+git verify-pack -v .git/objects/pack/*.idx | sort -k 3 -n -r | head -20
+```
+
+---
+
+### Remediation Checklist
+
+Run these commands before making any repository public:
+
+```bash
+# 1. Check repository size
+git count-objects -vH
+
+# 2. List all tracked files (should not include data/)
+git ls-files | head -50
+
+# 3. Search history for any CSV files ever committed
+git log --all --full-history -- "*.csv"
+
+# 4. Search history for any .env files ever committed
+git log --all --full-history -- ".env"
+
+# 5. Check for common PHI patterns in tracked file names
+git ls-files | grep -iE "participant|subject|patient|id_|dob|phi"
+
+# 6. Verify .gitignore excludes data directory
+cat .gitignore | grep "^data"
+
+# 7. Confirm no credential patterns in any tracked file
+git grep -l "password\|api_key\|secret\|token" -- "*.R" "*.py" "*.md" 2>/dev/null
+
+# 8. Verify .gitignore itself is committed
+git log --oneline -- .gitignore
+```
+
+If any check reveals a problem, address it before pushing to a public remote.
+
+---
+
+## Hands-on Exercise
+
+**[Exercises 08 →](../exercises/08-exercises.qmd)**
+
+**Quick check**: After configuring `.gitignore`:
+
+```bash
+git status
+```
+
+Files matching your patterns should not appear in the output.
+
+## What's Next
+
+Return to the module sequence:
+
+- **[Module 06 — Rebase](06-rebase.qmd)** if you haven't completed it yet
+- **[Module 09 — Collaboration](09-collaboration.qmd)** for team-based workflows
