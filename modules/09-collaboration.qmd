@@ -1,0 +1,368 @@
+---
+title: "Module 09: Collaboration via Terminal"
+description: "Work with forks, open pull requests, and keep your fork synchronized using the GitHub CLI."
+module: 9
+prerequisites:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+learning_objectives:
+  - "Learner can fork a repository and clone it from the terminal using gh"
+  - "Learner can create a pull request from the terminal with gh pr create"
+  - "Learner can review and check out a pull request locally"
+  - "Learner can keep a fork synchronized with the upstream repository"
+platform_coverage:
+  - macos
+  - linux
+  - windows-gitbash
+  - windows-wsl2
+---
+
+## Overview
+
+When multiple researchers work on the same codebase, each maintains their own fork —
+a personal copy of the repository — and contributes changes back via pull requests (PRs).
+This module covers the complete forking workflow entirely from the terminal using the
+GitHub CLI (`gh`).
+
+## Prerequisites
+
+- [Module 05 — Merging and Conflicts](05-merging.qmd)
+- SSH authentication working (Exercise 3.1)
+- GitHub account
+
+---
+
+### Forking Workflow Overview
+
+```{mermaid}
+%%{init: {'theme': 'dark'}}%%
+flowchart LR
+    UP["upstream\n(shared repo)"] -->|fork| FORK["origin\n(your fork)"]
+    FORK -->|clone| LOCAL["local\n(your machine)"]
+    LOCAL -->|push| FORK
+    FORK -->|pull request| UP
+    UP -->|fetch upstream| LOCAL
+
+    style UP fill:#50fa7b,color:#000
+    style FORK fill:#bd93f9,color:#000
+    style LOCAL fill:#8be9fd,color:#000
+```
+
+Three remotes in play:
+- **upstream**: The shared repository you do not directly write to
+- **origin**: Your personal fork on GitHub (you have write access)
+- **local**: Your working copy on your machine
+
+---
+
+### GitHub CLI Setup
+
+Install `gh` if not already available:
+
+::: {.panel-tabset}
+## macOS
+
+```bash
+brew install gh
+```
+
+## Linux
+
+```bash
+# Ubuntu/Debian
+sudo apt install gh
+
+# Fedora/RHEL
+sudo dnf install gh
+```
+
+## Windows Git Bash
+
+Download the installer from [cli.github.com](https://cli.github.com) and run it.
+`gh` is then available in Git Bash and PowerShell.
+:::
+
+Authenticate:
+
+```bash
+gh auth login
+```
+
+```text
+? What account do you want to log into? GitHub.com
+? What is your preferred protocol for Git operations on this host? SSH
+? Upload your public key to your GitHub account? Yes
+? Title for your SSH key: (GitHub CLI) GitHub CLI
+✓ Authentication complete.
+- gh config set -h github.com git_protocol ssh
+✓ Configured git protocol
+✓ SSH key already existed on your GitHub account: ~/.ssh/id_ed25519.pub
+✓ Logged in as yourusername
+```
+
+Verify:
+
+```bash
+gh auth status
+```
+
+```text
+github.com
+  ✓ Logged in to github.com account yourusername (keyring)
+  - Active account: true
+  - Git operations protocol: ssh
+  - Token: gho_****
+```
+
+---
+
+### Fork a Repository
+
+```bash
+gh repo fork OWNER/REPO --clone
+```
+
+Example — forking a practice repository:
+
+```bash
+gh repo fork rehab-institute/grip-strength-study --clone
+```
+
+```text
+✓ Created fork yourusername/grip-strength-study
+Cloning into 'grip-strength-study'...
+remote: Enumerating objects: 24, done.
+remote: Counting objects: 100% (24/24), done.
+Receiving objects: 100% (24/24), 4.32 KiB | 4.32 MiB/s, done.
+✓ Cloned fork
+! Repository rehab-institute/grip-strength-study set as the default repository. To learn more about the default repository, run: gh repo set-default --help
+```
+
+`--clone` forks and immediately clones in one step. The cloned directory is automatically
+configured with `origin` pointing to your fork.
+
+Check remotes:
+
+```bash
+cd grip-strength-study
+git remote -v
+```
+
+```text
+origin	git@github.com:yourusername/grip-strength-study.git (fetch)
+origin	git@github.com:yourusername/grip-strength-study.git (push)
+upstream	git@github.com:rehab-institute/grip-strength-study.git (fetch)
+upstream	git@github.com:rehab-institute/grip-strength-study.git (push)
+```
+
+`gh repo fork --clone` automatically adds `upstream` for you.
+
+---
+
+### Feature Branch Workflow
+
+Always work on a branch — never commit directly to `main` on your fork:
+
+```bash
+# Create and switch to a feature branch
+git switch -c feature/add-baseline-measures
+
+# Make changes
+nano scripts/analysis.R
+
+# Stage and commit
+git add scripts/analysis.R
+git commit -m "Add: baseline measure functions for grip and balance"
+
+# Push to your fork
+git push origin feature/add-baseline-measures
+```
+
+```text
+Enumerating objects: 5, done.
+Counting objects: 100% (5/5), done.
+Writing objects: 100% (3/3), 412 bytes | 412.00 KiB/s, done.
+To git@github.com:yourusername/grip-strength-study.git
+ * [new branch]      feature/add-baseline-measures -> feature/add-baseline-measures
+```
+
+---
+
+### Creating a Pull Request via Terminal
+
+```bash
+gh pr create \
+  --title "Add: baseline measure functions for grip and balance" \
+  --body "Implements measure_grip_strength() and normalize_balance() per protocol Section 3.2.
+
+Resolves #12.
+
+**Testing**: Verified output matches Table 2 in Smith et al. (2024)."
+```
+
+```text
+Creating pull request for yourusername:feature/add-baseline-measures into main in rehab-institute/grip-strength-study
+
+https://github.com/rehab-institute/grip-strength-study/pull/47
+```
+
+The URL is the PR page on GitHub. Share it with your collaborator for review.
+
+List open PRs:
+
+```bash
+gh pr list
+```
+
+```text
+Showing 2 of 2 open pull requests in rehab-institute/grip-strength-study
+
+#47  Add: baseline measure functions  feature/add-baseline-measures  about 1 minute ago
+#38  Docs: update wave 2 protocol     docs/wave2-protocol            3 days ago
+```
+
+Check status of your PR:
+
+```bash
+gh pr status
+```
+
+```text
+Relevant pull requests in rehab-institute/grip-strength-study
+
+Current branch
+  #47  Add: baseline measure functions  [open]
+   - Checks: 1 passing
+   - Review: 1 requesting changes
+```
+
+---
+
+### Reviewing Code via Terminal
+
+Check out a collaborator's PR to test it locally:
+
+```bash
+gh pr checkout 38
+```
+
+```text
+remote: Enumerating objects: 8, done.
+Fetching pull request...
+Switched to branch 'docs/wave2-protocol'
+```
+
+You are now on the PR's branch. Review the changes:
+
+```bash
+git diff main..docs/wave2-protocol
+```
+
+Run their code, test it, then return to your branch:
+
+```bash
+git switch feature/add-baseline-measures
+```
+
+Add a review comment:
+
+```bash
+gh pr review 38 --comment --body "Looks good overall. One question: Table 3 references participants.csv — is that gitignored?"
+```
+
+Approve the PR:
+
+```bash
+gh pr review 38 --approve --body "LGTM — data exclusion criteria match protocol."
+```
+
+---
+
+### Keeping Your Fork Updated
+
+When the upstream repository receives new commits, your fork falls behind. Sync it:
+
+```bash
+# Fetch all changes from upstream (does not modify your local branches)
+git fetch upstream
+```
+
+```text
+remote: Enumerating objects: 8, done.
+remote: Counting objects: 100% (8/8), done.
+Receiving objects: 100% (5/5), 1.23 KiB | 1.23 MiB/s, done.
+From git@github.com:rehab-institute/grip-strength-study
+   3c4d5e6..7e8f9a0  main -> upstream/main
+```
+
+```bash
+# View what's new
+git log --oneline upstream/main
+```
+
+```text
+7e8f9a0 Fix: update inclusion criteria for Wave 2
+3f2a1b4 Add: grip strength normative data
+3c4d5e6 Initial commit
+```
+
+```bash
+# Rebase your local main onto upstream/main (creates linear history)
+git switch main
+git rebase upstream/main
+```
+
+```text
+Successfully rebased and updated refs/heads/main.
+```
+
+```bash
+# Push the updated main to your fork
+git push origin main
+```
+
+```text
+Total 0 (delta 0), reused 0 (delta 0), pack-reused 0
+To git@github.com:yourusername/grip-strength-study.git
+   3c4d5e6..7e8f9a0  main -> main
+```
+
+Your fork's `main` now matches upstream. Feature branches built from `main`
+can now be rebased onto the updated `main` (see Module 06).
+
+::: {.callout-note}
+## gh sync: One-Step Fork Sync
+
+The GitHub CLI provides a shortcut:
+
+```bash
+gh repo sync
+```
+
+This fetches and merges upstream changes into your fork's default branch automatically.
+It is convenient but merges rather than rebases — the manual `git fetch upstream` +
+`git rebase upstream/main` gives you more control.
+:::
+
+---
+
+## Hands-on Exercise
+
+**[Exercises 09 →](../exercises/09-exercises.qmd)**
+
+**Quick check**: After opening a PR:
+
+```bash
+gh pr list
+```
+
+You should see your PR listed with an open status.
+
+## What's Next
+
+In **[Module 10 — Troubleshooting](10-troubleshooting.qmd)**, you will learn to
+recover from detached HEAD, undo commits safely, and use the reflog as your safety net.

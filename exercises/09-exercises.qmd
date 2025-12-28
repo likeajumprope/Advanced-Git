@@ -1,0 +1,319 @@
+---
+title: "Exercises: Module 09 — Collaboration"
+module: 9
+exercise_count: 2
+estimated_minutes: 35
+platform_tested:
+  - macos-14
+  - ubuntu-24.04
+  - windows-gitbash-2.44
+---
+
+## Before You Begin
+
+Complete [Module 09](../modules/09-collaboration.qmd) and [Exercises 03](03-exercises.qmd).
+
+Requirements:
+- `gh auth status` returns a logged-in status
+- SSH authentication is working (`ssh -T git@github.com` succeeds)
+- A GitHub account with a repository to fork, or ask your instructor for the
+  practice repository URL
+
+---
+
+### Exercise 9.1 — Fork, Branch, and Open a Pull Request
+
+**Goal**: Complete the full forking workflow: fork a repository, create a feature
+branch, make a research-relevant change, and open a pull request from the terminal.
+
+**Setup**: For this exercise you need a GitHub repository to fork. Use one of:
+- A repository provided by your instructor
+- Your own `rehab-research` repository (fork yourself to practise the workflow)
+- Any public repository you have permission to contribute to
+
+Replace `OWNER/REPO` with the actual repository path throughout.
+
+**Steps**:
+
+1. Fork and clone the repository:
+
+   ```bash
+   cd ~
+   gh repo fork OWNER/REPO --clone
+   cd REPO
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+✓ Created fork yourusername/REPO
+Cloning into 'REPO'...
+...
+✓ Cloned fork
+```
+
+Your fork is at `github.com/yourusername/REPO`. Your local clone has both
+`origin` (your fork) and `upstream` (the original) configured automatically.
+:::
+
+2. Verify both remotes are configured:
+
+   ```bash
+   git remote -v
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+origin      git@github.com:yourusername/REPO.git (fetch)
+origin      git@github.com:yourusername/REPO.git (push)
+upstream    git@github.com:OWNER/REPO.git (fetch)
+upstream    git@github.com:OWNER/REPO.git (push)
+```
+:::
+
+3. Create a feature branch:
+
+   ```bash
+   git switch -c feature/add-baseline-measures
+   ```
+
+4. Make a meaningful change — add a comment or small function to a script:
+
+   ```bash
+   # If the repository has an R script:
+   echo "" >> scripts/analysis.R
+   echo "# Baseline measure: grip strength asymmetry index" >> scripts/analysis.R
+   echo "grip_asymmetry_index <- function(dominant, non_dominant) {" >> scripts/analysis.R
+   echo "  abs(dominant - non_dominant) / ((dominant + non_dominant) / 2)" >> scripts/analysis.R
+   echo "}" >> scripts/analysis.R
+   ```
+
+   Adjust the file path to match the repository structure.
+
+5. Commit with a research-quality message:
+
+   ```bash
+   git add scripts/analysis.R
+   git commit -m "Add: grip_asymmetry_index function for bilateral strength comparison"
+   ```
+
+6. Push to your fork:
+
+   ```bash
+   git push origin feature/add-baseline-measures
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+Enumerating objects: 5, done.
+...
+To git@github.com:yourusername/REPO.git
+ * [new branch]      feature/add-baseline-measures -> feature/add-baseline-measures
+```
+:::
+
+7. Open a pull request:
+
+   ```bash
+   gh pr create \
+     --title "Add: grip_asymmetry_index for bilateral strength comparison" \
+     --body "Adds a function to compute the grip asymmetry index (|D - ND| / mean).
+
+   This measure is used in:
+   - Smith et al. (2024) Table 3
+   - The Wave 2 analysis protocol (docs/protocol.md)
+
+   **Testing**: Function verified against published reference values.
+   **No data files staged** — confirmed with git status."
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+Creating pull request for yourusername:feature/add-baseline-measures into main in OWNER/REPO
+
+https://github.com/OWNER/REPO/pull/XX
+```
+
+The URL links to your PR on GitHub.
+:::
+
+8. Verify the PR exists:
+
+   ```bash
+   gh pr list
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+Showing 1 of 1 open pull request in OWNER/REPO
+
+#XX  Add: grip_asymmetry_index for bilateral strength comparison  feature/add-baseline-measures  about 1 minute ago
+```
+:::
+
+**What you learned**:
+
+- `gh repo fork --clone` forks and clones in one step with both remotes configured
+- Feature branches on forks follow the same naming conventions as local branches
+- `gh pr create` opens a pull request with a title and body from the terminal
+
+---
+
+### Exercise 9.2 — Sync Your Fork with Upstream
+
+**Goal**: Simulate a situation where the upstream repository has received new commits
+while you were working on your fork, and synchronize correctly.
+
+**Setup**: To simulate upstream activity, open a second terminal or ask a collaborator
+to push a commit to the upstream repository. If working alone:
+
+1. Temporarily add a commit directly to the upstream (if you own it):
+
+   ```bash
+   # In the UPSTREAM repository (not your fork)
+   # Add a small documentation change to simulate upstream activity
+   echo "# Updated by upstream maintainer" >> README.md
+   git add README.md
+   git commit -m "Docs: update README with Wave 2 contact information"
+   git push origin main
+   ```
+
+   Then return to your fork's local directory:
+
+   ```bash
+   cd ~/REPO
+   ```
+
+**Steps**:
+
+1. Fetch changes from upstream (does not affect your local branches):
+
+   ```bash
+   git fetch upstream
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+remote: Enumerating objects: 5, done.
+remote: Counting objects: 100% (5/5), done.
+Receiving objects: 100% (3/3), 412 bytes | 412.00 KiB/s, done.
+From git@github.com:OWNER/REPO
+   3c4d5e6..7e8f9a0  main -> upstream/main
+```
+
+The `3c4d5e6..7e8f9a0` shows upstream/main advanced from one hash to another.
+Your local main is not yet updated.
+:::
+
+2. See what new commits exist on upstream:
+
+   ```bash
+   git log --oneline upstream/main
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+7e8f9a0 Docs: update README with Wave 2 contact information
+3c4d5e6 Initial commit
+...
+```
+
+The new commit at the top is what upstream added since you forked.
+:::
+
+3. Rebase your local main onto upstream/main:
+
+   ```bash
+   git switch main
+   git rebase upstream/main
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+Successfully rebased and updated refs/heads/main.
+```
+
+Your local `main` now includes upstream's new commits with a linear history.
+:::
+
+4. Push the updated main to your fork:
+
+   ```bash
+   git push origin main
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+Total 0 (delta 0), reused 0 (delta 0), pack-reused 0
+To git@github.com:yourusername/REPO.git
+   3c4d5e6..7e8f9a0  main -> main
+```
+
+Your fork's `main` on GitHub now matches upstream.
+:::
+
+5. Verify the full history:
+
+   ```bash
+   git log --oneline --graph --all
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+* c4d5e6f (HEAD -> feature/add-baseline-measures) Add: grip_asymmetry_index for bilateral strength comparison
+* 7e8f9a0 (upstream/main, origin/main, main) Docs: update README with Wave 2 contact information
+* 3c4d5e6 Initial commit
+```
+
+Your feature branch is one commit ahead of the synchronized main.
+:::
+
+**What you learned**:
+
+- `git fetch upstream` downloads upstream changes without modifying local branches
+- `git log upstream/main` shows upstream's history before you incorporate it
+- `git rebase upstream/main` replays your local main onto the upstream tip
+- This workflow keeps your fork current without merge commits
+
+::: {.callout-warning}
+## Common Mistakes
+
+- **Using `git pull upstream main` instead of fetch + rebase**: `git pull` by default
+  merges, creating a merge commit in your `main`. Use `git pull --rebase upstream main`
+  or the separate fetch + rebase steps to keep history linear.
+- **Rebasing a branch others have pulled**: If a collaborator has pulled from your fork's
+  `main`, rebasing rewrites the hashes they have locally. Coordinate before rebasing
+  shared branches.
+:::
+
+---
+
+## Summary
+
+You can now:
+
+- Fork and clone a repository with `gh repo fork --clone`
+- Create feature branches and push them to your fork
+- Open pull requests from the terminal with `gh pr create`
+- Keep your fork synchronized with `git fetch upstream` + `git rebase upstream/main`
+
+**You are ready for [Module 10 — Troubleshooting](../modules/10-troubleshooting.qmd).**
