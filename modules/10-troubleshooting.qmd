@@ -1,0 +1,397 @@
+---
+title: "Module 10: Troubleshooting and Recovery"
+description: "Undo mistakes, escape detached HEAD, recover lost commits, and restore working directory changes."
+module: 10
+prerequisites:
+  - 0
+  - 1
+  - 2
+learning_objectives:
+  - "Learner can restore working directory changes with git restore"
+  - "Learner can unstage changes and undo commits with git reset"
+  - "Learner can use git reflog to find and recover lost commits"
+  - "Learner can escape a detached HEAD state safely"
+  - "Learner can diagnose repository problems with git fsck"
+platform_coverage:
+  - macos
+  - linux
+  - windows-gitbash
+  - windows-wsl2
+---
+
+## Overview
+
+Every Git user eventually makes a mistake: a commit with wrong content, an accidental
+`git reset --hard`, or confusion after detaching HEAD. Git's recovery tools are
+surprisingly powerful — almost nothing is truly lost within the first 30 days. This
+module covers the full toolkit for undoing, recovering, and diagnosing problems.
+
+## Prerequisites
+
+- [Module 02 — Basic Workflow](02-basic-workflow.qmd)
+- [Module 01 — Git Concepts](01-git-concepts.qmd) (for understanding objects and refs)
+
+---
+
+### Reading Git Error Messages
+
+Git messages have four severity levels:
+
+| Prefix | Severity | Meaning |
+|--------|----------|---------|
+| `fatal:` | Highest | Operation could not start or complete — Git stopped entirely |
+| `error:` | High | An operation failed; Git may have partially applied changes |
+| `warning:` | Medium | Something unusual happened; operation continued |
+| `hint:` | Informational | Git suggestion — often tells you exactly how to fix the problem |
+
+**Strategy**: Always read `hint:` lines first — Git frequently tells you the fix directly.
+
+```text
+hint: Updates were rejected because the remote contains work that you do not
+hint: have locally. Integrate the remote changes (e.g.
+hint: 'git pull --rebase ...') before pushing again.
+```
+
+The fix is in the hint: `git pull --rebase`.
+
+---
+
+### Undoing Working Directory Changes: git restore
+
+Discard unstaged changes to a file — restore it to its last committed state:
+
+```bash
+git restore scripts/analysis.R
+```
+
+Discard all unstaged changes across all files:
+
+```bash
+git restore .
+```
+
+::: {.callout-warning}
+## git restore Is Permanent for Unstaged Changes
+
+Changes discarded with `git restore` **cannot be recovered**. They were never in a
+commit or the stash, so Git has no record of them. Double-check that you do not
+need the changes before running this command.
+:::
+
+**Restore a file to how it looked in a specific commit**:
+
+```bash
+git restore --source 3c4d5e6 scripts/analysis.R
+```
+
+This does not change the commit history — it just updates your working directory.
+The file will appear as "modified" in `git status`.
+
+---
+
+### Undoing Staged Changes: git restore --staged
+
+Move a staged file back to the working directory (unstage it):
+
+```bash
+git restore --staged scripts/analysis.R
+```
+
+```text
+(no output — the file is back in working directory, unstaged)
+```
+
+Verify:
+
+```bash
+git status
+```
+
+```text
+On branch main
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   scripts/analysis.R
+```
+
+The change is still in your working directory — you just removed it from the staging
+area. The file is not lost.
+
+---
+
+### Undoing Commits: git reset
+
+`git reset` moves the current branch pointer backwards. Three modes control what
+happens to the changes from the undone commits:
+
+| Mode | Branch pointer | Staging area | Working directory |
+|------|---------------|--------------|-------------------|
+| `--soft` | Moved back | Keeps changes staged | Unchanged |
+| `--mixed` (default) | Moved back | Unstages changes | Unchanged |
+| `--hard` | Moved back | Cleared | **Changes discarded** |
+
+**--soft: Undo commit, keep changes staged**
+
+```bash
+git reset HEAD~1 --soft
+```
+
+The last commit is undone. All its changes are staged, ready to recommit.
+Use this to fix a commit message or split a commit.
+
+**--mixed: Undo commit, keep changes in working directory**
+
+```bash
+git reset HEAD~1
+```
+
+(Default mode — `--mixed` is implied.) The commit is undone. Changes are in your
+working directory but not staged. Use this to reorganize which files go into a commit.
+
+**--hard: Undo commit, discard all changes**
+
+```bash
+git reset HEAD~1 --hard
+```
+
+::: {.callout-warning}
+## --hard Discards Work Permanently (Usually)
+
+`git reset --hard` discards the changes from the undone commits. They are not staged,
+not in the working directory, and not in any commit.
+
+**However**: If the discarded commits were already committed (they were reachable from
+some branch), they are still in `.git/objects/` and retrievable via `git reflog`
+for approximately 30 days until garbage collection.
+
+Use `--hard` only when you are certain you want to discard the changes.
+:::
+
+---
+
+### git reflog: Your Safety Net
+
+The reflog records every movement of `HEAD` — every commit, reset, checkout, and branch
+switch. It is your recovery tool for almost any mistake.
+
+```bash
+git reflog
+```
+
+```text
+7e8f9a0 (HEAD -> main) HEAD@{0}: reset: moving to HEAD~1
+3c4d5e6 HEAD@{1}: commit: Fix: use z-score normalization for balance index
+9d4c7e1 HEAD@{2}: commit: Add: normalize_balance function
+3f2a1b4 HEAD@{3}: commit: Add: initial analysis script
+1a5f3b2 HEAD@{4}: checkout: moving from feature/grip to main
+```
+
+Each entry shows: `hash (ref) HEAD@{N}: action: description`
+
+`HEAD@{0}` is the current position. `HEAD@{1}` is where HEAD was before the last action.
+
+**Recover a "lost" commit** after `git reset --hard`:
+
+```bash
+# Identify the hash of the commit you want to recover
+git reflog
+# Find the hash — e.g., 3c4d5e6
+
+# Option 1: Check it out to verify the content
+git checkout 3c4d5e6
+# (you are now in detached HEAD — see below)
+
+# Option 2: Create a branch at that commit immediately
+git switch -c recovered-work 3c4d5e6
+```
+
+---
+
+### Detached HEAD: Understanding and Fixing
+
+"Detached HEAD" means `HEAD` points directly to a commit hash rather than to a
+branch name.
+
+**How it happens**:
+
+```bash
+git checkout 3c4d5e6       # checking out a commit hash
+git checkout v1.0.0        # checking out a tag
+gh pr checkout 47          # checking out a PR
+```
+
+**What git status shows**:
+
+```bash
+git status
+```
+
+```text
+HEAD detached at 3c4d5e6
+nothing to commit, working tree clean
+```
+
+**What it means**: You can look at files and even make commits — but those commits
+are not on any branch. As soon as you switch to another branch, they become unreachable
+(though still recoverable via reflog for ~30 days).
+
+**Fix 1: Go back to a branch without saving anything**
+
+```bash
+git switch main
+```
+
+**Fix 2: Save commits made in detached HEAD onto a new branch**
+
+```bash
+# (while still in detached HEAD, after making some commits)
+git switch -c rescue-branch
+```
+
+Now your commits are safely on `rescue-branch` and HEAD is attached.
+
+---
+
+### Recovering Lost Commits
+
+Full recovery scenario:
+
+```bash
+# You ran git reset --hard one too many times
+git log --oneline
+```
+
+```text
+9d4c7e1 Add: normalize_balance function
+3f2a1b4 Add: initial analysis script
+```
+
+The "Fix: use z-score normalization" commit is gone from `git log`. Recover it:
+
+```bash
+git reflog
+```
+
+```text
+9d4c7e1 (HEAD -> main) HEAD@{0}: reset: moving to HEAD~1
+3c4d5e6 HEAD@{1}: commit: Fix: use z-score normalization for balance index
+9d4c7e1 HEAD@{2}: commit: Add: normalize_balance function
+```
+
+```bash
+# The lost commit hash is 3c4d5e6
+git switch -c recovery-branch 3c4d5e6
+```
+
+```text
+Switched to a new branch 'recovery-branch'
+```
+
+```bash
+git log --oneline
+```
+
+```text
+3c4d5e6 (HEAD -> recovery-branch) Fix: use z-score normalization for balance index
+9d4c7e1 Add: normalize_balance function
+3f2a1b4 Add: initial analysis script
+```
+
+Recovered. Now merge or cherry-pick as needed.
+
+---
+
+### git fsck: Repository Health Check
+
+`git fsck` verifies the integrity of the Git object database:
+
+```bash
+git fsck
+```
+
+```text
+Checking object directories: 100% (256/256), done.
+Checking connectivity: done.
+```
+
+If there are problems:
+
+```text
+dangling commit 7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f
+dangling tree 1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b
+```
+
+Dangling objects are commits or trees not reachable from any branch or tag — often
+created by `git reset` or rebases. They are harmless and will be garbage collected
+eventually.
+
+With `--lost-found`:
+
+```bash
+git fsck --lost-found
+```
+
+Unreachable objects are written to `.git/lost-found/`. You can inspect them with
+`git show`.
+
+---
+
+### Resetting to Remote State
+
+When your local branch has diverged from the remote and you want to discard all local
+changes:
+
+::: {.callout-important}
+## This Discards All Local Commits
+
+The following command permanently discards any local commits that are not on the remote.
+Make sure you have pushed or stashed anything you want to keep.
+:::
+
+```bash
+git fetch origin
+git reset --hard origin/main
+```
+
+```text
+HEAD is now at 7e8f9a0 Fix: update inclusion criteria for Wave 2
+```
+
+Your local `main` now exactly matches the remote.
+
+**Nuclear option** — destroy and re-clone:
+
+```bash
+cd ..
+rm -rf rehab-research
+git clone git@github.com:yourusername/rehab-research.git
+```
+
+::: {.callout-important}
+## rm -rf Destroys Everything Permanently
+
+This deletes the entire repository including `.git/`. All local commits not pushed,
+all stashes, all reflog history — everything is gone. Only use this if the repository
+is completely corrupted and you have confirmed everything important is on the remote.
+:::
+
+---
+
+## Hands-on Exercise
+
+**[Exercises 10 →](../exercises/10-exercises.qmd)**
+
+**Quick check**: After using `git reflog`:
+
+```bash
+git reflog | head -5
+```
+
+You should see the last 5 HEAD movements with their hashes.
+
+## What's Next
+
+In **[Module 11 — Tool Integration](11-tool-integration.qmd)**, you will connect
+Git with RStudio, Jupyter, and shell hooks to fit Git naturally into your research
+workflow.

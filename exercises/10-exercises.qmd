@@ -1,0 +1,407 @@
+---
+title: "Exercises: Module 10 — Troubleshooting and Recovery"
+module: 10
+exercise_count: 3
+estimated_minutes: 30
+platform_tested:
+  - macos-14
+  - ubuntu-24.04
+  - windows-gitbash-2.44
+---
+
+## Before You Begin
+
+Complete [Module 10](../modules/10-troubleshooting.qmd) and [Exercises 02](02-exercises.qmd).
+You should have `~/rehab-research/` with several commits in history.
+
+::: {.callout-important}
+## These Exercises Involve Destructive Commands
+
+Exercise 10.1 enters detached HEAD. Exercise 10.2 uses `git reset`. Exercise 10.3 uses
+`git restore`. All of these are recoverable within the exercise — but read each step
+carefully and do not skip ahead.
+:::
+
+---
+
+### Exercise 10.1 — Enter and Escape Detached HEAD
+
+**Goal**: Deliberately enter detached HEAD state, make a commit, then rescue that
+commit onto a branch before switching away.
+
+**Steps**:
+
+1. Confirm you are on `main` with a clean state:
+
+   ```bash
+   cd ~/rehab-research
+   git switch main
+   git status
+   ```
+
+2. Find a commit hash to check out (two commits back):
+
+   ```bash
+   git log --oneline -5
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+3c4d5e6 Fix: use z-score normalization for balance index
+9d4c7e1 Add: normalize_balance function
+3f2a1b4 Add: initial analysis script
+...
+```
+
+Note the hash of the second commit (e.g., `9d4c7e1`).
+:::
+
+3. Check out that commit by hash (this detaches HEAD):
+
+   ```bash
+   git checkout 9d4c7e1
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+Note: switching to '9d4c7e1'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, but if you switch to another branch, those commits
+may be lost and Git will tell you about it with 'git switch -c <new-branch-name>'.
+
+HEAD is now at 9d4c7e1 Add: normalize_balance function
+```
+:::
+
+4. Confirm detached HEAD with git status:
+
+   ```bash
+   git status
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+HEAD detached at 9d4c7e1
+nothing to commit, working tree clean
+```
+
+No branch name — just "HEAD detached at HASH".
+:::
+
+5. Make a commit while in detached HEAD:
+
+   ```bash
+   echo "# Experimental: test detached commit" >> scripts/analysis.R
+   git add scripts/analysis.R
+   git commit -m "Experiment: test commit in detached HEAD state"
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+[detached HEAD a1b2c3d] Experiment: test commit in detached HEAD state
+ 1 file changed, 1 insertion(+)
+```
+
+The commit was created but it is on no branch.
+:::
+
+6. Use git reflog to find the commit hash of what you just committed:
+
+   ```bash
+   git reflog | head -5
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+a1b2c3d (HEAD) HEAD@{0}: commit: Experiment: test commit in detached HEAD state
+9d4c7e1 HEAD@{1}: checkout: moving from main to 9d4c7e1
+3c4d5e6 (main) HEAD@{2}: commit: Fix: use z-score normalization for balance index
+```
+
+The detached commit is at `HEAD@{0}` — hash `a1b2c3d`.
+:::
+
+7. Rescue the commit onto a new branch before switching away:
+
+   ```bash
+   git switch -c rescued-commit
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+Switched to a new branch 'rescued-commit'
+```
+
+HEAD is now attached to `rescued-commit`. The experimental commit is safe.
+:::
+
+8. Verify:
+
+   ```bash
+   git log --oneline
+   git status
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+a1b2c3d (HEAD -> rescued-commit) Experiment: test commit in detached HEAD state
+9d4c7e1 Add: normalize_balance function
+3f2a1b4 Add: initial analysis script
+
+On branch rescued-commit
+nothing to commit, working tree clean
+```
+
+The commit is on `rescued-commit`. Switch back to main to continue normal work:
+```bash
+git switch main
+```
+:::
+
+::: {.callout-warning}
+## Common Mistakes
+
+- **Switching to another branch before creating a rescue branch**: If you run
+  `git switch main` while in detached HEAD with commits, those commits become
+  "dangling" — still in `.git/objects/` but not reachable from any branch.
+  You can still recover them via `git reflog`, but act quickly.
+:::
+
+---
+
+### Exercise 10.2 — Undo a Bad Commit with git reset
+
+**Goal**: Make a commit with incorrect content, then use `git reset --soft` to undo
+the commit while keeping the changes staged for recommitting correctly.
+
+**Steps**:
+
+1. Accidentally commit with the wrong message and mixed content:
+
+   ```bash
+   cd ~/rehab-research
+   git switch main
+   echo "grip_score <- 1 + 1  # wrong formula" >> scripts/analysis.R
+   echo "# TODO: remove this" >> scripts/analysis.R
+   git add scripts/analysis.R
+   git commit -m "asdfasdf fix stuff"
+   ```
+
+2. Check the bad commit:
+
+   ```bash
+   git log --oneline -3
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+b3c4d5e asdfasdf fix stuff
+3c4d5e6 Fix: use z-score normalization for balance index
+9d4c7e1 Add: normalize_balance function
+```
+
+The top commit has a poor message and mixed content.
+:::
+
+3. Undo the commit but keep the changes staged:
+
+   ```bash
+   git reset HEAD~1 --soft
+   ```
+
+4. Verify the commit is gone but changes are staged:
+
+   ```bash
+   git status
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+On branch main
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+        modified:   scripts/analysis.R
+```
+
+The commit is undone. The changes are staged, ready to be split and recommitted properly.
+:::
+
+5. Unstage and inspect what was added:
+
+   ```bash
+   git restore --staged scripts/analysis.R
+   git diff scripts/analysis.R
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+diff --git a/scripts/analysis.R b/scripts/analysis.R
+index a1b2c3d..4e5f6a7 100644
+--- a/scripts/analysis.R
++++ b/scripts/analysis.R
+@@ -N,N +N,N @@
++grip_score <- 1 + 1  # wrong formula
++# TODO: remove this
+```
+
+The two lines are visible as unstaged changes. You can now decide what to keep and
+what to discard.
+:::
+
+6. Discard the bad lines and make a clean commit:
+
+   ```bash
+   git restore scripts/analysis.R
+   git status
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+On branch main
+nothing to commit, working tree clean
+```
+
+The bad changes are gone. The repository is back to a clean state before the mistake.
+:::
+
+**What you learned**:
+
+- `git reset HEAD~1 --soft` undoes the last commit and leaves changes staged
+- `git restore --staged` unstages without discarding working directory changes
+- `git restore FILE` discards working directory changes (permanent — use carefully)
+
+---
+
+### Exercise 10.3 — Restore Unwanted Working Directory Changes
+
+**Goal**: Accidentally destructively edit a file without staging, then use
+`git restore` to recover the last committed version.
+
+**Steps**:
+
+1. Make a destructive change to `analysis.R` — overwrite it entirely:
+
+   ```bash
+   cd ~/rehab-research
+   echo "rm -rf everything" > scripts/analysis.R
+   cat scripts/analysis.R
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+rm -rf everything
+```
+
+The file now contains only this line — all previous content is gone from the
+working directory.
+:::
+
+2. Check git status:
+
+   ```bash
+   git status
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+On branch main
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   scripts/analysis.R
+```
+
+The file is modified but not staged. Git's hint already tells you the recovery command.
+:::
+
+3. Restore the last committed version:
+
+   ```bash
+   git restore scripts/analysis.R
+   ```
+
+4. Verify recovery:
+
+   ```bash
+   cat scripts/analysis.R
+   git status
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+library(dplyr)
+library(tidyr)
+
+normalize_balance <- function(x) (x - mean(x)) / sd(x)
+filter_complete_cases <- function(df) dplyr::filter(df, !is.na(grip_strength))
+
+...
+
+On branch main
+nothing to commit, working tree clean
+```
+
+The original content is fully restored from the last commit. The destructive change
+is gone.
+:::
+
+::: {.callout-important}
+## git restore Is Permanent for Unstaged Changes
+
+The destructive change in this exercise (`echo "rm -rf everything" > analysis.R`)
+was only in your working directory — never staged or committed. Once you ran
+`git restore`, it was permanently discarded with no way to recover it.
+
+This is the intended behavior — but it means you should **always check
+`git diff`** before running `git restore`, to confirm you are not discarding
+work you need.
+:::
+
+**What you learned**:
+
+- `git restore FILE` restores a file to its last committed state
+- This is permanent for unstaged changes — there is no undo
+- Always check `git diff` before restoring to confirm you want to discard the changes
+
+---
+
+## Summary
+
+You can now:
+
+- Enter and safely exit detached HEAD state
+- Rescue commits made in detached HEAD with `git switch -c branch-name HASH`
+- Undo the last commit while keeping changes staged with `git reset HEAD~1 --soft`
+- Recover working directory changes with `git restore`
+- Use `git reflog` to find any hash from the last 30 days of HEAD movements
+
+**You are ready for [Module 11 — Tool Integration](../modules/11-tool-integration.qmd).**
