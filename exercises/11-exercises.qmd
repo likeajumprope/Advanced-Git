@@ -1,0 +1,322 @@
+---
+title: "Exercises: Module 11 — Git with Research Tools"
+module: 11
+exercise_count: 2
+estimated_minutes: 25
+platform_tested:
+  - macos-14
+  - ubuntu-24.04
+  - windows-gitbash-2.44
+---
+
+## Before You Begin
+
+Complete [Module 11](../modules/11-tool-integration.qmd) and [Exercises 02](02-exercises.qmd).
+These exercises work with your global Git configuration and the `.git/hooks/` directory —
+changes persist across all repositories.
+
+---
+
+### Exercise 11.1 — Add Git Aliases for Research Workflows
+
+**Goal**: Configure four aliases that speed up daily Git use, then verify each
+works as expected.
+
+**Steps**:
+
+1. Add all four aliases to your global config:
+
+   ```bash
+   git config --global alias.lg "log --oneline --graph --all --decorate"
+   git config --global alias.st status
+   git config --global alias.unstage "restore --staged"
+   git config --global alias.last "log -1 HEAD --stat"
+   ```
+
+2. Verify all four are in your config:
+
+   ```bash
+   cat ~/.gitconfig
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output (alias section)
+
+```text
+[alias]
+    lg = log --oneline --graph --all --decorate
+    st = status
+    unstage = restore --staged
+    last = log -1 HEAD --stat
+```
+:::
+
+3. Test each alias:
+
+   ```bash
+   cd ~/rehab-research
+
+   # Short status
+   git st
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+On branch main
+nothing to commit, working tree clean
+```
+:::
+
+   ```bash
+   # Graph log
+   git lg
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+* 3c4d5e6 (HEAD -> main) Fix: use z-score normalization for balance index
+* 9d4c7e1 Add: normalize_balance function
+* 3f2a1b4 Add: initial analysis script with dplyr and tidyr
+```
+
+Full branch graph in one short command.
+:::
+
+   ```bash
+   # Last commit with stats
+   git last
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+commit 3c4d5e6 (HEAD -> main)
+Author: Dr. J. Bayer <j.bayer@rehab-institute.edu>
+Date:   Fri Feb 28 14:23:11 2026 +0100
+
+    Fix: use z-score normalization for balance index
+
+ scripts/analysis.R | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+```
+:::
+
+   ```bash
+   # Unstage — test by staging a file first
+   echo "# test" >> scripts/analysis.R
+   git add scripts/analysis.R
+   git st
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+On branch main
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+        modified:   scripts/analysis.R
+```
+:::
+
+   ```bash
+   git unstage scripts/analysis.R
+   git st
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+On branch main
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   scripts/analysis.R
+```
+
+The file was moved back from staging to the working directory. Clean up:
+```bash
+git restore scripts/analysis.R
+```
+:::
+
+**What you learned**:
+
+- `git config --global alias.NAME "command"` creates a permanent shortcut
+- Aliases are stored in `~/.gitconfig` and work in every repository
+- Aliases can wrap complex multi-flag commands into a single short name
+
+---
+
+### Exercise 11.2 — Create a Data Safety Pre-Commit Hook
+
+**Goal**: Write a shell script that automatically prevents accidental commits of
+files from the `data/` directory, and test it with a real staged data file.
+
+**Steps**:
+
+1. Open the pre-commit hook file:
+
+   ```bash
+   cd ~/rehab-research
+   nano .git/hooks/pre-commit
+   ```
+
+2. Write the following script exactly:
+
+   ```bash
+   #!/bin/bash
+   # Block commits that stage files in the data/ directory
+
+   staged_data=$(git diff --cached --name-only | grep -E "^data/")
+
+   if [ -n "$staged_data" ]; then
+       echo "ERROR: Staged file(s) found in data/ directory:"
+       echo "$staged_data"
+       echo ""
+       echo "Research data must not be committed."
+       echo "Steps to fix:"
+       echo "  1. git restore --staged <file>"
+       echo "  2. Add the pattern to .gitignore"
+       exit 1
+   fi
+   ```
+
+   Save: **Ctrl+O**, **Return**, **Ctrl+X**
+
+3. Make the hook executable:
+
+   ```bash
+   chmod +x .git/hooks/pre-commit
+   ```
+
+4. Verify the hook file is executable:
+
+   ```bash
+   ls -la .git/hooks/pre-commit
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+-rwxr-xr-x  1 jbayer  staff  287 Feb 28 16:30 .git/hooks/pre-commit
+```
+
+The `x` bits confirm the file is executable for user, group, and others.
+:::
+
+5. Test the hook by staging a data file and attempting a commit:
+
+   ```bash
+   mkdir -p data
+   echo "id,grip_kg" > data/test-participants.csv
+   git add data/test-participants.csv
+   git commit -m "Test: this commit should be blocked by the hook"
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+ERROR: Staged file(s) found in data/ directory:
+data/test-participants.csv
+
+Research data must not be committed.
+Steps to fix:
+  1. git restore --staged <file>
+  2. Add the pattern to .gitignore
+```
+
+The commit is blocked. The hook exited with code 1 which causes `git commit` to abort.
+:::
+
+6. Verify the commit did NOT happen:
+
+   ```bash
+   git log --oneline -3
+   git status
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+3c4d5e6 (HEAD -> main) Fix: use z-score normalization for balance index
+...
+
+On branch main
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+        new file:   data/test-participants.csv
+```
+
+No new commit in `git log`. The file is still staged — the hook blocked the commit
+without removing the staging.
+:::
+
+7. Fix the situation and clean up:
+
+   ```bash
+   git restore --staged data/test-participants.csv
+   echo 'data/' >> .gitignore
+   git add .gitignore
+   git commit -m "Data: add .gitignore to protect data directory"
+   ```
+
+8. Confirm the hook still works with a safe commit:
+
+   ```bash
+   echo "# Safe comment" >> scripts/analysis.R
+   git add scripts/analysis.R
+   git commit -m "Docs: add safe comment to analysis script"
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+[main 7e8f9a0] Docs: add safe comment to analysis script
+ 1 file changed, 1 insertion(+)
+```
+
+The hook runs, finds no `data/` files staged, and allows the commit through.
+:::
+
+**What you learned**:
+
+- Pre-commit hooks run as shell scripts before every commit
+- Exiting with code 1 (`exit 1`) aborts the commit
+- `git diff --cached --name-only` lists staged files — the hook reads this list
+- Hooks must be executable (`chmod +x`) to run
+
+::: {.callout-warning}
+## Common Mistakes
+
+- **Forgetting `chmod +x`**: The hook file exists but Git silently ignores non-executable
+  hooks. Always verify with `ls -la .git/hooks/pre-commit`.
+- **Skipping hooks in an emergency**: `git commit --no-verify` bypasses all hooks.
+  This exists for genuine emergencies — do not use it as a workaround for the hook
+  catching a real problem.
+- **Hooks are not shared**: The file is inside `.git/` which is not committed.
+  Every collaborator must install the hook manually on their machine.
+:::
+
+---
+
+## Summary
+
+You can now:
+
+- Create Git aliases for your most-used commands in `~/.gitconfig`
+- Write a pre-commit hook that enforces data safety rules
+- Use `git diff --cached --name-only` to inspect staged files programmatically
+- Make shell scripts executable with `chmod +x`
+
+**You are ready for [Module 12 — Professional Repositories](../modules/12-professional-repos.qmd).**

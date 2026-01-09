@@ -1,0 +1,367 @@
+---
+title: "Module 11: Git with Research Tools"
+description: "Integrate Git with RStudio, Jupyter notebooks, pre-commit hooks, and shell aliases for research workflows."
+module: 11
+prerequisites:
+  - 0
+  - 1
+  - 2
+learning_objectives:
+  - "Learner can explain why terminal Git is preferred over RStudio's Git GUI"
+  - "Learner can configure renv with Git for reproducible R environments"
+  - "Learner can handle Jupyter notebook diffs with nbstripout"
+  - "Learner can write a pre-commit hook that blocks data file staging"
+  - "Learner can create Git aliases to speed up daily research workflows"
+platform_coverage:
+  - macos
+  - linux
+  - windows-gitbash
+  - windows-wsl2
+---
+
+## Overview
+
+Research workflows combine editors, statistical software, notebooks, and the terminal.
+This module shows how Git integrates with each tool — and why the terminal remains
+the authoritative interface regardless of which other tools you use.
+
+## Prerequisites
+
+- [Module 02 — Basic Workflow](02-basic-workflow.qmd)
+- [Module 08 — Data Management](08-data-management.qmd) (for the pre-commit hook section)
+
+---
+
+### Git Terminal + RStudio: Recommended Workflow
+
+RStudio includes a Git panel that provides buttons for common operations. Using it
+is tempting — but it hides critical context:
+
+| RStudio Git GUI | Terminal Git |
+|-----------------|--------------|
+| "Commit" button | `git commit -m "..."` — message is explicit |
+| Checkbox per file | `git add scripts/analysis.R` — files are explicit |
+| No conflict markers | `git status` shows "both modified" clearly |
+| No reflog access | `git reflog` — full recovery history visible |
+| No rebase support | `git rebase -i` — history cleanup available |
+
+**Recommended workflow**: Use RStudio for writing and editing R code. Use the terminal
+for all Git operations. Open both windows side by side.
+
+```{mermaid}
+%%{init: {'theme': 'dark'}}%%
+flowchart LR
+    ED["RStudio Editor\n(write R code)"] --> TERM["Terminal\n(git add, commit, push)"]
+    TERM --> ED
+
+    style ED fill:#bd93f9,color:#000
+    style TERM fill:#50fa7b,color:#000
+```
+
+This way you always know exactly what Git is doing — no hidden operations.
+
+::: {.callout-note}
+## If You Must Use the RStudio Git Panel
+
+Open **Tools → Terminal** inside RStudio. This embeds a terminal directly in the IDE.
+You get the full terminal interface without switching windows, with files conveniently
+accessible in the Files pane.
+:::
+
+---
+
+### renv + Git
+
+`renv` manages R package versions for reproducibility. Configure it correctly with Git:
+
+**What to commit**:
+
+```bash
+# renv.lock: YES — contains exact package versions for reproducibility
+git add renv.lock
+git commit -m "renv: lock package versions for Wave 1 analysis"
+
+# .Rprofile: YES — activates renv when R starts in this directory
+git add .Rprofile
+
+# renv/settings.json: YES — renv configuration
+git add renv/settings.json
+```
+
+**What to exclude** (add to `.gitignore`):
+
+```bash
+echo 'renv/library/' >> .gitignore
+echo 'renv/staging/' >> .gitignore
+```
+
+`renv/library/` contains the installed packages — thousands of files, platform-specific,
+and reproducible from `renv.lock`. Including it balloons the repository.
+
+**Verify `renv.lock` is being tracked**:
+
+```bash
+git log --oneline renv.lock
+```
+
+```text
+b3a2c1d renv: lock package versions for Wave 1 analysis
+9f0a1b2 renv: update tidyverse to 2.0.0
+```
+
+**Restore environment on a new machine**:
+
+```bash
+# Clone the repository
+git clone git@github.com:yourusername/rehab-research.git
+cd rehab-research
+
+# Restore all packages from renv.lock
+Rscript -e "renv::restore()"
+```
+
+---
+
+### Jupyter Notebooks and Git
+
+Jupyter notebooks (`.ipynb`) store outputs — plots, tables, error messages — as JSON
+inside the file. This creates problems for Git:
+
+**The diff problem**:
+
+```text
+-   "execution_count": 7,
+-   "outputs": [{"data": {"image/png": "iVBORw0KGgo...AAAA"}, ...}]
++   "execution_count": 8,
++   "outputs": [{"data": {"image/png": "iVBORw0KGgoAAAANSUhE...BBBB"}, ...}]
+```
+
+A re-run with identical code produces a different base64 image string — spurious
+diffs of thousands of lines on every commit.
+
+**Solution 1: nbstripout — clear outputs before commit**
+
+```bash
+# Install
+pip install nbstripout
+
+# Configure for this repository (adds a Git filter)
+nbstripout --install
+```
+
+```text
+Installed nbstripout in /Users/jbayer/rehab-research
+```
+
+Now every `git commit` automatically strips outputs from notebooks before storing them.
+The filter is recorded in `.git/config` (local) and `.gitattributes` (shared):
+
+```bash
+cat .gitattributes
+```
+
+```text
+*.ipynb filter=nbstripout
+```
+
+Commit `.gitattributes` so collaborators get the same filter:
+
+```bash
+git add .gitattributes
+git commit -m "Config: add nbstripout filter for Jupyter notebooks"
+```
+
+**Solution 2: Jupytext — sync notebooks to plain Python**
+
+```bash
+pip install jupytext
+
+# Convert notebook to Python script (once)
+jupytext analysis.ipynb --to py
+
+# Sync automatically on save (add to .gitignore the .ipynb)
+echo '*.ipynb' >> .gitignore
+git add analysis.py
+git commit -m "Add: analysis script (jupytext-synced from notebook)"
+```
+
+Plain `.py` files have clean, readable diffs. Collaborators can run `jupytext analysis.py --to notebook` to regenerate the notebook.
+
+---
+
+### Pre-Commit Hooks via Shell Scripts
+
+Git hooks are shell scripts that run at specific points in the Git workflow.
+A `pre-commit` hook runs before every commit — perfect for enforcing data safety rules.
+
+**Create a hook that blocks data file staging**:
+
+```bash
+# Open the hook file
+nano .git/hooks/pre-commit
+```
+
+Write this script:
+
+```bash
+#!/bin/bash
+# Block commits that stage files in the data/ directory
+
+staged_data=$(git diff --cached --name-only | grep -E "^data/")
+
+if [ -n "$staged_data" ]; then
+    echo "ERROR: Staged file(s) found in data/ directory:"
+    echo "$staged_data"
+    echo ""
+    echo "Add a data/ pattern to .gitignore and use 'git rm --cached' to unstage."
+    exit 1
+fi
+```
+
+Make it executable:
+
+```bash
+chmod +x .git/hooks/pre-commit
+```
+
+Test the hook:
+
+```bash
+# Try to commit a data file
+echo "id,score" > data/test.csv
+git add data/test.csv
+git commit -m "Test: this should be blocked"
+```
+
+```text
+ERROR: Staged file(s) found in data/ directory:
+data/test.csv
+
+Add a data/ pattern to .gitignore and use 'git rm --cached' to unstage.
+```
+
+The commit is blocked. Fix:
+
+```bash
+git restore --staged data/test.csv
+echo 'data/' >> .gitignore
+git add .gitignore
+git commit -m "Data: add .gitignore to block data directory"
+```
+
+::: {.callout-note}
+## Hooks Are Local and Not Shared
+
+Files in `.git/hooks/` are not committed to the repository and do not push to remotes.
+Each collaborator must install hooks on their own machine.
+
+To share hooks with your team, store the scripts in a tracked `scripts/git-hooks/`
+directory and document the installation step in your repository's README.
+:::
+
+---
+
+### Git Aliases: Customize Your Workflow
+
+Aliases create shortcuts for commands you type frequently:
+
+```bash
+# Short status
+git config --global alias.st status
+
+# One-line graph log (the most useful alias for researchers)
+git config --global alias.lg "log --oneline --graph --all --decorate"
+
+# Unstage a file
+git config --global alias.unstage "restore --staged"
+
+# Show the last commit
+git config --global alias.last "log -1 HEAD --stat"
+
+# List all aliases
+git config --global alias.aliases "config --get-regexp alias"
+```
+
+Verify the aliases are stored:
+
+```bash
+cat ~/.gitconfig
+```
+
+```text
+[user]
+    name = Dr. J. Bayer
+    email = j.bayer@rehab-institute.edu
+[alias]
+    st = status
+    lg = log --oneline --graph --all --decorate
+    unstage = restore --staged
+    last = log -1 HEAD --stat
+    aliases = config --get-regexp alias
+```
+
+Use them:
+
+```bash
+git st              # git status
+git lg              # git log --oneline --graph --all --decorate
+git unstage scripts/analysis.R   # git restore --staged scripts/analysis.R
+git last            # show last commit with stats
+```
+
+---
+
+### Shell History as Documentation
+
+Your terminal history is an implicit record of your Git activity:
+
+```bash
+history | grep "^[0-9]* *git"
+```
+
+```text
+  423  git add scripts/analysis.R
+  424  git commit -m "Fix: z-score normalization"
+  425  git log --oneline
+  426  git switch feature/add-grip-strength-measure
+  427  git merge main
+```
+
+Use this to reconstruct what you did during a session — useful when writing up
+methods sections or answering reviewer questions about the analysis history.
+
+Search for specific git commands:
+
+```bash
+history | grep "git log"
+history | grep "git reset"
+```
+
+For a permanent audit trail, enable timestamps in bash history:
+
+```bash
+echo 'export HISTTIMEFORMAT="%F %T "' >> ~/.bashrc
+source ~/.bashrc
+```
+
+Now `history | grep git` shows exact timestamps alongside each command.
+
+---
+
+## Hands-on Exercise
+
+**[Exercises 11 →](../exercises/11-exercises.qmd)**
+
+**Quick check**: After setting up aliases:
+
+```bash
+git aliases
+```
+
+You should see a list of all configured aliases.
+
+## What's Next
+
+In **[Module 12 — Professional Repositories](12-professional-repos.qmd)**, you will
+set up a publication-ready repository with README, LICENSE, semantic versioning, and
+a pre-submission checklist.
