@@ -1,0 +1,461 @@
+---
+title: "Exercises: Module 12 — Professional Research Repositories"
+module: 12
+exercise_count: 2
+estimated_minutes: 40
+platform_tested:
+  - macos-14
+  - ubuntu-24.04
+  - windows-gitbash-2.44
+---
+
+## Before You Begin
+
+Complete [Module 12](../modules/12-professional-repos.qmd) and [Exercises 08](08-exercises.qmd).
+This is the capstone exercise — you will build a complete, publication-ready repository
+from scratch.
+
+---
+
+### Exercise 12.1 — Build a Publication-Ready Repository from Scratch
+
+**Goal**: Create a complete research repository for a grip strength study, applying
+everything learned across all 13 modules.
+
+**Steps**:
+
+1. Create a fresh repository:
+
+   ```bash
+   mkdir ~/grip-strength-study
+   cd ~/grip-strength-study
+   git init
+   git config user.name "Your Name"
+   git config user.email "your@institution.edu"
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+Initialized empty Git repository in /Users/jbayer/grip-strength-study/.git/
+```
+:::
+
+2. Create the full directory structure:
+
+   ```bash
+   mkdir -p scripts data figures docs
+   touch data/.gitkeep figures/.gitkeep
+   ```
+
+3. Write `README.md` with all required sections:
+
+   ```bash
+   nano README.md
+   ```
+
+   Write:
+
+   ```text
+   # Grip Strength Recovery in Stroke Rehabilitation
+
+   Analysis code for the study examining bilateral grip strength asymmetry
+   as a predictor of functional recovery in first-time stroke survivors.
+
+   ## Installation
+
+   ```bash
+   git clone git@github.com:yourusername/grip-strength-study.git
+   cd grip-strength-study
+   Rscript -e "renv::restore()"
+   ```
+
+   ## Usage
+
+   Data files are not included (participant privacy). Place your
+   processed data in `data/` following `docs/codebook.md`.
+
+   ```bash
+   Rscript scripts/analysis.R
+   Rscript scripts/figures.R
+   ```
+
+   ## Data
+
+   Raw data: restricted access via institutional archive.
+   Contact: your@institution.edu
+
+   ## Citation
+
+   Bayer, J. et al. (2026). Grip strength asymmetry as predictor of
+   recovery in stroke rehabilitation. *Neurorehabilitation*, XX, XXX-XXX.
+
+   ## License
+
+   Code: MIT License (see LICENSE).
+   ```
+
+   Save: **Ctrl+O**, **Return**, **Ctrl+X**
+
+4. Add the MIT License:
+
+   ```bash
+   cat > LICENSE << 'EOF'
+   MIT License
+
+   Copyright (c) 2026 Your Name
+
+   Permission is hereby granted, free of charge, to any person obtaining a copy
+   of this software and associated documentation files (the "Software"), to deal
+   in the Software without restriction, including without limitation the rights
+   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+   copies of the Software, and to permit persons to whom the Software is
+   furnished to do so, subject to the following conditions:
+
+   The above copyright notice and this permission notice shall be included in all
+   copies or substantial portions of the Software.
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+   SOFTWARE.
+   EOF
+   ```
+
+5. Create `.gitignore` with research patterns:
+
+   ```bash
+   cat > .gitignore << 'EOF'
+   data/
+   figures/
+   *.RData
+   *.csv
+   .env
+   .Rhistory
+   __pycache__/
+   *.pyc
+   .DS_Store
+   Thumbs.db
+   renv/library/
+   EOF
+   ```
+
+6. Create the main analysis script:
+
+   ```bash
+   cat > scripts/analysis.R << 'EOF'
+   library(dplyr)
+   library(tidyr)
+
+   # Grip strength asymmetry index
+   # |dominant - non-dominant| / mean(dominant, non-dominant)
+   grip_asymmetry <- function(dominant, non_dominant) {
+     abs(dominant - non_dominant) / ((dominant + non_dominant) / 2)
+   }
+
+   # Z-score normalization
+   normalize_grip <- function(x) (x - mean(x, na.rm = TRUE)) / sd(x, na.rm = TRUE)
+
+   # Filter complete grip strength cases
+   filter_complete_grip <- function(df) {
+     dplyr::filter(df, !is.na(grip_dominant), !is.na(grip_non_dominant))
+   }
+   EOF
+   ```
+
+7. Create a codebook:
+
+   ```bash
+   cat > docs/codebook.md << 'EOF'
+   # Data Codebook — Grip Strength Study
+
+   ## Variables
+
+   | Variable | Type | Units | Description |
+   |----------|------|-------|-------------|
+   | id | integer | — | Participant ID (anonymized) |
+   | age | integer | years | Age at enrollment |
+   | grip_dominant | numeric | kg | Dominant hand grip strength (mean of 3 trials) |
+   | grip_non_dominant | numeric | kg | Non-dominant hand grip strength (mean of 3 trials) |
+   | balance_score | numeric | 0–100 | Berg Balance Scale score |
+   | days_post_stroke | integer | days | Days between stroke onset and enrollment |
+
+   ## Missing Values
+
+   Missing values are coded as NA. Use `filter_complete_grip()` before analysis.
+   EOF
+   ```
+
+8. Make three structured commits:
+
+   ```bash
+   # Commit 1: project structure
+   git add README.md LICENSE .gitignore data/.gitkeep figures/.gitkeep
+   git commit -m "Structure: initialize grip strength study repository"
+
+   # Commit 2: analysis code
+   git add scripts/analysis.R
+   git commit -m "Add: core analysis functions (grip_asymmetry, normalize_grip, filter_complete_grip)"
+
+   # Commit 3: documentation
+   git add docs/codebook.md
+   git commit -m "Docs: add variable codebook for data contributors"
+   ```
+
+9. Verify the clean history:
+
+   ```bash
+   git log --oneline
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+c4d5e6f Docs: add variable codebook for data contributors
+b3c4d5e Add: core analysis functions (grip_asymmetry, normalize_grip, filter_complete_grip)
+a2b3c4d Structure: initialize grip strength study repository
+```
+:::
+
+10. Tag the first release:
+
+    ```bash
+    git tag -a v1.0.0 -m "Wave 1 analysis — manuscript submission ready"
+    ```
+
+11. Verify the tag:
+
+    ```bash
+    git show v1.0.0
+    ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+tag v1.0.0
+Tagger: Your Name <your@institution.edu>
+Date:   Fri Feb 28 17:00:00 2026 +0100
+
+Wave 1 analysis — manuscript submission ready
+
+commit c4d5e6f...
+Author: Your Name <your@institution.edu>
+Date:   Fri Feb 28 16:55:00 2026 +0100
+
+    Docs: add variable codebook for data contributors
+...
+```
+:::
+
+12. Create the release archive:
+
+    ```bash
+    git archive --format=zip v1.0.0 > grip-strength-v1.0.0.zip
+    ls -lh grip-strength-v1.0.0.zip
+    ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+-rw-r--r--  1 jbayer  staff   3.2K Feb 28 17:00 grip-strength-v1.0.0.zip
+```
+
+A small archive — only tracked source files, no data, no `.git/` history.
+:::
+
+::: {.callout-warning}
+## Common Mistakes
+
+- **Tagging the wrong commit**: Always confirm `git log --oneline` shows exactly the
+  commits you want before tagging. Once pushed, a tag pointing to the wrong commit
+  is awkward to fix (requires deleting and re-creating the tag on the remote).
+- **Forgetting to push the tag**: `git push origin main` does NOT push tags.
+  Use `git push origin v1.0.0` or `git push origin --tags`.
+- **Including data in the archive**: `git archive` includes everything that is tracked.
+  If you accidentally tracked a data file, it will appear in the archive. Always run
+  `git ls-files` before archiving to confirm no data files are tracked.
+:::
+
+---
+
+### Exercise 12.2 — Run the Publication Readiness Checklist
+
+**Goal**: Verify your new repository passes all eight pre-publication checks.
+
+**Steps**:
+
+Run each check and record the result:
+
+1. **Repository size**:
+
+   ```bash
+   git count-objects -vH
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+count: 12
+size: 12.50 KiB
+in-pack: 0
+packs: 0
+size-pack: 0 bytes
+```
+
+Under 1 MB total — healthy for a code-only repository.
+:::
+
+2. **Data directory excluded**:
+
+   ```bash
+   grep "^data" .gitignore && echo "PASS: data/ pattern found" || echo "FAIL: no data/ pattern"
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+data/
+PASS: data/ pattern found
+```
+:::
+
+3. **All tracked files** (verify no data files):
+
+   ```bash
+   git ls-files
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+.gitignore
+LICENSE
+README.md
+data/.gitkeep
+docs/codebook.md
+figures/.gitkeep
+scripts/analysis.R
+```
+
+`data/.gitkeep` is a zero-byte file — acceptable. No `.csv`, no participant data.
+:::
+
+4. **CSV history** (check if any CSV was ever committed):
+
+   ```bash
+   git log --all --full-history -- "*.csv" | head -5
+   echo "(empty = PASS: no CSV ever committed)"
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+(empty = PASS: no CSV ever committed)
+```
+:::
+
+5. **.env history** (check if any .env was ever committed):
+
+   ```bash
+   git log --all --full-history -- ".env" | head -5
+   echo "(empty = PASS: no .env ever committed)"
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+(empty = PASS: no .env ever committed)
+```
+:::
+
+6. **README present**:
+
+   ```bash
+   git ls-files README.md && echo "PASS: README.md committed" || echo "FAIL: no README.md"
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+README.md
+PASS: README.md committed
+```
+:::
+
+7. **LICENSE present**:
+
+   ```bash
+   git ls-files LICENSE && echo "PASS: LICENSE committed" || echo "FAIL: no LICENSE"
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+LICENSE
+PASS: LICENSE committed
+```
+:::
+
+8. **Version tag exists**:
+
+   ```bash
+   git tag && echo "PASS: tag(s) exist" || echo "FAIL: no tags found"
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+v1.0.0
+PASS: tag(s) exist
+```
+:::
+
+**All 8 checks pass** — your repository is publication-ready.
+
+**What you learned**:
+
+- A publication-ready repository requires: README, LICENSE, .gitignore, structured commits, and a version tag
+- The pre-publication checklist catches common mistakes before they become public
+- `git archive` creates a clean snapshot without `.git/` history for submission
+
+---
+
+## Summary
+
+You have completed Module 12 and all 13 modules of the Advanced_Git course.
+
+You can now:
+
+- Build a research repository with professional structure from scratch
+- Write README and LICENSE files from the terminal
+- Apply semantic versioning with annotated tags
+- Create release archives with `git archive`
+- Complete a pre-publication safety checklist
+
+::: {.callout-note}
+## Congratulations
+
+You have the skills to manage a research project from the first `git init` through
+manuscript submission — entirely from the terminal.
+
+**Reference materials**:
+
+- [Command Index](../reference/command-index.qmd) — all commands in one place
+- [Error Messages](../reference/error-messages.qmd) — quick troubleshooting lookup
+- [Cheat Sheet](../reference/cheat-sheet.qmd) — printable two-column reference
+:::
