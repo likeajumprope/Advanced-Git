@@ -1,0 +1,151 @@
+---
+title: "macOS Setup Guide"
+description: "Install Git, configure your terminal, and set up SSH authentication on macOS."
+platform: macos
+---
+
+## What You Will Install
+
+| Tool | Version | Purpose |
+|------|---------|---------|
+| Xcode Command Line Tools | Latest | Provides Git and core Unix tools |
+| Homebrew | Latest | Package manager (optional but recommended) |
+| Git | ≥ 2.28 | Version control |
+
+## Step 1: Open Terminal
+
+Press **Command + Space**, type `Terminal`, and press **Return**.
+
+You should see a window with a prompt ending in `$` or `%` (zsh default on macOS 10.15+).
+
+## Step 2: Install Git
+
+macOS ships with an older Git via Xcode Command Line Tools. Install the latest version via Homebrew for best compatibility.
+
+**Option A — Homebrew (recommended)**:
+
+```bash
+# Install Homebrew if you don't have it
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Install Git
+brew install git
+```
+
+**Option B — Xcode Command Line Tools only**:
+
+```bash
+xcode-select --install
+```
+
+A dialog will appear — click "Install".
+
+## Step 3: Verify Installation
+
+```bash
+git --version
+```
+
+```text
+git version 2.44.0
+```
+
+Your version number may differ. Anything ≥ 2.28 is supported.
+
+```bash
+which git
+```
+
+```text
+/opt/homebrew/bin/git
+```
+
+If you used Option B, you will see `/usr/bin/git` — that is also fine.
+
+## Step 4: Configure Git
+
+Tell Git who you are. These values appear in every commit you make.
+
+```bash
+git config --global user.name "Your Name"
+git config --global user.email "your@institution.edu"
+git config --global init.defaultBranch main
+git config --global core.editor nano
+```
+
+Verify your configuration:
+
+```bash
+git config --list
+```
+
+```text
+user.name=Your Name
+user.email=your@institution.edu
+init.defaultBranch=main
+core.editor=nano
+```
+
+## Step 5: Generate an SSH Key
+
+SSH keys let you authenticate with GitHub without entering a password every time.
+
+```bash
+ssh-keygen -t ed25519 -C "your@institution.edu"
+```
+
+When prompted:
+
+- **File location**: Press **Return** to accept the default (`~/.ssh/id_ed25519`)
+- **Passphrase**: Enter a passphrase (recommended) or press **Return** twice to skip
+
+```text
+Generating public/private ed25519 key pair.
+Enter file in which to save the key (/Users/yourname/.ssh/id_ed25519):
+Enter passphrase (empty for no passphrase):
+Enter same passphrase again:
+Your identification has been saved in /Users/yourname/.ssh/id_ed25519
+Your public key has been saved in /Users/yourname/.ssh/id_ed25519.pub
+```
+
+## Step 6: Add SSH Key to GitHub
+
+Copy your public key to the clipboard:
+
+```bash
+cat ~/.ssh/id_ed25519.pub
+```
+
+```text
+ssh-ed25519 AAAAC3Nza... your@institution.edu
+```
+
+Select and copy the entire output. Then:
+
+1. Go to **github.com → Settings → SSH and GPG keys → New SSH key**
+2. Title: `My MacBook` (or whatever describes your machine)
+3. Paste the key
+4. Click **Add SSH key**
+
+## Step 7: Verify SSH Connection
+
+```bash
+ssh -T git@github.com
+```
+
+```text
+Hi username! You've successfully authenticated, but GitHub does not provide shell access.
+```
+
+If you see this message, SSH is working correctly.
+
+## Troubleshooting
+
+**`git: command not found`**
+: Git is not on your PATH. If you used Homebrew, run `brew doctor` to check your PATH configuration. Restart your terminal after installing.
+
+**`Permission denied (publickey)`**
+: Your SSH key is not registered with GitHub, or the key agent is not running. Run `ssh-add ~/.ssh/id_ed25519` to add your key to the agent, then try again.
+
+**`brew: command not found`**
+: Homebrew did not install or is not on PATH. Follow the Homebrew installation instructions at [brew.sh](https://brew.sh) and restart your terminal.

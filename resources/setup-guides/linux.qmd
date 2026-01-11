@@ -1,0 +1,118 @@
+---
+title: "Linux Setup Guide"
+description: "Install Git, configure your terminal, and set up SSH authentication on Linux."
+platform: linux
+---
+
+## What You Will Install
+
+| Tool | Version | Purpose |
+|------|---------|---------|
+| Git | ≥ 2.28 | Version control |
+| OpenSSH client | Latest | SSH key authentication |
+
+## Step 1: Open Terminal
+
+Most Linux desktop environments provide a terminal via **Ctrl + Alt + T** or by
+searching "Terminal" in your application launcher.
+
+## Step 2: Install Git
+
+::: {.panel-tabset}
+## Ubuntu / Debian
+
+```bash
+sudo apt update
+sudo apt install git
+```
+
+## Fedora / RHEL
+
+```bash
+sudo dnf install git
+```
+
+## Arch Linux
+
+```bash
+sudo pacman -S git
+```
+:::
+
+## Step 3: Verify Installation
+
+```bash
+git --version
+```
+
+```text
+git version 2.43.0
+```
+
+Anything ≥ 2.28 is supported by this course.
+
+## Step 4: Configure Git
+
+```bash
+git config --global user.name "Your Name"
+git config --global user.email "your@institution.edu"
+git config --global init.defaultBranch main
+git config --global core.editor nano
+```
+
+Verify:
+
+```bash
+git config --list
+```
+
+```text
+user.name=Your Name
+user.email=your@institution.edu
+init.defaultBranch=main
+core.editor=nano
+```
+
+## Step 5: Generate an SSH Key
+
+```bash
+ssh-keygen -t ed25519 -C "your@institution.edu"
+```
+
+Press **Return** to accept the default file location. Enter a passphrase (recommended).
+
+```text
+Generating public/private ed25519 key pair.
+Enter file in which to save the key (/home/yourname/.ssh/id_ed25519):
+Your identification has been saved in /home/yourname/.ssh/id_ed25519
+Your public key has been saved in /home/yourname/.ssh/id_ed25519.pub
+```
+
+## Step 6: Add SSH Key to GitHub
+
+```bash
+cat ~/.ssh/id_ed25519.pub
+```
+
+Copy the output. In GitHub: **Settings → SSH and GPG keys → New SSH key** → paste and save.
+
+## Step 7: Verify SSH Connection
+
+```bash
+ssh -T git@github.com
+```
+
+```text
+Hi username! You've successfully authenticated, but GitHub does not provide shell access.
+```
+
+## Troubleshooting
+
+**`git: command not found`**
+: Installation may not have completed. Re-run the install command, or check `echo $PATH` to ensure `/usr/bin` is present.
+
+**`Permission denied (publickey)`**
+: Run `ssh-add ~/.ssh/id_ed25519` to load your key into the agent, then retry.
+
+**Git version too old (< 2.28)**
+: On older Ubuntu LTS releases, add the Git PPA: `sudo add-apt-repository ppa:git-core/ppa && sudo apt update && sudo apt install git`

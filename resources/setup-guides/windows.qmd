@@ -1,0 +1,174 @@
+---
+title: "Windows Setup Guide"
+description: "Install Git and set up a terminal environment on Windows 11 using Git Bash or WSL2."
+platform: windows
+---
+
+## Which Path Should I Choose?
+
+| Path | Best for | Limitation |
+|------|----------|------------|
+| **Git Bash** | Quick start, no admin rights needed | Slightly different from macOS/Linux |
+| **WSL2** | Full Linux environment inside Windows | Requires admin rights, 10–30 min setup |
+
+For this course, **Git Bash is sufficient for all exercises**. WSL2 is recommended
+if you plan to run Linux research tools (Python environments, bash scripts) on Windows.
+
+::: {.panel-tabset}
+## Git Bash (Recommended Start)
+
+### Step 1: Download Git for Windows
+
+Go to [git-scm.com/download/win](https://git-scm.com/download/win) and download
+the latest installer (64-bit).
+
+### Step 2: Run the Installer
+
+Accept defaults with these exceptions:
+
+- **Default editor**: Change from Vim to **Nano** (easier for beginners)
+- **Adjusting PATH**: Select **"Git from the command line and also from 3rd-party software"**
+- **Line endings**: Select **"Checkout as-is, commit as-is"** (recommended for research files)
+
+### Step 3: Open Git Bash
+
+Search "Git Bash" in the Start menu. You should see a terminal prompt:
+
+```text
+yourname@HOSTNAME MINGW64 ~
+$
+```
+
+### Step 4: Verify Installation
+
+```bash
+git --version
+```
+
+```text
+git version 2.44.0.windows.1
+```
+
+### Step 5: Configure Git
+
+```bash
+git config --global user.name "Your Name"
+git config --global user.email "your@institution.edu"
+git config --global init.defaultBranch main
+git config --global core.editor nano
+```
+
+### Step 6: Generate SSH Key
+
+```bash
+ssh-keygen -t ed25519 -C "your@institution.edu"
+```
+
+Press **Enter** to accept default location (`/c/Users/yourname/.ssh/id_ed25519`).
+
+### Step 7: Add Key to GitHub
+
+```bash
+cat ~/.ssh/id_ed25519.pub
+```
+
+Copy the output. In GitHub: **Settings → SSH and GPG keys → New SSH key** → paste and save.
+
+### Step 8: Verify SSH
+
+```bash
+ssh -T git@github.com
+```
+
+```text
+Hi username! You've successfully authenticated, but GitHub does not provide shell access.
+```
+
+## WSL2 (Full Linux)
+
+### Step 1: Enable WSL2
+
+Open **PowerShell as Administrator** and run:
+
+```text
+wsl --install
+```
+
+This installs WSL2 with Ubuntu by default. Restart your computer when prompted.
+
+### Step 2: Set Up Ubuntu
+
+After restart, Ubuntu opens automatically. Create a Unix username and password
+(these are separate from your Windows credentials).
+
+### Step 3: Install Git
+
+In the Ubuntu terminal:
+
+```bash
+sudo apt update
+sudo apt install git
+```
+
+### Step 4: Configure Git
+
+```bash
+git config --global user.name "Your Name"
+git config --global user.email "your@institution.edu"
+git config --global init.defaultBranch main
+git config --global core.editor nano
+```
+
+### Step 5: Generate SSH Key
+
+```bash
+ssh-keygen -t ed25519 -C "your@institution.edu"
+```
+
+The key is stored at `/home/yourname/.ssh/id_ed25519` inside WSL2.
+
+### Step 6: Add Key to GitHub
+
+```bash
+cat ~/.ssh/id_ed25519.pub
+```
+
+Copy and add to GitHub as described in the Git Bash tab.
+
+### Step 7: Verify SSH
+
+```bash
+ssh -T git@github.com
+```
+
+```text
+Hi username! You've successfully authenticated, but GitHub does not provide shell access.
+```
+
+:::
+
+## Troubleshooting
+
+**`ssh: connect to host github.com port 22: Connection refused`**
+: Your institution blocks port 22. Try SSH over HTTPS port 443:
+
+```bash
+ssh -T -p 443 git@ssh.github.com
+```
+
+If that works, add to `~/.ssh/config`:
+
+```text
+Host github.com
+  Hostname ssh.github.com
+  Port 443
+```
+
+**Git Bash: `$HOME` path issues**
+: Git Bash maps `~` to `C:\Users\yourname`. Use `$USERPROFILE` if a path does not resolve.
+
+**WSL2: `wsl --install` fails**
+: You may need to enable virtualization in BIOS/UEFI. Check your laptop manufacturer's documentation for enabling Intel VT-x or AMD-V.
+
+**No administrator rights**
+: Use the Git Bash path — it does not require admin rights for installation.
