@@ -1,0 +1,376 @@
+---
+title: "Glossary"
+description: "Plain-language definitions for every term introduced across Modules 00–12."
+---
+
+Alphabetically ordered definitions for every bolded term introduced in the course.
+Each entry gives a plain-language definition first, followed by technical precision.
+
+---
+
+## A
+
+**Annotated tag**
+A tag that stores a message, author, and date alongside the commit hash it points to.
+Unlike a lightweight tag (which is just a hash pointer), an annotated tag is a full
+Git object. Created with `git tag -a`. Preferred for release marking.
+→ [Module 07](../modules/07-advanced-operations.qmd)
+
+**Argument**
+A value passed to a command that specifies what the command operates on (e.g., the
+filename in `git add scripts/analysis.R`). Distinct from a flag/option, which modifies
+behavior rather than specifying a target.
+→ [Module 00](../modules/00-terminal-fundamentals.qmd)
+
+---
+
+## B
+
+**Blob object**
+A Git object that stores the raw content of a file, without the filename or path.
+Two files with identical content share a single blob object. Git identifies blobs
+by a SHA-1 hash of their content. Viewable with `git cat-file -p HASH`.
+→ [Module 01](../modules/01-git-concepts.qmd)
+
+**Branch**
+A lightweight, movable pointer to a specific commit, stored as a text file in
+`.git/refs/heads/`. Creating a branch is instantaneous — Git only writes a 41-byte file.
+When you commit, Git rewrites the branch file with the new commit's hash.
+→ [Module 04](../modules/04-branching.qmd)
+
+---
+
+## C
+
+**Cherry-pick**
+The act of copying a specific commit from one branch to another without merging
+the entire branch. Creates a new commit with the same changes but a different hash.
+Useful for applying a targeted fix across branches. Command: `git cherry-pick HASH`.
+→ [Module 07](../modules/07-advanced-operations.qmd)
+
+**Commit**
+A snapshot of all tracked files at a specific moment, stored permanently in
+`.git/objects/`. Each commit contains: a pointer to a tree object, the author's name
+and email, a timestamp, the commit message, and a pointer to the parent commit(s).
+Commits form a directed acyclic graph (DAG).
+→ [Module 01](../modules/01-git-concepts.qmd)
+
+**Commit graph**
+See **DAG**.
+
+**Commit message**
+A human-readable description attached to a commit. Research-grade messages follow
+the format `Type: description` (e.g., `Fix: use z-score normalization per Smith 2024`).
+The message is stored inside the commit object and is permanent.
+→ [Module 02](../modules/02-basic-workflow.qmd)
+
+**Commit object**
+The internal Git representation of a commit, stored as a compressed file in
+`.git/objects/`. Contains: tree hash, parent hash(es), author, committer, timestamp,
+and message. Viewable with `git cat-file -p COMMIT_HASH`.
+→ [Module 01](../modules/01-git-concepts.qmd)
+
+**Conflict marker**
+One of three special lines Git inserts into a file during a merge or rebase conflict:
+`<<<<<<< HEAD` (start of current branch version), `=======` (divider), and
+`>>>>>>> branch-name` (end of incoming version). Must be removed by the developer
+before staging the resolved file.
+→ [Module 05](../modules/05-merging.qmd)
+
+---
+
+## D
+
+**DAG (Directed Acyclic Graph)**
+The mathematical structure Git uses to represent commit history. Each commit points
+to its parent(s) — the graph is *directed* (arrows go from child to parent) and
+*acyclic* (no cycles — a commit cannot be its own ancestor). Branches are pointers
+into this graph.
+→ [Module 01](../modules/01-git-concepts.qmd)
+
+**Dangling object**
+A Git object (commit, tree, or blob) that is not reachable from any branch, tag,
+or other reference. Created by operations like `git reset --hard` or abandoned
+rebase attempts. Dangling objects are recoverable via `git reflog` until garbage
+collection runs (approximately every 30 days).
+→ [Module 10](../modules/10-troubleshooting.qmd)
+
+**Default branch**
+The primary branch in a repository, typically named `main`. Set with
+`git config --global init.defaultBranch main`. GitHub's default for new repositories
+is `main` (changed from `master` in 2020).
+→ [Module 01](../modules/01-git-concepts.qmd)
+
+**Detached HEAD**
+A state where `HEAD` points directly to a commit hash rather than a branch name.
+Occurs when checking out a specific commit, tag, or PR. Commits made in detached
+HEAD are not on any branch and can be lost when switching away. Escape by creating
+a branch: `git switch -c rescue-branch`.
+→ [Module 10](../modules/10-troubleshooting.qmd)
+
+**diff**
+The representation of changes between two versions of a file or tree. Lines prefixed
+with `+` were added; lines prefixed with `-` were removed. Git generates diffs using
+the Myers diff algorithm. Viewable with `git diff`, `git diff --staged`, or `git show`.
+→ [Module 02](../modules/02-basic-workflow.qmd)
+
+---
+
+## F
+
+**Fast-forward merge**
+A merge strategy where the target branch (e.g., `main`) simply moves its pointer
+forward to match the incoming branch, without creating a merge commit. Possible only
+when the incoming branch is directly ahead of the target with no divergence.
+→ [Module 05](../modules/05-merging.qmd)
+
+**Flag / Option**
+A modifier to a command that changes its behavior, typically prefixed with `-` (short
+form) or `--` (long form). Example: `git log --oneline` uses the `--oneline` flag.
+→ [Module 00](../modules/00-terminal-fundamentals.qmd)
+
+**Fork**
+A personal copy of another repository on GitHub, owned by your account. A fork gives
+you write access to your copy while leaving the original unchanged. Used in the
+forking workflow: fork → clone → branch → PR → upstream sync.
+→ [Module 09](../modules/09-collaboration.qmd)
+
+---
+
+## G
+
+**Garbage collection**
+Git's automatic process (triggered by `git gc`) that compresses loose objects into
+pack files, removes unreachable dangling objects older than the grace period
+(default: 30 days), and reclaims disk space.
+→ [Module 08](../modules/08-data-management.qmd)
+
+**git**
+A distributed version control system created by Linus Torvalds in 2005.
+"Distributed" means every clone is a complete repository with full history — there
+is no single server that is authoritative (GitHub is a convention, not a requirement).
+→ [Module 01](../modules/01-git-concepts.qmd)
+
+**gitignore**
+A file named `.gitignore` containing patterns for files and directories that Git
+should not track. Patterns use glob syntax (`*`, `?`, `**`). Only applies to files
+not yet tracked — already-committed files require `git rm --cached` to stop tracking.
+→ [Module 08](../modules/08-data-management.qmd)
+
+**Git LFS (Large File Storage)**
+A Git extension that replaces large file content with a pointer in the Git object
+database, storing the actual file content on a separate LFS server. Required for
+files too large for standard Git storage (neuroimaging, video, large tabular data).
+→ [Module 08](../modules/08-data-management.qmd)
+
+---
+
+## H
+
+**Hash (SHA-1)**
+A 40-character hexadecimal string that uniquely identifies a Git object.
+Computed as a cryptographic hash of the object's content — identical content always
+produces the same hash. Git uses hashes instead of filenames to store objects.
+Example: `3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d`.
+→ [Module 01](../modules/01-git-concepts.qmd)
+
+**HEAD**
+A special pointer that indicates which branch (or commit) is currently checked out.
+Stored in `.git/HEAD` as either a branch reference (`ref: refs/heads/main`) or a
+raw commit hash (when in detached HEAD state). HEAD is updated by `git switch`,
+`git commit`, `git reset`, and `git checkout`.
+→ [Module 01](../modules/01-git-concepts.qmd)
+
+**Hook**
+A shell script in `.git/hooks/` that Git runs automatically at specific workflow
+points. A `pre-commit` hook runs before every commit; a `post-merge` hook runs
+after every merge. Hooks are local (not committed) and must be made executable
+with `chmod +x`.
+→ [Module 11](../modules/11-tool-integration.qmd)
+
+---
+
+## I
+
+**Index**
+See **Staging area**.
+
+**Interactive rebase**
+A rebase mode (`git rebase -i`) that opens a text editor showing each commit as a
+line in a "todo list". The developer can reorder, squash, fixup, reword, edit, or
+drop commits before they are replayed. Used to clean up local history before sharing.
+→ [Module 06](../modules/06-rebase.qmd)
+
+---
+
+## M
+
+**Merge**
+The act of combining the histories of two branches. Git finds the common ancestor,
+computes the changes in each branch, and combines them. Results in either a
+fast-forward (no new commit) or a three-way merge commit.
+→ [Module 05](../modules/05-merging.qmd)
+
+**Merge commit**
+A commit with two parent commits, created when two diverged branches are merged.
+Visually appears as the "diamond" in `git log --graph`. Contains the combined state
+of both branches at the point of merging.
+→ [Module 05](../modules/05-merging.qmd)
+
+---
+
+## O
+
+**Object**
+Git's fundamental storage unit. Every file version, directory listing, commit, and
+tag is stored as an object in `.git/objects/`. The four types are: blob (file content),
+tree (directory listing), commit, and tag. Objects are content-addressed by hash.
+→ [Module 01](../modules/01-git-concepts.qmd)
+
+**Origin**
+The conventional name for the primary remote repository. Set automatically when you
+`git clone` or added manually with `git remote add origin URL`. `origin/main` is the
+remote-tracking branch for the `main` branch on the remote named `origin`.
+→ [Module 03](../modules/03-remotes.qmd)
+
+---
+
+## P
+
+**Pack file**
+A compressed binary file in `.git/objects/pack/` containing many Git objects stored
+together. Pack files are more space-efficient than loose objects and are created
+by `git gc` or during `git push`/`git clone`.
+→ [Module 01](../modules/01-git-concepts.qmd)
+
+**Pickaxe search**
+Informal name for `git log -S "string"` — searches for commits where the count of
+a specific string changed (i.e., the string was added or removed). Named after the
+`-S` flag's original code reference.
+→ [Module 07](../modules/07-advanced-operations.qmd)
+
+**Pull request (PR)**
+A request to merge changes from one branch (or fork) into another, typically reviewed
+by at least one other person before merging. Despite the name, a pull request is a
+GitHub/GitLab concept, not a core Git feature. Created from the terminal with `gh pr create`.
+→ [Module 09](../modules/09-collaboration.qmd)
+
+---
+
+## R
+
+**Rebase**
+A Git operation that replays commits from one branch onto a different base commit.
+Changes the parent of each replayed commit, resulting in new hashes. Creates linear
+history without merge commits. Never rebase shared/published history.
+→ [Module 06](../modules/06-rebase.qmd)
+
+**Reflog**
+A local log of all HEAD movements, stored in `.git/logs/HEAD`. Records every commit,
+reset, checkout, merge, and rebase. Used to recover commits after `git reset --hard`
+or accidental branch deletion. Entries expire after approximately 30 days.
+→ [Module 10](../modules/10-troubleshooting.qmd)
+
+**Remote**
+A named URL pointing to another copy of the repository, typically on GitHub.
+Managed with `git remote`. The conventional name for the primary remote is `origin`;
+`upstream` is used for the original repository when working with forks.
+→ [Module 03](../modules/03-remotes.qmd)
+
+**Repository (repo)**
+A directory tracked by Git, containing a `.git/` subdirectory that stores all
+version history, configuration, and objects. Can be local (on your machine) or
+remote (on GitHub). A clone is a complete, independent copy of a repository.
+→ [Module 01](../modules/01-git-concepts.qmd)
+
+---
+
+## S
+
+**Semantic versioning**
+A version numbering convention using MAJOR.MINOR.PATCH (e.g., v1.2.3):
+MAJOR increments for breaking changes, MINOR for new features, PATCH for bug fixes.
+Applied to analysis code via annotated Git tags to mark manuscript submission points.
+→ [Module 12](../modules/12-professional-repos.qmd)
+
+**Snapshot**
+Git's model for storing file versions — each commit records the complete state of
+all tracked files at that moment (not just the changes). Internally Git avoids
+storing duplicate content by reusing blob objects with identical hashes.
+→ [Module 01](../modules/01-git-concepts.qmd)
+
+**SSH key**
+An asymmetric cryptographic key pair used to authenticate with remote Git hosts
+without a password. The private key (`~/.ssh/id_ed25519`) stays on your machine;
+the public key (`~/.ssh/id_ed25519.pub`) is uploaded to GitHub. The Ed25519 algorithm
+is recommended for new keys.
+→ [Module 03](../modules/03-remotes.qmd)
+
+**Squash**
+Combining multiple commits into one. In interactive rebase, `squash` folds a commit
+into the previous one and opens an editor for the combined message; `fixup` does the
+same but discards the later commit's message silently.
+→ [Module 06](../modules/06-rebase.qmd)
+
+**Staging area (index)**
+An intermediate area between the working directory and the repository where changes
+are assembled before committing. Files are added to the staging area with `git add`
+and removed with `git restore --staged`. The staging area allows composing commits
+from a subset of working directory changes.
+→ [Module 01](../modules/01-git-concepts.qmd), [Module 02](../modules/02-basic-workflow.qmd)
+
+**Stash**
+A temporary storage area for uncommitted working directory changes. Created with
+`git stash save`. Changes are saved to a stack (`git stash list`), can be restored
+with `git stash pop`, and are lost if the repository is deleted. Local only — stashes
+do not push to remotes.
+→ [Module 07](../modules/07-advanced-operations.qmd)
+
+---
+
+## T
+
+**Terminal**
+A text-based interface for interacting with a computer's operating system via typed
+commands. On macOS: Terminal.app or iTerm2. On Linux: the built-in terminal emulator.
+On Windows: Git Bash or Windows Terminal with WSL2.
+→ [Module 00](../modules/00-terminal-fundamentals.qmd)
+
+**Three-way merge**
+A merge strategy used when both branches have diverged from their common ancestor.
+Git computes the diff from the ancestor to each branch tip and combines them.
+If both branches modified the same lines, a conflict results. Creates a merge commit.
+→ [Module 05](../modules/05-merging.qmd)
+
+**Tracked file**
+A file that Git is monitoring for changes — it was added with `git add` at least once
+and is included in the most recent commit. Opposite of an untracked file (new, never added)
+or an ignored file (matches a `.gitignore` pattern).
+→ [Module 02](../modules/02-basic-workflow.qmd)
+
+**Tree object**
+A Git object that represents a directory listing, mapping filenames and permissions
+to blob (file) or tree (subdirectory) hashes. Every commit points to one root tree
+object that describes the complete file system state at that snapshot.
+→ [Module 01](../modules/01-git-concepts.qmd)
+
+---
+
+## U
+
+**Upstream**
+1. A remote named `upstream` — conventionally the original repository you forked from,
+   as opposed to your personal fork (`origin`).
+2. A tracking relationship: a local branch that is configured to track a remote branch
+   is said to have an upstream. Set with `git push -u origin BRANCH`.
+→ [Module 09](../modules/09-collaboration.qmd)
+
+---
+
+## W
+
+**Working directory (working tree)**
+The directory on your local filesystem where files appear in their current, editable
+state. Changes made here are not saved to Git until staged and committed. Three states
+apply to files: untracked, modified (tracked but changed), or staged.
+→ [Module 01](../modules/01-git-concepts.qmd)

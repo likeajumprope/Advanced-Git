@@ -1,0 +1,252 @@
+---
+title: "Cheat Sheet"
+description: "Two-column printable quick reference for all commands taught in Modules 00–12."
+format:
+  html:
+    toc: false
+---
+
+*Print this page (Ctrl+P / Cmd+P) for a desk reference. All commands use the
+same syntax on macOS, Linux, and Windows Git Bash.*
+
+::: {layout-ncol=2}
+
+## Modules 00–05
+
+**Terminal Navigation**
+
+| Command | What it does |
+|---------|--------------|
+| `pwd` | Print current directory |
+| `ls -la` | List all files with details |
+| `cd PATH` | Change directory |
+| `mkdir -p DIR` | Create directory (with parents) |
+| `touch FILE` | Create empty file |
+| `cat FILE` | Display file contents |
+| `nano FILE` | Edit file (Ctrl+O save, Ctrl+X exit) |
+| `rm FILE` | Remove a file |
+| `mv SRC DEST` | Move or rename |
+| `cp SRC DEST` | Copy a file |
+| `COMMAND --help` | Show help |
+
+---
+
+**Repository Init & Config**
+
+| Command | What it does |
+|---------|--------------|
+| `git init` | Initialize a new repository |
+| `git config --global user.name "Name"` | Set author name |
+| `git config --global user.email "email"` | Set author email |
+| `git config --list` | Show all config |
+| `cat .git/HEAD` | Show current branch ref |
+
+---
+
+**Staging & Committing**
+
+| Command | What it does |
+|---------|--------------|
+| `git status` | Show working tree state |
+| `git add FILE` | Stage a file |
+| `git add .` | Stage all changes |
+| `git restore --staged FILE` | Unstage a file |
+| `git restore FILE` | Discard working dir changes |
+| `git commit -m "message"` | Commit staged changes |
+| `git commit --amend` | Edit last commit (local only) |
+| `git diff` | Unstaged changes |
+| `git diff --staged` | Staged changes |
+
+---
+
+**Viewing History**
+
+| Command | What it does |
+|---------|--------------|
+| `git log --oneline` | Compact one-line history |
+| `git log --oneline --graph --all` | Branch graph |
+| `git show HEAD` | Last commit diff |
+| `git show HASH` | Specific commit diff |
+
+---
+
+**Remotes**
+
+| Command | What it does |
+|---------|--------------|
+| `git clone URL` | Clone a repository |
+| `git remote -v` | List remotes |
+| `git remote add origin URL` | Add remote |
+| `git push -u origin main` | Push + set upstream |
+| `git push origin main` | Push to remote |
+| `git pull --rebase origin main` | Pull (rebase strategy) |
+| `git fetch origin` | Download without merging |
+| `ssh -T git@github.com` | Test SSH auth |
+
+---
+
+**Branching**
+
+| Command | What it does |
+|---------|--------------|
+| `git branch` | List branches |
+| `git branch -v` | List with last commit |
+| `git switch -c BRANCH` | Create + switch |
+| `git switch BRANCH` | Switch branch |
+| `git branch -d BRANCH` | Delete merged branch |
+
+---
+
+**Merging**
+
+| Command | What it does |
+|---------|--------------|
+| `git merge BRANCH` | Merge into current |
+| `git merge --continue` | Continue after conflict |
+| `git merge --abort` | Abort merge |
+
+Conflict markers in file:
+
+```text
+<<<<<<< HEAD        ← your version
+content A
+=======
+content B
+>>>>>>> branch      ← incoming version
+```
+
+Delete all three marker lines, keep one version, then `git add` + `git merge --continue`.
+
+---
+
+## Modules 06–12
+
+**Rebase**
+
+| Command | What it does |
+|---------|--------------|
+| `git rebase BRANCH` | Rebase onto branch |
+| `git rebase -i HEAD~N` | Interactive rebase (last N) |
+| `git rebase --continue` | Continue after conflict |
+| `git rebase --abort` | Abort rebase |
+
+Interactive rebase commands: `pick`, `squash`/`s`, `fixup`/`f`, `reword`/`r`, `drop`/`d`
+
+**Golden rule**: Never rebase shared/published history.
+
+---
+
+**Advanced History**
+
+| Command | What it does |
+|---------|--------------|
+| `git log -S "string"` | Find commits adding/removing string |
+| `git log --grep "pattern"` | Find commits by message |
+| `git log --oneline -- FILE` | Commits touching a file |
+| `git blame FILE` | Line-by-line attribution |
+| `git cherry-pick HASH` | Copy commit to current branch |
+
+---
+
+**Stash**
+
+| Command | What it does |
+|---------|--------------|
+| `git stash save "msg"` | Save WIP |
+| `git stash list` | List stashes |
+| `git stash pop` | Restore + remove top stash |
+| `git stash apply stash@{N}` | Restore specific stash |
+| `git stash drop stash@{N}` | Remove without restoring |
+
+---
+
+**Tags & Releases**
+
+| Command | What it does |
+|---------|--------------|
+| `git tag -a v1.0.0 -m "msg"` | Create annotated tag |
+| `git tag` | List tags |
+| `git push origin v1.0.0` | Push a tag |
+| `git archive --format=zip TAG > f.zip` | Create release archive |
+| `gh release create TAG` | Create GitHub release |
+
+---
+
+**Data Management**
+
+| Command | What it does |
+|---------|--------------|
+| `echo 'data/' >> .gitignore` | Add pattern |
+| `git rm --cached FILE` | Stop tracking (keep on disk) |
+| `git ls-files` | List tracked files |
+| `git check-ignore -v FILE` | Explain why file is ignored |
+| `git count-objects -vH` | Repository size |
+| `git log --all -- "*.csv"` | Find CSV in history |
+
+Essential `.gitignore` patterns:
+
+```text
+data/
+*.RData
+*.csv
+.env
+.Rhistory
+__pycache__/
+.DS_Store
+renv/library/
+```
+
+---
+
+**Troubleshooting**
+
+| Command | What it does |
+|---------|--------------|
+| `git reset HEAD~1 --soft` | Undo commit, keep staged |
+| `git reset HEAD~1` | Undo commit, keep in working dir |
+| `git reset HEAD~1 --hard` | Undo commit, discard changes |
+| `git reflog` | All HEAD movements |
+| `git switch -c NAME HASH` | Rescue from reflog |
+| `git fsck` | Check repository integrity |
+
+---
+
+**Collaboration (GitHub CLI)**
+
+| Command | What it does |
+|---------|--------------|
+| `gh auth login` | Authenticate |
+| `gh repo fork OWNER/REPO --clone` | Fork + clone |
+| `gh pr create --title "..." --body "..."` | Open PR |
+| `gh pr list` | List open PRs |
+| `gh pr checkout N` | Check out PR locally |
+| `git fetch upstream` | Download upstream changes |
+| `git rebase upstream/main` | Sync fork |
+
+---
+
+**Tool Integration**
+
+| Command | What it does |
+|---------|--------------|
+| `git config --global alias.lg "log --oneline --graph --all"` | Create alias |
+| `chmod +x .git/hooks/pre-commit` | Enable hook |
+| `history \| grep git` | Find past git commands |
+
+---
+
+**Professional Repos**
+
+| Command | What it does |
+|---------|--------------|
+| `git tag -a v1.0.0 -m "msg"` | Tag release |
+| `git push origin --tags` | Push all tags |
+| `git archive --format=zip v1.0.0 > f.zip` | Archive snapshot |
+| `git ls-files` | Verify tracked files |
+| `git log --all -- "*.csv"` | Audit CSV history |
+
+:::
+
+---
+
+*Full command reference: [Command Index](command-index.qmd) · Definitions: [Glossary](glossary.qmd) · Errors: [Error Messages](error-messages.qmd)*

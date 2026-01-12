@@ -1,0 +1,471 @@
+---
+title: "Error Messages"
+description: "Verbatim Git error messages with plain-language explanations and terminal-only fixes."
+---
+
+A lookup reference for error messages you will encounter in Modules 00–12.
+Entries are organized by context. Use **Ctrl+F** / **Cmd+F** to search for the
+exact text of your error.
+
+---
+
+## Environment Setup
+
+### `command not found: git`
+
+```text
+command not found: git
+```
+
+**Meaning**: Git is not installed, or its directory is not in your `PATH`.
+
+**Causes** (most common first):
+1. Git was never installed
+2. Git was installed but the terminal session was not restarted after installation
+
+**Fix**:
+- macOS: `brew install git` then open a new terminal
+- Linux: `sudo apt install git` or `sudo dnf install git`
+- Windows: Install Git for Windows from git-scm.com
+
+→ [Module 00](../modules/00-terminal-fundamentals.qmd), [Setup Guides](../resources/setup-guides/macos.qmd)
+
+---
+
+### `ssh: connect to host github.com port 22: Connection refused`
+
+```text
+ssh: connect to host github.com port 22: Connection refused
+```
+
+**Meaning**: Port 22 (standard SSH) is blocked by a firewall.
+
+**Causes**:
+1. Institutional firewall blocks port 22
+2. VPN or network policy restriction
+
+**Fix**: Use SSH over port 443 (HTTPS port — usually allowed):
+
+```bash
+# Test if port 443 works
+ssh -T -p 443 git@ssh.github.com
+
+# Configure permanently (~/.ssh/config)
+nano ~/.ssh/config
+```
+
+Add:
+```text
+Host github.com
+  Hostname ssh.github.com
+  Port 443
+```
+
+→ [Module 03](../modules/03-remotes.qmd)
+
+---
+
+### `Permission denied (publickey)`
+
+```text
+git@github.com: Permission denied (publickey).
+fatal: Could not read from remote repository.
+```
+
+**Meaning**: SSH authentication failed — GitHub rejected your key.
+
+**Causes** (most common first):
+1. Your SSH key is not loaded in the SSH agent
+2. The public key in GitHub Settings does not match your `~/.ssh/id_ed25519.pub`
+3. You generated a key but never added it to GitHub
+
+**Fix**:
+
+```bash
+# Load your key into the SSH agent
+ssh-add ~/.ssh/id_ed25519
+
+# Verify the loaded keys
+ssh-add -l
+
+# Re-test connection
+ssh -T git@github.com
+```
+
+If still failing, copy `cat ~/.ssh/id_ed25519.pub` and verify it matches exactly
+what is in GitHub → Settings → SSH and GPG keys.
+
+→ [Module 03](../modules/03-remotes.qmd), [Exercise 3.1](../exercises/03-exercises.qmd)
+
+---
+
+## Staging & Committing
+
+### `nothing to commit, working tree clean`
+
+```text
+On branch main
+nothing to commit, working tree clean
+```
+
+**Meaning**: Not an error — this is the ideal state. No changes since the last commit.
+
+→ [Module 02](../modules/02-basic-workflow.qmd)
+
+---
+
+### `error: pathspec 'FILE' did not match any file(s) known to git`
+
+```text
+error: pathspec 'scripts/analysis.R' did not match any file(s) known to git
+```
+
+**Meaning**: The file path you specified does not match any tracked file.
+
+**Causes** (most common first):
+1. Typo in the file path
+2. The file was deleted and is no longer in the working tree
+3. Wrong directory — `git` commands must be run from inside the repository
+
+**Fix**: Run `git status` to see what files exist. Run `ls scripts/` to verify the
+file name. Run `pwd` to confirm you are inside the repository.
+
+→ [Module 02](../modules/02-basic-workflow.qmd)
+
+---
+
+### `Untracked files` shown after adding to .gitignore
+
+```text
+Untracked files:
+    data/participants.csv
+```
+
+Even after adding `data/` to `.gitignore`.
+
+**Meaning**: The file was committed before `.gitignore` was set up. `.gitignore`
+only works on **untracked** files.
+
+**Fix**: `git rm --cached data/participants.csv` then commit.
+
+→ [Module 08](../modules/08-data-management.qmd)
+
+---
+
+## Pushing & Pulling
+
+### `[rejected] main -> main (non-fast-forward)`
+
+```text
+ ! [rejected]        main -> main (non-fast-forward)
+error: failed to push some refs to 'git@github.com:yourusername/repo.git'
+hint: Updates were rejected because the remote contains work that you do not
+hint: have locally. Integrate the remote changes (e.g.
+hint: 'git pull --rebase ...') before pushing again.
+```
+
+**Meaning**: The remote has commits you do not have locally. Git refuses to overwrite them.
+
+**Causes**:
+1. A collaborator pushed while you were working
+2. You used `git commit --amend` on a commit that was already pushed
+
+**Fix**:
+
+```bash
+git pull --rebase origin main
+git push origin main
+```
+
+Never use `git push --force` on a shared branch.
+
+→ [Module 03](../modules/03-remotes.qmd), [Exercise 3.3](../exercises/03-exercises.qmd)
+
+---
+
+### `fatal: remote origin already exists`
+
+```text
+fatal: remote origin already exists.
+```
+
+**Meaning**: You already have a remote named `origin`.
+
+**Fix**: Check existing remotes first:
+
+```bash
+git remote -v
+```
+
+If the URL is wrong, update it:
+
+```bash
+git remote set-url origin git@github.com:yourusername/repo.git
+```
+
+→ [Module 03](../modules/03-remotes.qmd)
+
+---
+
+### `fatal: 'origin' does not appear to be a git repository`
+
+```text
+fatal: 'origin' does not appear to be a git repository
+fatal: Could not read from remote repository.
+```
+
+**Meaning**: The remote URL is incorrect or the repository does not exist on GitHub.
+
+**Causes**:
+1. Typo in the repository URL
+2. The repository was deleted or renamed on GitHub
+3. Wrong GitHub account
+
+**Fix**:
+
+```bash
+git remote -v    # check the URL
+gh repo view    # verify the repository exists (requires gh auth)
+```
+
+→ [Module 03](../modules/03-remotes.qmd)
+
+---
+
+## Merging
+
+### `CONFLICT (content): Merge conflict in FILE`
+
+```text
+Auto-merging scripts/analysis.R
+CONFLICT (content): Merge conflict in scripts/analysis.R
+Automatic merge failed; fix conflicts and then commit the result.
+```
+
+**Meaning**: Both branches modified the same lines. Git cannot choose automatically.
+
+**Causes**: Two branches changed the same line(s) of the same file.
+
+**Fix**:
+
+```bash
+# 1. See which files have conflicts
+git status
+
+# 2. Open the file and look for conflict markers
+nano scripts/analysis.R
+
+# 3. Delete the three marker lines, keep the content you want
+# 4. Save
+
+# 5. Stage the resolved file
+git add scripts/analysis.R
+
+# 6. Complete the merge
+git merge --continue
+```
+
+→ [Module 05](../modules/05-merging.qmd), [Exercise 5.1](../exercises/05-exercises.qmd)
+
+---
+
+### `You have unmerged paths.`
+
+```text
+On branch main
+You have unmerged paths.
+  (fix conflicts and run "git merge --continue")
+  (use "git merge --abort" to abort the merge)
+
+Unmerged paths:
+  (use "git add <file>..." to mark resolution)
+        both modified:   scripts/analysis.R
+```
+
+**Meaning**: You are in a merge conflict state. You must resolve all conflicts before
+the merge can complete.
+
+**Fix**: Resolve each file listed under "Unmerged paths", `git add` each one, then
+`git merge --continue`.
+
+→ [Module 05](../modules/05-merging.qmd)
+
+---
+
+## Rebasing
+
+### `error: could not apply HASH... (rebase conflict)`
+
+```text
+error: could not apply 3c4d5e6... Fix: use z-score normalization
+hint: Resolve all conflicts manually, mark them as resolved with
+hint: "git add/rm <conflicted_files>", then run "git rebase --continue".
+hint: You can instead skip this commit: run "git rebase --skip".
+hint: To abort and get back to the state before "git rebase", run "git rebase --abort".
+```
+
+**Meaning**: A conflict occurred while replaying a commit during rebase.
+
+**Fix**: Same resolution process as a merge conflict:
+
+```bash
+nano CONFLICTED_FILE     # resolve markers
+git add CONFLICTED_FILE
+git rebase --continue
+```
+
+→ [Module 06](../modules/06-rebase.qmd)
+
+---
+
+### `fatal: It seems that there is already a rebase-merge directory`
+
+```text
+fatal: It seems that there is already a rebase-merge directory, and
+I wonder if you are in the middle of another rebase.  If that is the
+case, please try
+      git rebase (--continue | --abort | --skip)
+```
+
+**Meaning**: A previous rebase was not completed or aborted cleanly.
+
+**Fix**: Check state and either continue or abort:
+
+```bash
+git status
+git rebase --abort    # if you want to start fresh
+```
+
+→ [Module 06](../modules/06-rebase.qmd)
+
+---
+
+## Configuration
+
+### `Please tell me who you are.`
+
+```text
+Author identity unknown
+
+*** Please tell me who you are.
+
+Run
+
+  git config --global user.email "you@example.com"
+  git config --global user.name "Your Name"
+```
+
+**Meaning**: Git cannot create a commit because no user identity is configured.
+
+**Fix**: Run exactly what Git suggests:
+
+```bash
+git config --global user.email "your@institution.edu"
+git config --global user.name "Your Name"
+```
+
+→ [Module 01](../modules/01-git-concepts.qmd)
+
+---
+
+### `error: Your local changes to the following files would be overwritten by checkout`
+
+```text
+error: Your local changes to the following files would be overwritten by checkout:
+        scripts/analysis.R
+Please commit your changes or stash them before you switch branches.
+Aborting
+```
+
+**Meaning**: You have uncommitted changes that would be overwritten by the branch switch.
+
+**Causes**: Unsaved working directory changes on a file that differs between branches.
+
+**Fix** (choose one):
+
+```bash
+# Option 1: Commit your changes first
+git add scripts/analysis.R
+git commit -m "WIP: save in-progress changes"
+git switch other-branch
+
+# Option 2: Stash your changes
+git stash save "WIP: changes before branch switch"
+git switch other-branch
+git stash pop    # restore after switching back
+```
+
+→ [Module 04](../modules/04-branching.qmd), [Module 07](../modules/07-advanced-operations.qmd)
+
+---
+
+### `HEAD detached at HASH`
+
+```text
+HEAD detached at 3c4d5e6
+nothing to commit, working tree clean
+```
+
+**Meaning**: You checked out a specific commit (or tag) directly. HEAD points to a hash,
+not a branch. Commits you make here are not on any branch.
+
+**Causes**: `git checkout HASH`, `git checkout TAG`, or `gh pr checkout N`.
+
+**Fix**:
+
+```bash
+# If you have not made any commits in detached state:
+git switch main
+
+# If you made commits you want to keep:
+git switch -c rescue-branch    # attach HEAD to a new branch
+```
+
+→ [Module 10](../modules/10-troubleshooting.qmd), [Exercise 10.1](../exercises/10-exercises.qmd)
+
+---
+
+### `fatal: not a git repository (or any of the parent directories): .git`
+
+```text
+fatal: not a git repository (or any of the parent directories): .git
+```
+
+**Meaning**: You ran a `git` command outside of a Git repository.
+
+**Fix**: Navigate to your repository first:
+
+```bash
+cd ~/rehab-research
+git status
+```
+
+→ [Module 01](../modules/01-git-concepts.qmd)
+
+---
+
+### `Filename too long` (Windows)
+
+```text
+error: could not create leading directories of '...' : No such file or directory
+```
+
+or
+
+```text
+warning: Clone succeeded, but checkout failed.
+```
+
+**Meaning**: Windows has a 260-character path length limit by default. Long paths
+in the repository exceed this.
+
+**Fix**: Enable long paths in Git:
+
+```bash
+git config --global core.longpaths true
+```
+
+Also enable in Windows Group Policy (requires admin): Computer Configuration →
+Administrative Templates → System → Filesystem → Enable Win32 long paths.
+
+→ [Setup Guides](../resources/setup-guides/windows.qmd)

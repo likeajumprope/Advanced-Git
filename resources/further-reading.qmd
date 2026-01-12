@@ -1,0 +1,138 @@
+---
+title: "Further Reading"
+description: "Curated resources for going deeper on Git, the terminal, research data management, and reproducible analysis."
+---
+
+Curated resources organized by topic. All free resources are marked with
+the source — many are available online at no cost.
+
+---
+
+## Git Internals
+
+**Pro Git** (Scott Chacon & Ben Straub)
+The authoritative free book on Git, published by Apress and available at
+[git-scm.com/book](https://git-scm.com/book/en/v2). Chapters 1–3 cover everything
+in this course. **Chapters 10–11** ("Git Internals" and "Git and Other Systems")
+provide the deeper object model and plumbing command coverage referenced in
+[Git Internals Deep Dive](git-internals-deep-dive.qmd).
+
+**Git from the Bottom Up** (John Wiegley)
+A 40-page essay explaining Git by starting with object storage and working up to
+branches and merges — the inverse of how most tutorials teach it. Available free at
+[jwiegley.github.io/git-from-the-bottom-up](https://jwiegley.github.io/git-from-the-bottom-up/).
+Excellent complement to Module 01.
+
+**GitLab Git Reference**
+Concise command reference with examples, maintained by GitLab. Useful as a
+secondary reference when GitHub's documentation is platform-specific.
+→ [docs.gitlab.com/ee/topics/git](https://docs.gitlab.com/ee/topics/git/)
+
+---
+
+## Terminal Skills
+
+**The Linux Command Line** (William E. Shotts)
+A comprehensive introduction to the Bash shell and Unix command-line tools,
+free online at [linuxcommand.org/tlcl.php](https://linuxcommand.org/tlcl.php).
+Chapters 1–8 cover everything in Module 00 and more. Part 4 covers shell scripting
+(relevant to Module 11 hooks).
+
+**Bash Reference Manual**
+The official GNU documentation for Bash. Dense but complete — useful when you need
+to understand shell syntax for writing hooks or aliases.
+→ [gnu.org/software/bash/manual](https://www.gnu.org/software/bash/manual/)
+
+**Terminal Cheat Sheet** (SS64)
+Quick reference for commands on macOS (`ss64.com/osx`), Linux Bash (`ss64.com/bash`),
+and Windows CMD/PowerShell. Useful when looking up a specific command's flags.
+→ [ss64.com](https://ss64.com)
+
+---
+
+## Research Data Management
+
+**UK Data Service: Research Data Management**
+Practical guidance for managing research data throughout the project lifecycle —
+data management plans, file naming, storage, access, and sharing. Especially
+relevant for clinical and health research.
+→ [ukdataservice.ac.uk/manage-data](https://ukdataservice.ac.uk/manage-data/)
+
+**FAIR Data Principles**
+The FAIR (Findable, Accessible, Interoperable, Reusable) principles for scientific
+data management. The original 2016 paper is freely available:
+Wilkinson et al. (2016). *Scientific Data*, 3, 160018.
+→ [doi.org/10.1038/sdata.2016.18](https://doi.org/10.1038/sdata.2016.18)
+
+**Research Data Alliance (RDA): Active DMPs**
+Working group resources on active data management plans that integrate version
+control and provenance tracking. Useful context for why Git fits into a broader
+data management strategy.
+→ [rd-alliance.org](https://www.rd-alliance.org)
+
+**OSF (Open Science Framework)**
+A free platform for pre-registration, data sharing, and linking GitHub repositories
+to publications. Widely used in rehabilitation and health science research.
+→ [osf.io](https://osf.io)
+
+---
+
+## R Reproducibility
+
+**renv documentation**
+Official documentation for the `renv` R package for reproducible environments.
+Covers the lock file format, snapshot/restore workflow, and integration with Git.
+→ [rstudio.github.io/renv](https://rstudio.github.io/renv/)
+
+**The Turing Way: Reproducible Research**
+A community-maintained handbook covering version control, testing, continuous
+integration, and reproducible environments — with R and Python examples.
+Free online at [the-turing-way.netlify.app](https://the-turing-way.netlify.app).
+Particularly relevant: "Version Control" and "Reproducible Environments" chapters.
+
+**R for Reproducible Scientific Analysis** (Software Carpentry)
+A workshop curriculum that teaches R, Git, and research best practices together.
+Free at [swcarpentry.github.io/r-novice-gapminder](https://swcarpentry.github.io/r-novice-gapminder/).
+Useful companion to this course for learners who are new to R.
+
+---
+
+## Python Reproducibility
+
+**Python Packaging User Guide**
+Official guide to `pip`, virtual environments, and `requirements.txt` — the Python
+equivalent of `renv.lock`. Essential for Python-based research projects.
+→ [packaging.python.org](https://packaging.python.org)
+
+**nbstripout documentation**
+Tool for clearing Jupyter notebook outputs before committing — covered briefly
+in Module 11. The README explains the Git filter mechanism in detail.
+→ [github.com/kynan/nbstripout](https://github.com/kynan/nbstripout)
+
+**Jupytext documentation**
+Alternative approach: sync `.ipynb` files to plain `.py` or `.Rmd` files for
+readable diffs in Git. Complements nbstripout for collaborative notebook workflows.
+→ [jupytext.readthedocs.io](https://jupytext.readthedocs.io)
+
+---
+
+## Rehabilitation Research Workflows
+
+**Stroke rehabilitation analysis on GitHub** (example workflows)
+Several published rehabilitation studies include their analysis code on GitHub.
+Searching "stroke rehabilitation analysis R GitHub" or "physiotherapy outcome measure
+reproducible analysis" surfaces real examples of the patterns taught in this course.
+The `rehab-research` example repository used throughout this course follows
+these real-world conventions.
+
+**CONSORT statement and data transparency**
+The CONSORT 2010 statement encourages transparency in reporting randomized trials.
+Linking a GitHub repository (tagged at the analysis version used for submission)
+to a trial registration is increasingly expected by high-impact journals.
+→ [consort-statement.org](http://www.consort-statement.org)
+
+**EQUATOR Network: Reporting Guidelines**
+A library of reporting guidelines for health research (CONSORT, STROBE, PRISMA, etc.).
+Each guideline increasingly expects or requires data and code availability — Git
+provides the version control infrastructure.
+→ [equator-network.org](https://www.equator-network.org)

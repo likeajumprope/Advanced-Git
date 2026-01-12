@@ -1,0 +1,207 @@
+---
+title: "Command Index"
+description: "Every command taught in Advanced_Git, organized by topic."
+---
+
+A complete reference for all terminal commands and Git operations taught across
+Modules 00–12. Commands are organized by topic — use your browser's **Ctrl+F** /
+**Cmd+F** to search for a specific command.
+
+---
+
+## Navigation & Environment
+
+Commands for moving around the filesystem and inspecting your environment.
+
+| Command | Description | Key Flags | Module |
+|---------|-------------|-----------|--------|
+| `pwd` | Print current working directory | — | [00](../modules/00-terminal-fundamentals.qmd) |
+| `ls` | List directory contents | `-la` (all + details), `-1` (one per line) | [00](../modules/00-terminal-fundamentals.qmd) |
+| `cd PATH` | Change directory | `..` (parent), `~` (home), `-` (previous) | [00](../modules/00-terminal-fundamentals.qmd) |
+| `mkdir NAME` | Create a directory | `-p` (create parents) | [00](../modules/00-terminal-fundamentals.qmd) |
+| `touch FILE` | Create empty file or update timestamp | — | [00](../modules/00-terminal-fundamentals.qmd) |
+| `cat FILE` | Display file contents | `-n` (line numbers) | [00](../modules/00-terminal-fundamentals.qmd) |
+| `rm FILE` | Remove a file | `-r` (recursive), `-f` (force) | [00](../modules/00-terminal-fundamentals.qmd) |
+| `mv SRC DEST` | Move or rename a file | — | [00](../modules/00-terminal-fundamentals.qmd) |
+| `cp SRC DEST` | Copy a file | `-r` (recursive) | [00](../modules/00-terminal-fundamentals.qmd) |
+| `nano FILE` | Open file in nano editor | — | [00](../modules/00-terminal-fundamentals.qmd) |
+| `COMMAND --help` | Show command help | — | [00](../modules/00-terminal-fundamentals.qmd) |
+| `man COMMAND` | Open manual page | — | [00](../modules/00-terminal-fundamentals.qmd) |
+| `history` | Show command history | `\| grep PATTERN` (filter) | [11](../modules/11-tool-integration.qmd) |
+| `tree DIR` | Show directory tree | — | [12](../modules/12-professional-repos.qmd) |
+
+---
+
+## Repository Init & Config
+
+Setting up repositories and configuring Git identity.
+
+| Command | Description | Key Flags | Module |
+|---------|-------------|-----------|--------|
+| `git init` | Initialize a new repository | — | [01](../modules/01-git-concepts.qmd) |
+| `git config user.name "Name"` | Set commit author name | `--global` (all repos) | [01](../modules/01-git-concepts.qmd) |
+| `git config user.email "email"` | Set commit author email | `--global` (all repos) | [01](../modules/01-git-concepts.qmd) |
+| `git config init.defaultBranch main` | Set default branch name | `--global` | [01](../modules/01-git-concepts.qmd) |
+| `git config --list` | Show all configuration | `--global`, `--local` | [01](../modules/01-git-concepts.qmd) |
+| `cat .git/HEAD` | Show current branch ref | — | [01](../modules/01-git-concepts.qmd) |
+| `cat .git/config` | Show repository config | — | [01](../modules/01-git-concepts.qmd) |
+| `git config --global alias.NAME "cmd"` | Create a command alias | — | [11](../modules/11-tool-integration.qmd) |
+
+---
+
+## Staging & Committing
+
+The add-commit workflow for recording changes.
+
+| Command | Description | Key Flags | Module |
+|---------|-------------|-----------|--------|
+| `git status` | Show working tree status | `-s` (short format) | [02](../modules/02-basic-workflow.qmd) |
+| `git add FILE` | Stage a file | `.` (all), `-p` (interactive patch) | [02](../modules/02-basic-workflow.qmd) |
+| `git restore --staged FILE` | Unstage a file | — | [02](../modules/02-basic-workflow.qmd) |
+| `git restore FILE` | Discard working directory changes | `--source HASH` (from commit) | [10](../modules/10-troubleshooting.qmd) |
+| `git commit -m "message"` | Commit staged changes | `--amend` (modify last commit) | [02](../modules/02-basic-workflow.qmd) |
+| `git diff` | Unstaged changes | `--staged` (staged), `HASH..HASH` (between commits) | [02](../modules/02-basic-workflow.qmd) |
+| `git rm --cached FILE` | Stop tracking a file (keep on disk) | — | [08](../modules/08-data-management.qmd) |
+| `git check-ignore -v FILE` | Explain why a file is ignored | — | [08](../modules/08-data-management.qmd) |
+
+---
+
+## History & Inspection
+
+Viewing and searching commit history.
+
+| Command | Description | Key Flags | Module |
+|---------|-------------|-----------|--------|
+| `git log` | Show commit history | `--oneline`, `--graph`, `--all`, `--decorate`, `-p`, `--stat` | [02](../modules/02-basic-workflow.qmd) |
+| `git log --oneline -N` | Show last N commits | — | [02](../modules/02-basic-workflow.qmd) |
+| `git log -- FILE` | Commits touching a file | `--follow` (track renames) | [07](../modules/07-advanced-operations.qmd) |
+| `git log -S "string"` | Commits adding/removing string | — | [07](../modules/07-advanced-operations.qmd) |
+| `git log --grep "pattern"` | Commits matching message pattern | `-i` (case-insensitive) | [07](../modules/07-advanced-operations.qmd) |
+| `git show HASH` | Show commit diff and metadata | `--stat` (summary only) | [07](../modules/07-advanced-operations.qmd) |
+| `git blame FILE` | Line-by-line last-modification info | `-L N,M` (line range), `-w` (ignore whitespace) | [07](../modules/07-advanced-operations.qmd) |
+| `git reflog` | Show HEAD movement history | — | [10](../modules/10-troubleshooting.qmd) |
+| `git ls-files` | List all tracked files | — | [08](../modules/08-data-management.qmd) |
+| `git count-objects -vH` | Repository size breakdown | — | [08](../modules/08-data-management.qmd) |
+| `git cat-file -p HASH` | Show raw object content | `-t` (type only) | [01](../modules/01-git-concepts.qmd) |
+| `git fsck` | Check repository integrity | `--lost-found` | [10](../modules/10-troubleshooting.qmd) |
+
+---
+
+## Branching
+
+Creating, switching, and managing branches.
+
+| Command | Description | Key Flags | Module |
+|---------|-------------|-----------|--------|
+| `git branch` | List local branches | `-v` (with last commit), `-a` (include remotes), `--merged` | [04](../modules/04-branching.qmd) |
+| `git switch BRANCH` | Switch to a branch | `-c NAME` (create and switch) | [04](../modules/04-branching.qmd) |
+| `git checkout BRANCH` | Switch to a branch (legacy) | `-b NAME` (create and switch) | [04](../modules/04-branching.qmd) |
+| `git checkout HASH` | Detach HEAD at a commit | — | [10](../modules/10-troubleshooting.qmd) |
+| `git branch -d BRANCH` | Delete a merged branch | `-D` (force delete) | [04](../modules/04-branching.qmd) |
+| `cat .git/refs/heads/BRANCH` | Show commit hash for branch | — | [04](../modules/04-branching.qmd) |
+
+---
+
+## Merging & Rebasing
+
+Combining and rewriting history.
+
+| Command | Description | Key Flags | Module |
+|---------|-------------|-----------|--------|
+| `git merge BRANCH` | Merge a branch into current | `--no-ff` (force merge commit) | [05](../modules/05-merging.qmd) |
+| `git merge --continue` | Continue after resolving conflict | — | [05](../modules/05-merging.qmd) |
+| `git merge --abort` | Abort an in-progress merge | — | [05](../modules/05-merging.qmd) |
+| `git rebase BRANCH` | Rebase current branch onto target | — | [06](../modules/06-rebase.qmd) |
+| `git rebase -i HEAD~N` | Interactive rebase of last N commits | — | [06](../modules/06-rebase.qmd) |
+| `git rebase --continue` | Continue after resolving rebase conflict | — | [06](../modules/06-rebase.qmd) |
+| `git rebase --abort` | Abort an in-progress rebase | — | [06](../modules/06-rebase.qmd) |
+| `git cherry-pick HASH` | Copy a specific commit to current branch | — | [07](../modules/07-advanced-operations.qmd) |
+
+---
+
+## Remote Operations
+
+Working with remote repositories.
+
+| Command | Description | Key Flags | Module |
+|---------|-------------|-----------|--------|
+| `git clone URL` | Clone a remote repository | — | [03](../modules/03-remotes.qmd) |
+| `git remote add NAME URL` | Add a remote | — | [03](../modules/03-remotes.qmd) |
+| `git remote -v` | List remotes with URLs | — | [03](../modules/03-remotes.qmd) |
+| `git push origin BRANCH` | Push branch to remote | `-u` (set upstream), `--tags`, `--force-with-lease` | [03](../modules/03-remotes.qmd) |
+| `git pull` | Fetch and merge remote changes | `--rebase` (rebase instead of merge) | [03](../modules/03-remotes.qmd) |
+| `git fetch REMOTE` | Download remote changes (no merge) | — | [03](../modules/03-remotes.qmd) |
+| `git log --oneline origin/main` | See remote branch history | — | [03](../modules/03-remotes.qmd) |
+| `ssh-keygen -t ed25519 -C "email"` | Generate SSH key pair | — | [03](../modules/03-remotes.qmd) |
+| `ssh -T git@github.com` | Test SSH authentication | — | [03](../modules/03-remotes.qmd) |
+
+---
+
+## Stashing & Tags
+
+Saving work in progress and marking releases.
+
+| Command | Description | Key Flags | Module |
+|---------|-------------|-----------|--------|
+| `git stash save "message"` | Save uncommitted work | — | [07](../modules/07-advanced-operations.qmd) |
+| `git stash list` | List all stashes | — | [07](../modules/07-advanced-operations.qmd) |
+| `git stash pop` | Restore and remove top stash | — | [07](../modules/07-advanced-operations.qmd) |
+| `git stash apply stash@{N}` | Restore specific stash (keep it) | — | [07](../modules/07-advanced-operations.qmd) |
+| `git stash drop stash@{N}` | Remove a stash without applying | — | [07](../modules/07-advanced-operations.qmd) |
+| `git stash clear` | Remove all stashes | — | [07](../modules/07-advanced-operations.qmd) |
+| `git tag -a NAME -m "msg"` | Create an annotated tag | — | [07](../modules/07-advanced-operations.qmd) |
+| `git tag` | List all tags | — | [07](../modules/07-advanced-operations.qmd) |
+| `git show TAG` | Show tag details | — | [07](../modules/07-advanced-operations.qmd) |
+| `git push origin TAG` | Push a tag to remote | `--tags` (all tags) | [12](../modules/12-professional-repos.qmd) |
+
+---
+
+## Data Management
+
+Protecting research data and managing repository size.
+
+| Command | Description | Key Flags | Module |
+|---------|-------------|-----------|--------|
+| `echo 'pattern' >> .gitignore` | Add a pattern to .gitignore | — | [08](../modules/08-data-management.qmd) |
+| `git rm --cached FILE` | Stop tracking a file (keep on disk) | — | [08](../modules/08-data-management.qmd) |
+| `git ls-files` | List all tracked files | — | [08](../modules/08-data-management.qmd) |
+| `git log --all --full-history -- PATTERN` | Find commits touching a pattern | — | [08](../modules/08-data-management.qmd) |
+| `git count-objects -vH` | Repository size breakdown | — | [08](../modules/08-data-management.qmd) |
+| `git lfs install` | Initialize Git LFS | — | [08](../modules/08-data-management.qmd) |
+| `git lfs track "*.PATTERN"` | Track file type with LFS | — | [08](../modules/08-data-management.qmd) |
+| `git lfs ls-files` | List LFS-tracked files | — | [08](../modules/08-data-management.qmd) |
+
+---
+
+## Troubleshooting & Recovery
+
+Undoing mistakes and recovering lost work.
+
+| Command | Description | Key Flags | Module |
+|---------|-------------|-----------|--------|
+| `git reset HEAD~N` | Undo N commits (keep changes in working dir) | `--soft` (keep staged), `--hard` (discard all) | [10](../modules/10-troubleshooting.qmd) |
+| `git restore FILE` | Discard working directory changes | `--staged` (unstage), `--source HASH` | [10](../modules/10-troubleshooting.qmd) |
+| `git reflog` | Show HEAD movement history | — | [10](../modules/10-troubleshooting.qmd) |
+| `git switch -c NAME HASH` | Create branch at specific commit | — | [10](../modules/10-troubleshooting.qmd) |
+| `git fsck --lost-found` | Find unreachable objects | — | [10](../modules/10-troubleshooting.qmd) |
+| `git reset --hard origin/main` | Reset to remote state (destructive) | — | [10](../modules/10-troubleshooting.qmd) |
+
+---
+
+## Collaboration & GitHub CLI
+
+Forking, pull requests, and team workflows.
+
+| Command | Description | Key Flags | Module |
+|---------|-------------|-----------|--------|
+| `gh auth login` | Authenticate with GitHub | — | [09](../modules/09-collaboration.qmd) |
+| `gh auth status` | Check authentication status | — | [09](../modules/09-collaboration.qmd) |
+| `gh repo fork OWNER/REPO --clone` | Fork and clone a repository | — | [09](../modules/09-collaboration.qmd) |
+| `gh pr create` | Open a pull request | `--title`, `--body` | [09](../modules/09-collaboration.qmd) |
+| `gh pr list` | List open pull requests | — | [09](../modules/09-collaboration.qmd) |
+| `gh pr checkout N` | Check out a PR locally | — | [09](../modules/09-collaboration.qmd) |
+| `gh pr review N` | Review a pull request | `--approve`, `--comment`, `--body` | [09](../modules/09-collaboration.qmd) |
+| `gh pr status` | Show status of your PRs | — | [09](../modules/09-collaboration.qmd) |
+| `gh release create TAG` | Create a GitHub release | `--title`, `--notes` | [12](../modules/12-professional-repos.qmd) |
+| `gh repo sync` | Sync fork with upstream | — | [09](../modules/09-collaboration.qmd) |
+| `git archive --format=zip TAG > file.zip` | Create release archive | — | [12](../modules/12-professional-repos.qmd) |
