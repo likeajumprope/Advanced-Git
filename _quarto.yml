@@ -153,6 +153,8 @@ format:
     theme:
       - cyborg
       - assets/scss/custom.scss
+    mermaid: 
+      theme: dark
     toc: true
     toc-depth: 3
     toc-title: "On this page"
