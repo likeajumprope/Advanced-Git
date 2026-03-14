@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.553">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="Verbatim Git error messages with plain-language explanations and terminal-only fixes.">
+
+<title>Advanced_Git - Error Messages</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../assets/img/favicon.ico" rel="icon">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+
+</head>
+
+<body class="nav-sidebar docked nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Advanced_Git</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link active" href="../index.html" aria-current="page"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-modules" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Modules</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-modules">    
+        <li>
+    <a class="dropdown-item" href="../modules/00-terminal-fundamentals.html">
+ <span class="dropdown-text">00 — Terminal Fundamentals</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../modules/01-git-concepts.html">
+ <span class="dropdown-text">01 — Git Concepts</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../modules/02-basic-workflow.html">
+ <span class="dropdown-text">02 — Basic Workflow</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../modules/03-remotes.html">
+ <span class="dropdown-text">03 — Remote Repositories</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../modules/04-branching.html">
+ <span class="dropdown-text">04 — Branching</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../modules/05-merging.html">
+ <span class="dropdown-text">05 — Merging &amp; Conflicts</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../modules/06-rebase.html">
+ <span class="dropdown-text">06 — Rebase</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../modules/07-advanced-operations.html">
+ <span class="dropdown-text">07 — Advanced Operations</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../modules/08-data-management.html">
+ <span class="dropdown-text">08 — Data Management</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../modules/09-collaboration.html">
+ <span class="dropdown-text">09 — Collaboration</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../modules/10-troubleshooting.html">
+ <span class="dropdown-text">10 — Troubleshooting</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../modules/11-tool-integration.html">
+ <span class="dropdown-text">11 — Tool Integration</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../modules/12-professional-repos.html">
+ <span class="dropdown-text">12 — Professional Repos</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-reference" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Reference</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-reference">    
+        <li>
+    <a class="dropdown-item" href="../reference/command-index.html">
+ <span class="dropdown-text">Command Index</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../reference/error-messages.html">
+ <span class="dropdown-text">Error Messages</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../reference/cheat-sheet.html">
+ <span class="dropdown-text">Cheat Sheet</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../reference/glossary.html">
+ <span class="dropdown-text">Glossary</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-resources" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Resources</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-resources">    
+        <li>
+    <a class="dropdown-item" href="../resources/setup-guides/macos.html">
+ <span class="dropdown-text">macOS Setup</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../resources/setup-guides/linux.html">
+ <span class="dropdown-text">Linux Setup</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../resources/setup-guides/windows.html">
+ <span class="dropdown-text">Windows Setup</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../resources/further-reading.html">
+ <span class="dropdown-text">Further Reading</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../resources/git-internals-deep-dive.html">
+ <span class="dropdown-text">Git Internals Deep Dive</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+          <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../reference/command-index.html">Reference</a></li><li class="breadcrumb-item"><a href="../reference/error-messages.html">Error Messages</a></li></ol></nav>
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Advanced_Git</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text">Module 00 — Terminal Fundamentals</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../modules/00-terminal-fundamentals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Module 00: Terminal Fundamentals</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/00-exercises.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercises: Module 00 — Terminal Fundamentals</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+ <span class="menu-text">Module 01 — Git Concepts</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../modules/01-git-concepts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Module 01: Git Conceptual Foundation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/01-exercises.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercises: Module 01 — Git Conceptual Foundation</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+ <span class="menu-text">Module 02 — Basic Workflow</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../modules/02-basic-workflow.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Module 02: Basic Git Terminal Workflow</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/02-exercises.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercises: Module 02 — Basic Git Workflow</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">
+ <span class="menu-text">Module 03 — Remote Repositories</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../modules/03-remotes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Module 03: Remote Repositories via Terminal</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/03-exercises.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercises: Module 03 — Remote Repositories</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true">
+ <span class="menu-text">Module 04 — Branching</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../modules/04-branching.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Module 04: Branching in the Terminal</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/04-exercises.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercises: Module 04 — Branching</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true">
+ <span class="menu-text">Module 05 — Merging &amp; Conflicts</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../modules/05-merging.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Module 05: Merging and Conflicts via Terminal</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/05-exercises.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercises: Module 05 — Merging and Conflicts</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" aria-expanded="true">
+ <span class="menu-text">Module 06 — Rebase</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../modules/06-rebase.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Module 06: Rebase via Terminal</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/06-exercises.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercises: Module 06 — Rebase</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" aria-expanded="true">
+ <span class="menu-text">Module 07 — Advanced Operations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../modules/07-advanced-operations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Module 07: Advanced Git Operations</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/07-exercises.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercises: Module 07 — Advanced Operations</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" aria-expanded="true">
+ <span class="menu-text">Module 08 — Data Management</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../modules/08-data-management.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Module 08: Data Management and .gitignore</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/08-exercises.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercises: Module 08 — Data Management</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" aria-expanded="true">
+ <span class="menu-text">Module 09 — Collaboration</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../modules/09-collaboration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Module 09: Collaboration via Terminal</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/09-exercises.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercises: Module 09 — Collaboration</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" aria-expanded="true">
+ <span class="menu-text">Module 10 — Troubleshooting</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-11" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../modules/10-troubleshooting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Module 10: Troubleshooting and Recovery</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/10-exercises.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercises: Module 10 — Troubleshooting and Recovery</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" aria-expanded="true">
+ <span class="menu-text">Module 11 — Tool Integration</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../modules/11-tool-integration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Module 11: Git with Research Tools</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/11-exercises.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercises: Module 11 — Git with Research Tools</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-13" aria-expanded="true">
+ <span class="menu-text">Module 12 — Professional Repos</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-13" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-13" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../modules/12-professional-repos.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Module 12: Professional Research Repositories</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../exercises/12-exercises.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exercises: Module 12 — Professional Research Repositories</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-14" aria-expanded="true">
+ <span class="menu-text">Reference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-14" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-14" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/command-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Command Index</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/error-messages.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Error Messages</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/cheat-sheet.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Cheat Sheet</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../reference/glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Glossary</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-15" aria-expanded="true">
+ <span class="menu-text">Resources</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-15" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-15" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../resources/setup-guides/macos.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">macOS Setup Guide</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../resources/setup-guides/linux.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Linux Setup Guide</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../resources/setup-guides/windows.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Windows Setup Guide</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../resources/further-reading.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Further Reading</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../resources/git-internals-deep-dive.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Git Internals Deep Dive</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#environment-setup" id="toc-environment-setup" class="nav-link active" data-scroll-target="#environment-setup">Environment Setup</a>
+  <ul class="collapse">
+  <li><a href="#command-not-found-git" id="toc-command-not-found-git" class="nav-link" data-scroll-target="#command-not-found-git"><code>command not found: git</code></a></li>
+  <li><a href="#ssh-connect-to-host-github.com-port-22-connection-refused" id="toc-ssh-connect-to-host-github.com-port-22-connection-refused" class="nav-link" data-scroll-target="#ssh-connect-to-host-github.com-port-22-connection-refused"><code>ssh: connect to host github.com port 22: Connection refused</code></a></li>
+  <li><a href="#permission-denied-publickey" id="toc-permission-denied-publickey" class="nav-link" data-scroll-target="#permission-denied-publickey"><code>Permission denied (publickey)</code></a></li>
+  </ul></li>
+  <li><a href="#staging-committing" id="toc-staging-committing" class="nav-link" data-scroll-target="#staging-committing">Staging &amp; Committing</a>
+  <ul class="collapse">
+  <li><a href="#nothing-to-commit-working-tree-clean" id="toc-nothing-to-commit-working-tree-clean" class="nav-link" data-scroll-target="#nothing-to-commit-working-tree-clean"><code>nothing to commit, working tree clean</code></a></li>
+  <li><a href="#error-pathspec-file-did-not-match-any-files-known-to-git" id="toc-error-pathspec-file-did-not-match-any-files-known-to-git" class="nav-link" data-scroll-target="#error-pathspec-file-did-not-match-any-files-known-to-git"><code>error: pathspec 'FILE' did not match any file(s) known to git</code></a></li>
+  <li><a href="#untracked-files-shown-after-adding-to-.gitignore" id="toc-untracked-files-shown-after-adding-to-.gitignore" class="nav-link" data-scroll-target="#untracked-files-shown-after-adding-to-.gitignore"><code>Untracked files</code> shown after adding to .gitignore</a></li>
+  </ul></li>
+  <li><a href="#pushing-pulling" id="toc-pushing-pulling" class="nav-link" data-scroll-target="#pushing-pulling">Pushing &amp; Pulling</a>
+  <ul class="collapse">
+  <li><a href="#rejected-main---main-non-fast-forward" id="toc-rejected-main---main-non-fast-forward" class="nav-link" data-scroll-target="#rejected-main---main-non-fast-forward"><code>[rejected] main -&gt; main (non-fast-forward)</code></a></li>
+  <li><a href="#fatal-remote-origin-already-exists" id="toc-fatal-remote-origin-already-exists" class="nav-link" data-scroll-target="#fatal-remote-origin-already-exists"><code>fatal: remote origin already exists</code></a></li>
+  <li><a href="#fatal-origin-does-not-appear-to-be-a-git-repository" id="toc-fatal-origin-does-not-appear-to-be-a-git-repository" class="nav-link" data-scroll-target="#fatal-origin-does-not-appear-to-be-a-git-repository"><code>fatal: 'origin' does not appear to be a git repository</code></a></li>
+  </ul></li>
+  <li><a href="#merging" id="toc-merging" class="nav-link" data-scroll-target="#merging">Merging</a>
+  <ul class="collapse">
+  <li><a href="#conflict-content-merge-conflict-in-file" id="toc-conflict-content-merge-conflict-in-file" class="nav-link" data-scroll-target="#conflict-content-merge-conflict-in-file"><code>CONFLICT (content): Merge conflict in FILE</code></a></li>
+  <li><a href="#you-have-unmerged-paths." id="toc-you-have-unmerged-paths." class="nav-link" data-scroll-target="#you-have-unmerged-paths."><code>You have unmerged paths.</code></a></li>
+  </ul></li>
+  <li><a href="#rebasing" id="toc-rebasing" class="nav-link" data-scroll-target="#rebasing">Rebasing</a>
+  <ul class="collapse">
+  <li><a href="#error-could-not-apply-hash...-rebase-conflict" id="toc-error-could-not-apply-hash...-rebase-conflict" class="nav-link" data-scroll-target="#error-could-not-apply-hash...-rebase-conflict"><code>error: could not apply HASH... (rebase conflict)</code></a></li>
+  <li><a href="#fatal-it-seems-that-there-is-already-a-rebase-merge-directory" id="toc-fatal-it-seems-that-there-is-already-a-rebase-merge-directory" class="nav-link" data-scroll-target="#fatal-it-seems-that-there-is-already-a-rebase-merge-directory"><code>fatal: It seems that there is already a rebase-merge directory</code></a></li>
+  </ul></li>
+  <li><a href="#configuration" id="toc-configuration" class="nav-link" data-scroll-target="#configuration">Configuration</a>
+  <ul class="collapse">
+  <li><a href="#please-tell-me-who-you-are." id="toc-please-tell-me-who-you-are." class="nav-link" data-scroll-target="#please-tell-me-who-you-are."><code>Please tell me who you are.</code></a></li>
+  <li><a href="#error-your-local-changes-to-the-following-files-would-be-overwritten-by-checkout" id="toc-error-your-local-changes-to-the-following-files-would-be-overwritten-by-checkout" class="nav-link" data-scroll-target="#error-your-local-changes-to-the-following-files-would-be-overwritten-by-checkout"><code>error: Your local changes to the following files would be overwritten by checkout</code></a></li>
+  <li><a href="#head-detached-at-hash" id="toc-head-detached-at-hash" class="nav-link" data-scroll-target="#head-detached-at-hash"><code>HEAD detached at HASH</code></a></li>
+  <li><a href="#fatal-not-a-git-repository-or-any-of-the-parent-directories-.git" id="toc-fatal-not-a-git-repository-or-any-of-the-parent-directories-.git" class="nav-link" data-scroll-target="#fatal-not-a-git-repository-or-any-of-the-parent-directories-.git"><code>fatal: not a git repository (or any of the parent directories): .git</code></a></li>
+  <li><a href="#filename-too-long-windows" id="toc-filename-too-long-windows" class="nav-link" data-scroll-target="#filename-too-long-windows"><code>Filename too long</code> (Windows)</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/johannabayer/Advanced_Git/edit/main/reference/error-messages.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/johannabayer/Advanced_Git/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../reference/command-index.html">Reference</a></li><li class="breadcrumb-item"><a href="../reference/error-messages.html">Error Messages</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Error Messages</h1>
+</div>
+
+<div>
+  <div class="description">
+    Verbatim Git error messages with plain-language explanations and terminal-only fixes.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>A lookup reference for error messages you will encounter in Modules 00–12. Entries are organized by context. Use <strong>Ctrl+F</strong> / <strong>Cmd+F</strong> to search for the exact text of your error.</p>
+<hr>
+<section id="environment-setup" class="level2">
+<h2 class="anchored" data-anchor-id="environment-setup">Environment Setup</h2>
+<section id="command-not-found-git" class="level3">
+<h3 class="anchored" data-anchor-id="command-not-found-git"><code>command not found: git</code></h3>
+<pre class="text"><code>command not found: git</code></pre>
+<p><strong>Meaning</strong>: Git is not installed, or its directory is not in your <code>PATH</code>.</p>
+<p><strong>Causes</strong> (most common first): 1. Git was never installed 2. Git was installed but the terminal session was not restarted after installation</p>
+<p><strong>Fix</strong>: - macOS: <code>brew install git</code> then open a new terminal - Linux: <code>sudo apt install git</code> or <code>sudo dnf install git</code> - Windows: Install Git for Windows from git-scm.com</p>
+<p>→ <a href="../modules/00-terminal-fundamentals.html">Module 00</a>, <a href="../resources/setup-guides/macos.html">Setup Guides</a></p>
+<hr>
+</section>
+<section id="ssh-connect-to-host-github.com-port-22-connection-refused" class="level3">
+<h3 class="anchored" data-anchor-id="ssh-connect-to-host-github.com-port-22-connection-refused"><code>ssh: connect to host github.com port 22: Connection refused</code></h3>
+<pre class="text"><code>ssh: connect to host github.com port 22: Connection refused</code></pre>
+<p><strong>Meaning</strong>: Port 22 (standard SSH) is blocked by a firewall.</p>
+<p><strong>Causes</strong>: 1. Institutional firewall blocks port 22 2. VPN or network policy restriction</p>
+<p><strong>Fix</strong>: Use SSH over port 443 (HTTPS port — usually allowed):</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test if port 443 works</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> <span class="at">-T</span> <span class="at">-p</span> 443 git@ssh.github.com</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Configure permanently (~/.ssh/config)</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">nano</span> ~/.ssh/config</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Add:</p>
+<pre class="text"><code>Host github.com
+  Hostname ssh.github.com
+  Port 443</code></pre>
+<p>→ <a href="../modules/03-remotes.html">Module 03</a></p>
+<hr>
+</section>
+<section id="permission-denied-publickey" class="level3">
+<h3 class="anchored" data-anchor-id="permission-denied-publickey"><code>Permission denied (publickey)</code></h3>
+<pre class="text"><code>git@github.com: Permission denied (publickey).
+fatal: Could not read from remote repository.</code></pre>
+<p><strong>Meaning</strong>: SSH authentication failed — GitHub rejected your key.</p>
+<p><strong>Causes</strong> (most common first): 1. Your SSH key is not loaded in the SSH agent 2. The public key in GitHub Settings does not match your <code>~/.ssh/id_ed25519.pub</code> 3. You generated a key but never added it to GitHub</p>
+<p><strong>Fix</strong>:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load your key into the SSH agent</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh-add</span> ~/.ssh/id_ed25519</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify the loaded keys</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh-add</span> <span class="at">-l</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Re-test connection</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> <span class="at">-T</span> git@github.com</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>If still failing, copy <code>cat ~/.ssh/id_ed25519.pub</code> and verify it matches exactly what is in GitHub → Settings → SSH and GPG keys.</p>
+<p>→ <a href="../modules/03-remotes.html">Module 03</a>, <a href="../exercises/03-exercises.html">Exercise 3.1</a></p>
+<hr>
+</section>
+</section>
+<section id="staging-committing" class="level2">
+<h2 class="anchored" data-anchor-id="staging-committing">Staging &amp; Committing</h2>
+<section id="nothing-to-commit-working-tree-clean" class="level3">
+<h3 class="anchored" data-anchor-id="nothing-to-commit-working-tree-clean"><code>nothing to commit, working tree clean</code></h3>
+<pre class="text"><code>On branch main
+nothing to commit, working tree clean</code></pre>
+<p><strong>Meaning</strong>: Not an error — this is the ideal state. No changes since the last commit.</p>
+<p>→ <a href="../modules/02-basic-workflow.html">Module 02</a></p>
+<hr>
+</section>
+<section id="error-pathspec-file-did-not-match-any-files-known-to-git" class="level3">
+<h3 class="anchored" data-anchor-id="error-pathspec-file-did-not-match-any-files-known-to-git"><code>error: pathspec 'FILE' did not match any file(s) known to git</code></h3>
+<pre class="text"><code>error: pathspec 'scripts/analysis.R' did not match any file(s) known to git</code></pre>
+<p><strong>Meaning</strong>: The file path you specified does not match any tracked file.</p>
+<p><strong>Causes</strong> (most common first): 1. Typo in the file path 2. The file was deleted and is no longer in the working tree 3. Wrong directory — <code>git</code> commands must be run from inside the repository</p>
+<p><strong>Fix</strong>: Run <code>git status</code> to see what files exist. Run <code>ls scripts/</code> to verify the file name. Run <code>pwd</code> to confirm you are inside the repository.</p>
+<p>→ <a href="../modules/02-basic-workflow.html">Module 02</a></p>
+<hr>
+</section>
+<section id="untracked-files-shown-after-adding-to-.gitignore" class="level3">
+<h3 class="anchored" data-anchor-id="untracked-files-shown-after-adding-to-.gitignore"><code>Untracked files</code> shown after adding to .gitignore</h3>
+<pre class="text"><code>Untracked files:
+    data/participants.csv</code></pre>
+<p>Even after adding <code>data/</code> to <code>.gitignore</code>.</p>
+<p><strong>Meaning</strong>: The file was committed before <code>.gitignore</code> was set up. <code>.gitignore</code> only works on <strong>untracked</strong> files.</p>
+<p><strong>Fix</strong>: <code>git rm --cached data/participants.csv</code> then commit.</p>
+<p>→ <a href="../modules/08-data-management.html">Module 08</a></p>
+<hr>
+</section>
+</section>
+<section id="pushing-pulling" class="level2">
+<h2 class="anchored" data-anchor-id="pushing-pulling">Pushing &amp; Pulling</h2>
+<section id="rejected-main---main-non-fast-forward" class="level3">
+<h3 class="anchored" data-anchor-id="rejected-main---main-non-fast-forward"><code>[rejected] main -&gt; main (non-fast-forward)</code></h3>
+<pre class="text"><code> ! [rejected]        main -&gt; main (non-fast-forward)
+error: failed to push some refs to 'git@github.com:yourusername/repo.git'
+hint: Updates were rejected because the remote contains work that you do not
+hint: have locally. Integrate the remote changes (e.g.
+hint: 'git pull --rebase ...') before pushing again.</code></pre>
+<p><strong>Meaning</strong>: The remote has commits you do not have locally. Git refuses to overwrite them.</p>
+<p><strong>Causes</strong>: 1. A collaborator pushed while you were working 2. You used <code>git commit --amend</code> on a commit that was already pushed</p>
+<p><strong>Fix</strong>:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> pull <span class="at">--rebase</span> origin main</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push origin main</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Never use <code>git push --force</code> on a shared branch.</p>
+<p>→ <a href="../modules/03-remotes.html">Module 03</a>, <a href="../exercises/03-exercises.html">Exercise 3.3</a></p>
+<hr>
+</section>
+<section id="fatal-remote-origin-already-exists" class="level3">
+<h3 class="anchored" data-anchor-id="fatal-remote-origin-already-exists"><code>fatal: remote origin already exists</code></h3>
+<pre class="text"><code>fatal: remote origin already exists.</code></pre>
+<p><strong>Meaning</strong>: You already have a remote named <code>origin</code>.</p>
+<p><strong>Fix</strong>: Check existing remotes first:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> remote <span class="at">-v</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>If the URL is wrong, update it:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> remote set-url origin git@github.com:yourusername/repo.git</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>→ <a href="../modules/03-remotes.html">Module 03</a></p>
+<hr>
+</section>
+<section id="fatal-origin-does-not-appear-to-be-a-git-repository" class="level3">
+<h3 class="anchored" data-anchor-id="fatal-origin-does-not-appear-to-be-a-git-repository"><code>fatal: 'origin' does not appear to be a git repository</code></h3>
+<pre class="text"><code>fatal: 'origin' does not appear to be a git repository
+fatal: Could not read from remote repository.</code></pre>
+<p><strong>Meaning</strong>: The remote URL is incorrect or the repository does not exist on GitHub.</p>
+<p><strong>Causes</strong>: 1. Typo in the repository URL 2. The repository was deleted or renamed on GitHub 3. Wrong GitHub account</p>
+<p><strong>Fix</strong>:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> remote <span class="at">-v</span>    <span class="co"># check the URL</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="ex">gh</span> repo view    <span class="co"># verify the repository exists (requires gh auth)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>→ <a href="../modules/03-remotes.html">Module 03</a></p>
+<hr>
+</section>
+</section>
+<section id="merging" class="level2">
+<h2 class="anchored" data-anchor-id="merging">Merging</h2>
+<section id="conflict-content-merge-conflict-in-file" class="level3">
+<h3 class="anchored" data-anchor-id="conflict-content-merge-conflict-in-file"><code>CONFLICT (content): Merge conflict in FILE</code></h3>
+<pre class="text"><code>Auto-merging scripts/analysis.R
+CONFLICT (content): Merge conflict in scripts/analysis.R
+Automatic merge failed; fix conflicts and then commit the result.</code></pre>
+<p><strong>Meaning</strong>: Both branches modified the same lines. Git cannot choose automatically.</p>
+<p><strong>Causes</strong>: Two branches changed the same line(s) of the same file.</p>
+<p><strong>Fix</strong>:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. See which files have conflicts</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> status</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Open the file and look for conflict markers</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="fu">nano</span> scripts/analysis.R</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Delete the three marker lines, keep the content you want</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. Save</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a><span class="co"># 5. Stage the resolved file</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add scripts/analysis.R</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a><span class="co"># 6. Complete the merge</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> merge <span class="at">--continue</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>→ <a href="../modules/05-merging.html">Module 05</a>, <a href="../exercises/05-exercises.html">Exercise 5.1</a></p>
+<hr>
+</section>
+<section id="you-have-unmerged-paths." class="level3">
+<h3 class="anchored" data-anchor-id="you-have-unmerged-paths."><code>You have unmerged paths.</code></h3>
+<pre class="text"><code>On branch main
+You have unmerged paths.
+  (fix conflicts and run "git merge --continue")
+  (use "git merge --abort" to abort the merge)
+
+Unmerged paths:
+  (use "git add &lt;file&gt;..." to mark resolution)
+        both modified:   scripts/analysis.R</code></pre>
+<p><strong>Meaning</strong>: You are in a merge conflict state. You must resolve all conflicts before the merge can complete.</p>
+<p><strong>Fix</strong>: Resolve each file listed under “Unmerged paths”, <code>git add</code> each one, then <code>git merge --continue</code>.</p>
+<p>→ <a href="../modules/05-merging.html">Module 05</a></p>
+<hr>
+</section>
+</section>
+<section id="rebasing" class="level2">
+<h2 class="anchored" data-anchor-id="rebasing">Rebasing</h2>
+<section id="error-could-not-apply-hash...-rebase-conflict" class="level3">
+<h3 class="anchored" data-anchor-id="error-could-not-apply-hash...-rebase-conflict"><code>error: could not apply HASH... (rebase conflict)</code></h3>
+<pre class="text"><code>error: could not apply 3c4d5e6... Fix: use z-score normalization
+hint: Resolve all conflicts manually, mark them as resolved with
+hint: "git add/rm &lt;conflicted_files&gt;", then run "git rebase --continue".
+hint: You can instead skip this commit: run "git rebase --skip".
+hint: To abort and get back to the state before "git rebase", run "git rebase --abort".</code></pre>
+<p><strong>Meaning</strong>: A conflict occurred while replaying a commit during rebase.</p>
+<p><strong>Fix</strong>: Same resolution process as a merge conflict:</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nano</span> CONFLICTED_FILE     <span class="co"># resolve markers</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add CONFLICTED_FILE</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> rebase <span class="at">--continue</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>→ <a href="../modules/06-rebase.html">Module 06</a></p>
+<hr>
+</section>
+<section id="fatal-it-seems-that-there-is-already-a-rebase-merge-directory" class="level3">
+<h3 class="anchored" data-anchor-id="fatal-it-seems-that-there-is-already-a-rebase-merge-directory"><code>fatal: It seems that there is already a rebase-merge directory</code></h3>
+<pre class="text"><code>fatal: It seems that there is already a rebase-merge directory, and
+I wonder if you are in the middle of another rebase.  If that is the
+case, please try
+      git rebase (--continue | --abort | --skip)</code></pre>
+<p><strong>Meaning</strong>: A previous rebase was not completed or aborted cleanly.</p>
+<p><strong>Fix</strong>: Check state and either continue or abort:</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> status</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> rebase <span class="at">--abort</span>    <span class="co"># if you want to start fresh</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>→ <a href="../modules/06-rebase.html">Module 06</a></p>
+<hr>
+</section>
+</section>
+<section id="configuration" class="level2">
+<h2 class="anchored" data-anchor-id="configuration">Configuration</h2>
+<section id="please-tell-me-who-you-are." class="level3">
+<h3 class="anchored" data-anchor-id="please-tell-me-who-you-are."><code>Please tell me who you are.</code></h3>
+<pre class="text"><code>Author identity unknown
+
+*** Please tell me who you are.
+
+Run
+
+  git config --global user.email "you@example.com"
+  git config --global user.name "Your Name"</code></pre>
+<p><strong>Meaning</strong>: Git cannot create a commit because no user identity is configured.</p>
+<p><strong>Fix</strong>: Run exactly what Git suggests:</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> config <span class="at">--global</span> user.email <span class="st">"your@institution.edu"</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> config <span class="at">--global</span> user.name <span class="st">"Your Name"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>→ <a href="../modules/01-git-concepts.html">Module 01</a></p>
+<hr>
+</section>
+<section id="error-your-local-changes-to-the-following-files-would-be-overwritten-by-checkout" class="level3">
+<h3 class="anchored" data-anchor-id="error-your-local-changes-to-the-following-files-would-be-overwritten-by-checkout"><code>error: Your local changes to the following files would be overwritten by checkout</code></h3>
+<pre class="text"><code>error: Your local changes to the following files would be overwritten by checkout:
+        scripts/analysis.R
+Please commit your changes or stash them before you switch branches.
+Aborting</code></pre>
+<p><strong>Meaning</strong>: You have uncommitted changes that would be overwritten by the branch switch.</p>
+<p><strong>Causes</strong>: Unsaved working directory changes on a file that differs between branches.</p>
+<p><strong>Fix</strong> (choose one):</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Option 1: Commit your changes first</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add scripts/analysis.R</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">"WIP: save in-progress changes"</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> switch other-branch</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Option 2: Stash your changes</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> stash save <span class="st">"WIP: changes before branch switch"</span></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> switch other-branch</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> stash pop    <span class="co"># restore after switching back</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>→ <a href="../modules/04-branching.html">Module 04</a>, <a href="../modules/07-advanced-operations.html">Module 07</a></p>
+<hr>
+</section>
+<section id="head-detached-at-hash" class="level3">
+<h3 class="anchored" data-anchor-id="head-detached-at-hash"><code>HEAD detached at HASH</code></h3>
+<pre class="text"><code>HEAD detached at 3c4d5e6
+nothing to commit, working tree clean</code></pre>
+<p><strong>Meaning</strong>: You checked out a specific commit (or tag) directly. HEAD points to a hash, not a branch. Commits you make here are not on any branch.</p>
+<p><strong>Causes</strong>: <code>git checkout HASH</code>, <code>git checkout TAG</code>, or <code>gh pr checkout N</code>.</p>
+<p><strong>Fix</strong>:</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># If you have not made any commits in detached state:</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> switch main</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="co"># If you made commits you want to keep:</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> switch <span class="at">-c</span> rescue-branch    <span class="co"># attach HEAD to a new branch</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>→ <a href="../modules/10-troubleshooting.html">Module 10</a>, <a href="../exercises/10-exercises.html">Exercise 10.1</a></p>
+<hr>
+</section>
+<section id="fatal-not-a-git-repository-or-any-of-the-parent-directories-.git" class="level3">
+<h3 class="anchored" data-anchor-id="fatal-not-a-git-repository-or-any-of-the-parent-directories-.git"><code>fatal: not a git repository (or any of the parent directories): .git</code></h3>
+<pre class="text"><code>fatal: not a git repository (or any of the parent directories): .git</code></pre>
+<p><strong>Meaning</strong>: You ran a <code>git</code> command outside of a Git repository.</p>
+<p><strong>Fix</strong>: Navigate to your repository first:</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ~/rehab-research</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> status</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>→ <a href="../modules/01-git-concepts.html">Module 01</a></p>
+<hr>
+</section>
+<section id="filename-too-long-windows" class="level3">
+<h3 class="anchored" data-anchor-id="filename-too-long-windows"><code>Filename too long</code> (Windows)</h3>
+<pre class="text"><code>error: could not create leading directories of '...' : No such file or directory</code></pre>
+<p>or</p>
+<pre class="text"><code>warning: Clone succeeded, but checkout failed.</code></pre>
+<p><strong>Meaning</strong>: Windows has a 260-character path length limit by default. Long paths in the repository exceed this.</p>
+<p><strong>Fix</strong>: Enable long paths in Git:</p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> config <span class="at">--global</span> core.longpaths true</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Also enable in Windows Group Policy (requires admin): Computer Configuration → Administrative Templates → System → Filesystem → Enable Win32 long paths.</p>
+<p>→ <a href="../resources/setup-guides/windows.html">Setup Guides</a></p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+          // target, if specified
+          link.setAttribute("target", "_blank");
+          if (link.getAttribute("rel") === null) {
+            link.setAttribute("rel", "noopener");
+          }
+          // default icon
+          link.classList.add("external");
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+});
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>Advanced_Git — Terminal-Based Git for Rehabilitation Science</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/johannabayer/Advanced_Git/edit/main/reference/error-messages.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/johannabayer/Advanced_Git/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div>
+    <div class="nav-footer-right">
+      <ul class="footer-items list-unstyled">
+    <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/johannabayer/Advanced_Git">
+      <i class="bi bi-github" role="img">
+</i> 
+    </a>
+  </li>  
+</ul>
+    </div>
+  </div>
+</footer>
+
+
+
+
+<script src="../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>
