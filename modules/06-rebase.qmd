@@ -47,6 +47,7 @@ When you rebase `feature` onto `main`, Git:
 
 **Before rebase**:
 
+[]!(../resources/imgs/06_rebase_before.png){width=40%}
 ```{mermaid}
 %%{init: {'gitGraph': {'theme': 'dark'}} }%%
 gitGraph
@@ -61,6 +62,7 @@ gitGraph
 
 **After `git rebase main` on the feature branch**:
 
+[]!(../resources/imgs/06_rebase_after.png){width=40%}
 ```{mermaid}
 %%{init: {'gitGraph': {'theme': 'dark'}} }%%
 gitGraph

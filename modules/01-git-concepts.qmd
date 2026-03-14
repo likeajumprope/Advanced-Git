@@ -63,18 +63,19 @@ Most version control systems store **diffs** — the line-by-line changes betwee
 versions. Git is different: it stores **snapshots** of your entire project at
 each point in time.
 
-```{mermaid}
+[]![](../resources/imgs/01_git_diff.png){width=15%}
+<!-- ```{mermaid}
 %%{init: {'theme': 'dark'}}%%
 flowchart LR
     subgraph Diff-based
-        D1[Version 1] -->|"+ line 5\n- line 12"| D2[Version 2]
-        D2 -->|"+ lines 3-4"| D3[Version 3]
+        D1[Version 1] --|"+ line 5\n- line 12"| D2[Version 2]
+        D2 |"+ lines 3-4"| D3[Version 3]
     end
     subgraph Snapshot-based Git
-        S1[Snapshot 1\nall files] --> S2[Snapshot 2\nall files]
-        S2 --> S3[Snapshot 3\nall files]
+        S1[Snapshot 1\nall files] -- S2[Snapshot 2\nall files]
+        S2 -- S3[Snapshot 3\nall files]
     end
-```
+``` -->
 
 When a file has not changed between snapshots, Git stores only a pointer to the
 previous version of that file — it does not duplicate it. This makes Git both
@@ -86,16 +87,17 @@ efficient and conceptually clean: every commit is a complete picture of your pro
 
 Every file in a Git repository is in one of three states:
 
-```{mermaid}
+![](../resources/imgs/01_three_states.png)
+<!-- ```{mermaid}
 flowchart LR
     W["Working Directory<br/>(your files on disk)"]
     S["Staging Area<br/>(the index)"]
     R["Repository<br/>(.git/objects)"]
 
-    W -->|"git add"| S
-    S -->|"git commit"| R
-    R -->|"git checkout / git restore"| W
-```
+    W |"git add"| S
+    S |"git commit"| R
+    R |"git checkout / git restore"| W
+``` -->
 
 - **Working directory**: your files as they exist on disk — what you see in
   Finder/File Explorer
@@ -278,13 +280,14 @@ A commit object contains:
 As you make more commits, Git builds a **directed acyclic graph** (DAG) —
 a chain of commits where each one points back to its parent(s).
 
-```{mermaid}
+![](../resources/imgs/01_commit_graph.png){width=40%}
+<!-- ```{mermaid}
  gitGraph
    commit id: "3f2a1b4 Initial script"
    commit id: "9d4c7e1 Add normalization"
    commit id: "1a5f3b2 Fix baseline calc"
 
-```
+``` -->
 
 "Directed" means each commit knows its parent (arrows point backwards in time).
 "Acyclic" means there are no loops — history always moves forward.
@@ -310,17 +313,18 @@ That is the full commit hash. **A branch is nothing more than a file containing
 a single commit hash.** When you make a new commit, Git updates this file to
 point to the new commit automatically.
 
-```{mermaid}
+![](../resources/imgs/01_concepts_2.png)
+<!-- ```{mermaid}
 %%{init: {'theme': 'dark'}}%%
 flowchart LR
-    C1["commit 3f2a1b4\nInitial script"] --> C2["commit 9d4c7e1\nAdd normalization"]
-    C2 --> C3["commit 1a5f3b2\nFix baseline calc"]
-    MAIN["main"] --> C3
-    HEAD["HEAD"] --> MAIN
+    C1["commit 3f2a1b4\nInitial script"]  C2["commit 9d4c7e1\nAdd normalization"]
+    C2 - C3["commit 1a5f3b2\nFix baseline calc"]
+    MAIN["main"] -- C3
+    HEAD["HEAD"] -- MAIN
 
     style MAIN fill:#50fa7b,color:#000
     style HEAD fill:#bd93f9,color:#000
-```
+``` -->
 
 When you create a new branch, Git creates a new file in `refs/heads/` pointing
 to the same commit. Branches are cheap because they are just tiny files.

@@ -50,18 +50,20 @@ cat .git/refs/heads/main
 That is the entire branch. **A branch is a file containing one commit hash.**
 Nothing more. When you make a new commit, Git rewrites that file with the new hash.
 
-```{mermaid}
+[]!(../resources/imgs/04_branches.png){width=40%}
+
+<!-- ```{mermaid}
 %%{init: {'theme': 'dark'}}%%
 flowchart LR
-    C1["3f2a1b4\nInitial script"] --> C2["9d4c7e1\nAdd normalize"]
-    C2 --> C3["1a5f3b2\nFix baseline"]
+    C1["3f2a1b4\nInitial script"] - C2["9d4c7e1\nAdd normalize"]
+    C2 - C3["1a5f3b2\nFix baseline"]
 
-    MAIN["refs/heads/main\n= 1a5f3b2"] --> C3
-    HEAD["HEAD\n= ref: refs/heads/main"] --> MAIN
+    MAIN["refs/heads/main\n= 1a5f3b2"] - C3
+    HEAD["HEAD\n= ref: refs/heads/main"] - MAIN
 
     style MAIN fill:#50fa7b,color:#000
     style HEAD fill:#bd93f9,color:#000
-```
+``` -->
 
 When you create a new branch, Git creates a new file in `refs/heads/` pointing
 to the same commit as your current branch. Branches are cheap because they are

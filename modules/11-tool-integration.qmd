@@ -48,15 +48,17 @@ is tempting — but it hides critical context:
 **Recommended workflow**: Use RStudio for writing and editing R code. Use the terminal
 for all Git operations. Open both windows side by side.
 
-```{mermaid}
-%%{init: {'theme': 'dark'}}%%
+
+[]!(../resources/imgs/11_tools.png){width=40%}
+
+<!-- ``{mermaid}
 flowchart LR
-    ED["RStudio Editor\n(write R code)"] --> TERM["Terminal\n(git add, commit, push)"]
-    TERM --> ED
+    ED["RStudio Editor\n(write R code)"] - TERM["Terminal\n(git add, commit, push)"]
+    TERM - ED
 
     style ED fill:#bd93f9,color:#000
     style TERM fill:#50fa7b,color:#000
-```
+``` -->
 
 This way you always know exactly what Git is doing — no hidden operations.
 

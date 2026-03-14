@@ -42,7 +42,7 @@ Git chooses the merge strategy automatically based on the history.
 **Fast-forward merge**: The feature branch is ahead of main with no divergence.
 Git just moves the `main` pointer forward — no merge commit needed.
 
-```{mermaid}
+<!-- ```{mermaid}
 %%{init: {'gitGraph': {'theme': 'dark'}} }%%
 gitGraph
    commit id: "Initial"
@@ -52,20 +52,23 @@ gitGraph
    commit id: "Add tests"
    checkout main
    merge feature/grip id: "Fast-forward"
-```
+``` -->
 
 **Three-way merge**: Both branches have commits the other does not.
 Git finds the common ancestor and creates a new merge commit.
 
+
 ```{mermaid}
-gitGraph
+
+gitgraph
    commit id: "Initial"
    commit id: "Add normalize"
-   branch feature/grip
+   branch "feature/grip"
    commit id: "Add grip fn"
    checkout main
    commit id: "Fix protocol"
-   merge feature/grip id: "Merge commit"
+   merge "feature/grip" id: "Merge commit"
+
 ```
 
 ---
