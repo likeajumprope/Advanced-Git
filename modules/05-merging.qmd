@@ -58,7 +58,6 @@ gitGraph
 Git finds the common ancestor and creates a new merge commit.
 
 ```{mermaid}
-%%{init: {'gitGraph': {'theme': 'dark'}} }%%
 gitGraph
    commit id: "Initial"
    commit id: "Add normalize"
