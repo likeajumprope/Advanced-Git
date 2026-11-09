@@ -1,0 +1,382 @@
+---
+title: "Module 01: Git Conceptual Foundation"
+description: "Understand what Git does internally before you learn the commands."
+module: 1
+prerequisites:
+  - 0
+learning_objectives:
+  - "Learner can explain the difference between snapshots and diffs"
+  - "Learner can describe the three states: working directory, staging area, repository"
+  - "Learner can list and describe the contents of the .git directory"
+  - "Learner can explain what a commit hash represents"
+  - "Learner can describe branches as movable pointers"
+  - "Learner can identify a detached HEAD state"
+platform_coverage:
+  - macos
+  - linux
+  - windows-gitbash
+  - windows-wsl2
+---
+
+## Overview
+
+Most Git confusion comes from using commands without understanding what Git is doing.
+This module builds the mental model first — so that when you run `git add` or
+`git commit`, you know exactly what is happening inside your repository.
+
+We will explore the `.git` directory directly using the terminal commands from Module 00.
+
+## Prerequisites
+
+- [Module 00 — Terminal Fundamentals](00-terminal-fundamentals.qmd)
+
+You should be able to `cd`, `ls`, and `cat` files before continuing.
+
+---
+
+### What Is Version Control?
+
+**Version control**: a system that records changes to files over time so that
+you can recall specific versions later.
+
+Without version control, researchers track versions manually:
+
+```text
+analysis.R
+analysis_v2.R
+analysis_v2_FINAL.R
+analysis_v2_FINAL_corrected.R
+analysis_v2_FINAL_corrected_USE_THIS_ONE.R
+```
+
+This is error-prone, takes disk space for every copy, and makes it impossible to
+understand *what* changed between versions or *why*.
+
+Git solves this by recording a complete history of your project — who changed what,
+when, and with a message explaining why — in a hidden folder called `.git`.
+
+---
+
+### Git's Mental Model: Snapshots, Not Diffs
+
+Most version control systems store **diffs** — the line-by-line changes between
+versions. Git is different: it stores **snapshots** of your entire project at
+each point in time.
+
+```{mermaid}
+%%{init: {'theme': 'dark'}}%%
+flowchart LR
+    subgraph Diff-based
+        D1[Version 1] -->|"+ line 5\n- line 12"| D2[Version 2]
+        D2 -->|"+ lines 3-4"| D3[Version 3]
+    end
+    subgraph Snapshot-based Git
+        S1[Snapshot 1\nall files] --> S2[Snapshot 2\nall files]
+        S2 --> S3[Snapshot 3\nall files]
+    end
+```
+
+When a file has not changed between snapshots, Git stores only a pointer to the
+previous version of that file — it does not duplicate it. This makes Git both
+efficient and conceptually clean: every commit is a complete picture of your project.
+
+---
+
+### The Three States
+
+Every file in a Git repository is in one of three states:
+
+```{mermaid}
+%%{init: {'theme': 'dark'}}%%
+flowchart LR
+    W["Working Directory\n(your files on disk)"]
+    S["Staging Area\n(the index)"]
+    R["Repository\n(.git/objects)"]
+
+    W -->|"git add"| S
+    S -->|"git commit"| R
+    R -->|"git checkout / git restore"| W
+```
+
+- **Working directory**: your files as they exist on disk — what you see in
+  Finder/File Explorer
+- **Staging area** (also called the *index*): a preparation area where you assemble
+  the next snapshot. You choose exactly which changes to include.
+- **Repository**: the `.git` directory — the permanent record of every snapshot
+  you have committed
+
+Understanding these three states explains why `git add` exists. You do not have to
+commit everything you changed — you can carefully select what goes into each snapshot.
+
+---
+
+### Exploring the .git Directory
+
+The `.git` directory is where Git stores everything. Let us create a repository and
+look inside.
+
+```bash
+cd ~/rehab-research
+git init
+```
+
+```text
+Initialized empty Git repository in /Users/yourname/rehab-research/.git/
+```
+
+Now list the `.git` directory:
+
+```bash
+ls -la .git/
+```
+
+```text
+total 24
+drwxr-xr-x   9 yourname  staff  288 Feb 28 09:15 .
+drwxr-xr-x   5 yourname  staff  160 Feb 28 09:15 ..
+-rw-r--r--   1 yourname  staff   23 Feb 28 09:15 HEAD        # your current position
+-rw-r--r--   1 yourname  staff   92 Feb 28 09:15 config      # repository settings
+-rw-r--r--   1 yourname  staff   73 Feb 28 09:15 description # ignored except by GitWeb
+drwxr-xr-x   2 yourname  staff   64 Feb 28 09:15 hooks/      # automation scripts
+drwxr-xr-x   3 yourname  staff   96 Feb 28 09:15 info/
+drwxr-xr-x   4 yourname  staff  128 Feb 28 09:15 objects/    # Git's object database
+drwxr-xr-x   4 yourname  staff  128 Feb 28 09:15 refs/       # branches and tags
+```
+
+Each entry has a purpose. The important ones:
+
+#### `objects/` — Git's Database
+
+```bash
+ls .git/objects/
+```
+
+```text
+info  pack
+```
+
+Right now it is almost empty — you have not committed anything yet. After a commit,
+Git stores **blobs** (file contents), **trees** (directory listings), and **commits**
+(metadata + pointer to a tree) here. Each is identified by a SHA-1 hash.
+
+#### `refs/` — Branches and Tags
+
+```bash
+ls .git/refs/
+```
+
+```text
+heads  tags
+```
+
+```bash
+ls .git/refs/heads/
+```
+
+```text
+(empty — no branches have a commit yet)
+```
+
+After your first commit, `refs/heads/main` will appear as a file containing
+the hash of the latest commit. That is all a branch is: a file containing a hash.
+
+#### `HEAD` — Your Current Position
+
+```bash
+cat .git/HEAD
+```
+
+```text
+ref: refs/heads/main
+```
+
+**`HEAD`** is a pointer to where you currently are in the repository. Right now it
+points at `refs/heads/main` (which does not exist yet because there are no commits).
+After commits, it will point to the latest commit on your current branch.
+
+#### `config` — Repository Configuration
+
+```bash
+cat .git/config
+```
+
+```text
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = false
+	logallrefupdates = true
+```
+
+This is your repository's local configuration — it overrides your global
+`~/.gitconfig` for this repository only.
+
+#### `index` — The Staging Area
+
+The `index` file does not exist until you stage something (`git add`). It is a
+binary file that records the exact state of what you are about to commit.
+
+---
+
+### Commits as Snapshots with Metadata
+
+Let us create a file and make a commit so we can inspect the resulting objects:
+
+```bash
+echo "library(dplyr)" > scripts/analysis.R
+git add scripts/analysis.R
+git commit -m "Add initial data cleaning script"
+```
+
+```text
+[main (root-commit) 3f2a1b4] Add initial data cleaning script
+ 1 file changed, 1 insertion(+)
+ create mode 100644 scripts/analysis.R
+```
+
+The string `3f2a1b4` is the beginning of your **commit hash** — a 40-character
+SHA-1 fingerprint of the entire snapshot. Now look at the objects directory:
+
+```bash
+ls .git/objects/
+```
+
+```text
+3f  a8  pack  info
+```
+
+```bash
+git cat-file -t 3f2a1b4
+```
+
+```text
+commit
+```
+
+```bash
+git cat-file -p 3f2a1b4
+```
+
+```text
+tree a8c3d5e2f1...
+author Your Name <your@institution.edu> 1709114400 -0500
+committer Your Name <your@institution.edu> 1709114400 -0500
+
+Add initial data cleaning script
+```
+
+A commit object contains:
+
+- **tree**: pointer to the snapshot (the directory listing at this point)
+- **parent**: pointer to the previous commit (none for the first commit)
+- **author** / **committer**: who made the change and when
+- **message**: your description of the change
+
+---
+
+### The Commit Graph as a DAG
+
+As you make more commits, Git builds a **directed acyclic graph** (DAG) —
+a chain of commits where each one points back to its parent(s).
+
+```{mermaid}
+%%{init: {'gitGraph': {'theme': 'dark'}} }%%
+gitGraph
+   commit id: "3f2a1b4 Initial script"
+   commit id: "9d4c7e1 Add normalization"
+   commit id: "1a5f3b2 Fix baseline calc"
+```
+
+"Directed" means each commit knows its parent (arrows point backwards in time).
+"Acyclic" means there are no loops — history always moves forward.
+
+This graph is the foundation of branching, merging, and rebasing — everything
+in the later modules builds on it.
+
+---
+
+### Branches as Movable Pointers
+
+Now look at what the branch file contains after your commit:
+
+```bash
+cat .git/refs/heads/main
+```
+
+```text
+3f2a1b4c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a
+```
+
+That is the full commit hash. **A branch is nothing more than a file containing
+a single commit hash.** When you make a new commit, Git updates this file to
+point to the new commit automatically.
+
+```{mermaid}
+%%{init: {'theme': 'dark'}}%%
+flowchart LR
+    C1["commit 3f2a1b4\nInitial script"] --> C2["commit 9d4c7e1\nAdd normalization"]
+    C2 --> C3["commit 1a5f3b2\nFix baseline calc"]
+    MAIN["main"] --> C3
+    HEAD["HEAD"] --> MAIN
+
+    style MAIN fill:#50fa7b,color:#000
+    style HEAD fill:#bd93f9,color:#000
+```
+
+When you create a new branch, Git creates a new file in `refs/heads/` pointing
+to the same commit. Branches are cheap because they are just tiny files.
+
+---
+
+### HEAD and Detached HEAD
+
+`HEAD` normally points to a **branch name** (e.g., `refs/heads/main`), which in
+turn points to a commit. This is the **attached** state.
+
+```bash
+cat .git/HEAD
+```
+
+```text
+ref: refs/heads/main
+```
+
+If you check out a commit directly (by hash or tag), HEAD points to the commit
+itself — not to a branch. This is called **detached HEAD**:
+
+```bash
+# Hypothetical — do not run this yet
+git checkout 3f2a1b4
+cat .git/HEAD
+```
+
+```text
+3f2a1b4c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a
+```
+
+In detached HEAD, any commits you make will not belong to any branch and can be
+lost. Module 10 covers how to recover from this. For now, just know the concept.
+
+---
+
+## Hands-on Exercise
+
+**[Exercises 01 →](../exercises/01-exercises.qmd)**
+
+**Quick check**: After your first commit, run:
+
+```bash
+git log --oneline
+```
+
+```text
+3f2a1b4 (HEAD -> main) Add initial data cleaning script
+```
+
+If you see a commit with your message, Git is tracking your work.
+
+## What's Next
+
+In **[Module 02 — Basic Git Workflow](02-basic-workflow.qmd)**, you will learn the
+daily commands — `git status`, `git add`, `git commit`, `git log`, and `git diff` —
+and write your first research-grade commit history.

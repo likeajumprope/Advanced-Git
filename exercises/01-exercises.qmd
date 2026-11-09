@@ -1,0 +1,316 @@
+---
+title: "Exercises: Module 01 — Git Conceptual Foundation"
+module: 1
+exercise_count: 3
+estimated_minutes: 25
+platform_tested:
+  - macos-14
+  - ubuntu-24.04
+  - windows-gitbash-2.44
+---
+
+## Before You Begin
+
+Make sure you have completed:
+
+- [Module 00 — Terminal Fundamentals](../modules/00-terminal-fundamentals.qmd)
+- [Module 01 — Git Conceptual Foundation](../modules/01-git-concepts.qmd)
+- [Exercise 00.3](00-exercises.qmd#exercise-0.3): Your `~/rehab-research/` folder exists
+
+---
+
+### Exercise 1.1 — Initialize a Repository and Explore .git
+
+**Goal**: Use `git init` to create a repository and inspect every file in the `.git` directory.
+
+**Steps**:
+
+1. Navigate to your project folder:
+
+   ```bash
+   cd ~/rehab-research
+   ```
+
+2. Initialize a Git repository:
+
+   ```bash
+   git init
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+Initialized empty Git repository in /Users/yourname/rehab-research/.git/
+```
+
+Git created the `.git` directory. Your project files are unchanged.
+:::
+
+3. List the `.git` directory contents in detail:
+
+   ```bash
+   ls -la .git/
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+total 24
+drwxr-xr-x   9 yourname  staff  288 Feb 28 09:15 .
+drwxr-xr-x   5 yourname  staff  160 Feb 28 09:15 ..
+-rw-r--r--   1 yourname  staff   23 Feb 28 09:15 HEAD
+-rw-r--r--   1 yourname  staff   92 Feb 28 09:15 config
+-rw-r--r--   1 yourname  staff   73 Feb 28 09:15 description
+drwxr-xr-x   2 yourname  staff   64 Feb 28 09:15 hooks/
+drwxr-xr-x   3 yourname  staff   96 Feb 28 09:15 info/
+drwxr-xr-x   4 yourname  staff  128 Feb 28 09:15 objects/
+drwxr-xr-x   4 yourname  staff  128 Feb 28 09:15 refs/
+```
+
+You should see: `HEAD`, `config`, `description`, `hooks/`, `info/`, `objects/`, `refs/`.
+:::
+
+4. Look inside `objects/` and `refs/`:
+
+   ```bash
+   ls .git/objects/
+   ls .git/refs/
+   ls .git/refs/heads/
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+info  pack
+heads  tags
+(empty)
+```
+
+`objects/` only has `info/` and `pack/` — no commits yet.
+`refs/heads/` is empty — no branches with commits yet.
+:::
+
+**What you learned**:
+
+- `git init` creates the `.git` directory that holds all of Git's data
+- The `objects/` directory is Git's database — empty until you commit
+- `refs/heads/` holds branch files — empty until you make a commit
+
+::: {.callout-warning}
+## Common Mistakes
+
+- **`.git` does not appear in `ls -la`**: Hidden directories start with `.` and require the `-a` flag. Always use `ls -la .git/` not `ls .git/`.
+- **`git init` says "Reinitialized existing Git repository"**: You ran `git init` in a directory that already had a `.git` directory. This is harmless — Git just confirms it is already set up.
+:::
+
+---
+
+### Exercise 1.2 — Read Git's Internal Files
+
+**Goal**: Use `cat` to read `HEAD` and `config`, then make a commit and inspect what changed.
+
+**Steps**:
+
+1. Read the `HEAD` file:
+
+   ```bash
+   cat .git/HEAD
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+ref: refs/heads/main
+```
+
+HEAD points to the `main` branch. The branch does not exist yet (no commits),
+but HEAD is already prepared to point there.
+:::
+
+2. Read the `config` file:
+
+   ```bash
+   cat .git/config
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = false
+	logallrefupdates = true
+```
+
+This is the repository's local configuration. When you run `git config --local`,
+you are editing this file.
+:::
+
+3. Make your first commit (so we can inspect the resulting objects):
+
+   ```bash
+   echo "library(dplyr)" > scripts/analysis.R
+   git add scripts/analysis.R
+   git commit -m "Add initial data cleaning script"
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+[main (root-commit) 3f2a1b4] Add initial data cleaning script
+ 1 file changed, 1 insertion(+)
+ create mode 100644 scripts/analysis.R
+```
+
+The hash (`3f2a1b4`) will be different on your machine — it is computed from the
+commit's exact contents, author, timestamp, and parent.
+:::
+
+4. Now look at what `refs/heads/main` contains:
+
+   ```bash
+   cat .git/refs/heads/main
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+3f2a1b4c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a
+```
+
+Your hash will be different. This is the full commit hash that `main` currently points to.
+A branch is literally just this: a file containing a 40-character hash.
+:::
+
+5. List the `objects/` directory again:
+
+   ```bash
+   ls .git/objects/
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+1a  3f  a8  info  pack
+```
+
+New two-character subdirectories appeared — these are the first two characters
+of each object's hash. Git stores objects this way to avoid having too many files
+in a single directory.
+:::
+
+**What you learned**:
+
+- `HEAD` always points to your current position (usually a branch)
+- A branch is a file containing a commit hash — nothing more
+- After a commit, `objects/` grows with new blob, tree, and commit objects
+
+---
+
+### Exercise 1.3 — Understand Git Status Output
+
+**Goal**: Create a file, stage it, and interpret every line of `git status` output.
+
+**Steps**:
+
+1. Create a new file:
+
+   ```bash
+   echo "# Grip Strength Study Protocol" > docs/protocol.md
+   ```
+
+2. Run `git status` and read the output carefully:
+
+   ```bash
+   git status
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+On branch main
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        docs/protocol.md
+
+nothing added to commit but untracked files present (use "git add" to track)
+```
+
+**Reading this output**:
+
+- `On branch main` — you are on the main branch
+- `Untracked files` — Git sees the file but is not tracking it yet
+- `docs/protocol.md` — this specific file needs to be staged before Git will include it
+- The hint `use "git add <file>..."` tells you exactly what to do next
+:::
+
+3. Stage the file:
+
+   ```bash
+   git add docs/protocol.md
+   ```
+
+4. Run `git status` again:
+
+   ```bash
+   git status
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+On branch main
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+        new file:   docs/protocol.md
+```
+
+**What changed**:
+
+- The file moved from "Untracked" to "Changes to be committed"
+- `new file:` indicates this is being tracked for the first time
+- The hint now shows `git restore --staged` to undo the staging
+:::
+
+**What you learned**:
+
+- `git status` always tells you the current state — run it constantly
+- "Untracked" means Git sees the file but is ignoring it
+- "Changes to be committed" means the file is staged and ready for a commit
+- The parenthetical hints in `git status` are suggestions — read them
+
+::: {.callout-warning}
+## Common Mistakes
+
+- **`git status` says "not a git repository"**: You ran it outside `~/rehab-research/`. Run `cd ~/rehab-research` and try again.
+- **File does not appear as "Untracked"**: The file might not exist. Run `ls docs/` to check. If it is not there, the `echo` command may have had a typo.
+:::
+
+---
+
+## Summary
+
+You have completed Module 01 exercises. At this point you can:
+
+- Initialize a Git repository with `git init`
+- Explore the `.git` directory and identify its key components
+- Read `HEAD` and understand what it points to
+- Recognize that a branch is a file containing a commit hash
+- Interpret all three states in `git status` output
+
+**You are ready for [Module 02 — Basic Git Workflow](../modules/02-basic-workflow.qmd).**

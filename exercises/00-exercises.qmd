@@ -1,0 +1,271 @@
+---
+title: "Exercises: Module 00 — Terminal Fundamentals"
+module: 0
+exercise_count: 3
+estimated_minutes: 20
+platform_tested:
+  - macos-14
+  - ubuntu-24.04
+  - windows-gitbash-2.44
+---
+
+## Before You Begin
+
+Make sure you have completed the [Module 00 reading](../modules/00-terminal-fundamentals.qmd)
+and installed a terminal on your operating system.
+
+These exercises build on each other — complete them in order.
+
+---
+
+### Exercise 0.1 — Open Your Terminal and Meet the Prompt
+
+**Goal**: Open a terminal, identify its components, and run your first command.
+
+**Steps**:
+
+1. Open a terminal using the method for your operating system (see Module 00 — Opening a Terminal).
+
+2. Look at your prompt. Identify the username, hostname, and current directory:
+
+   ```bash
+   # Your prompt will look something like this — do not type this line
+   yourname@hostname ~ $
+   ```
+
+3. Run your first command:
+
+   ```bash
+   pwd
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+/Users/yourname
+```
+
+Your output will show your actual username. The path ends with your username because
+`~` (home directory) expands to `/Users/yourname` on macOS, `/home/yourname` on Linux,
+and `/c/Users/yourname` on Windows Git Bash.
+:::
+
+4. Run `whoami` to confirm your username:
+
+   ```bash
+   whoami
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+yourname
+```
+:::
+
+**What you learned**:
+
+- The terminal prompt shows who you are, which machine you are on, and where you are
+- `pwd` prints your current location in the file system
+- Commands produce output immediately below where you type them
+
+::: {.callout-warning}
+## Common Mistakes
+
+- **Typed the `$` symbol**: The `$` is the prompt — it already exists. Only type what comes *after* it.
+- **Nothing happened after pressing Return**: Check that you pressed **Return** (not just Enter on the numpad on some keyboards). If nothing happens, press **Ctrl + C** to cancel and try again.
+:::
+
+---
+
+### Exercise 0.2 — Navigate Your File System
+
+**Goal**: Use `cd` and `ls` to move through your file system and list directory contents.
+
+**Steps**:
+
+1. Go to your home directory:
+
+   ```bash
+   cd ~
+   ```
+
+2. List everything in your home directory, including hidden files:
+
+   ```bash
+   ls -la
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+total 64
+drwxr-xr-x  20 yourname  staff   640 Feb 28 09:00 .
+drwxr-xr-x   8 root      wheel   256 Feb 20 08:00 ..
+-rw-r--r--   1 yourname  staff   220 Feb 28 09:00 .bash_profile
+-rw-r--r--   1 yourname  staff  3771 Feb 28 09:00 .bashrc
+drwxr-xr-x   2 yourname  staff    64 Feb 28 09:00 Desktop
+drwxr-xr-x   2 yourname  staff    64 Feb 28 09:00 Documents
+drwxr-xr-x   2 yourname  staff    64 Feb 28 09:00 Downloads
+```
+
+Your output will differ — you may have different folders. Items starting with `.`
+are hidden files (configuration files). The `d` at the start of `drwxr-xr-x`
+means it is a directory; `-` means it is a file.
+:::
+
+3. Navigate into your `Documents` folder:
+
+   ```bash
+   cd Documents
+   pwd
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+/Users/yourname/Documents
+```
+:::
+
+4. Go back to your home directory in one step:
+
+   ```bash
+   cd ~
+   pwd
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+/Users/yourname
+```
+:::
+
+**What you learned**:
+
+- `cd ~` always returns you home, no matter where you are
+- `ls -la` reveals hidden files and shows file details
+- `cd ..` moves up one level; `cd ~` goes all the way home
+
+::: {.callout-warning}
+## Common Mistakes
+
+- **`cd Documents` says "no such file or directory"**: Directory names are case-sensitive on macOS and Linux. Try `ls` first to see the exact name.
+- **Got lost**: Run `cd ~` to return home and `pwd` to confirm where you are.
+:::
+
+---
+
+### Exercise 0.3 — Create Your Research Project Folder
+
+**Goal**: Create the `rehab-research/` project structure you will use throughout this course.
+
+**Steps**:
+
+1. Go to your home directory:
+
+   ```bash
+   cd ~
+   ```
+
+2. Create the project directory with all subdirectories at once:
+
+   ```bash
+   mkdir -p rehab-research/scripts rehab-research/data rehab-research/docs
+   ```
+
+3. Verify the structure was created:
+
+   ```bash
+   ls rehab-research/
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+data    docs    scripts
+```
+
+Three directories created. `data/` is where your (gitignored) data files will live.
+`scripts/` is where your R and Python analysis scripts go. `docs/` is for protocol
+documents and notes.
+:::
+
+4. Navigate into the `scripts` directory and create a placeholder file:
+
+   ```bash
+   cd rehab-research/scripts
+   touch analysis.R
+   ls
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+analysis.R
+```
+:::
+
+5. Confirm your location with `pwd`:
+
+   ```bash
+   pwd
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+/Users/yourname/rehab-research/scripts
+```
+:::
+
+6. Go back to the project root:
+
+   ```bash
+   cd ~/rehab-research
+   pwd
+   ```
+
+::: {.callout-note collapse="true"}
+## Expected Output
+
+```text
+/Users/yourname/rehab-research
+```
+:::
+
+**What you learned**:
+
+- `mkdir -p` creates nested directories in a single command
+- `touch` creates an empty file
+- `pwd` confirms your location at any time
+- Using `~/` as the start of a path guarantees the path works from anywhere
+
+::: {.callout-warning}
+## Common Mistakes
+
+- **`mkdir rehab-research/scripts` fails with "No such file or directory"**: You forgot the `-p` flag. Without it, `mkdir` will not create intermediate directories. Always use `mkdir -p` for nested paths.
+- **`ls` shows nothing after `mkdir`**: Check that you are in the right directory with `pwd`. If `pwd` shows `/Users/yourname/rehab-research`, then `ls` should show `data docs scripts`.
+:::
+
+---
+
+## Summary
+
+You have completed Module 00 exercises. At this point you can:
+
+- Open a terminal and identify its components
+- Navigate the file system with `cd`, `ls`, and `pwd`
+- Create a multi-level directory structure with `mkdir -p`
+- Create empty files with `touch`
+
+**You are ready for [Module 01 — Git Concepts](../modules/01-git-concepts.qmd).**

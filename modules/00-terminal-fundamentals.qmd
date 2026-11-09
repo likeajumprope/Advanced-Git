@@ -1,0 +1,457 @@
+---
+title: "Module 00: Terminal Fundamentals"
+description: "Learn to navigate the command line from scratch — no prior experience required."
+module: 0
+prerequisites: []
+learning_objectives:
+  - "Learner can open a terminal on their operating system"
+  - "Learner can navigate the file system using pwd, ls, and cd"
+  - "Learner can create, move, and delete files and directories from the terminal"
+  - "Learner can read a command's help documentation"
+  - "Learner can interpret common terminal error messages"
+platform_coverage:
+  - macos
+  - linux
+  - windows-gitbash
+  - windows-wsl2
+---
+
+## Overview
+
+The terminal is a text interface for giving your computer instructions. Instead of
+clicking icons, you type commands. This module teaches you everything you need to
+use the terminal confidently — before we touch Git at all.
+
+By the end of this module, you will be able to navigate your computer's file system,
+create the project folder for this course, and understand what every part of a
+terminal command means.
+
+## Prerequisites
+
+None. This is the starting point.
+
+Before beginning, make sure Git and a terminal are installed on your machine.
+See the setup guide for your operating system:
+
+- [macOS Setup Guide](../resources/setup-guides/macos.qmd)
+- [Linux Setup Guide](../resources/setup-guides/linux.qmd)
+- [Windows Setup Guide](../resources/setup-guides/windows.qmd)
+
+---
+
+### What Is the Terminal?
+
+The **terminal** (also called the *command line*, *shell*, or *console*) is a
+text-based interface for communicating with your operating system. Instead of
+pointing and clicking, you type instructions called **commands**.
+
+When you open the terminal, you see something like this:
+
+```text
+yourname@hostname ~ $
+```
+
+Each part has a meaning:
+
+```text
+yourname   @   hostname   ~   $
+   │            │         │   │
+   │            │         │   └─ prompt: the terminal is ready for your input
+   │            │         └───── current directory (~ means your home directory)
+   │            └─────────────── your computer's name
+   └──────────────────────────── your username
+```
+
+The `$` symbol at the end is called the **prompt**. It means "I'm ready — type a command."
+In this course, we always use `$` as the generic prompt symbol regardless of your shell.
+
+::: {.callout-tip}
+**Windows note (Git Bash)**: Your prompt will look like `yourname@HOSTNAME MINGW64 ~\n$`. The `MINGW64` part just means you are using Git Bash — ignore it.
+:::
+
+---
+
+### Opening a Terminal
+
+::: {.panel-tabset}
+## macOS
+Press **Command + Space**, type `Terminal`, and press **Return**.
+
+Alternatively: **Applications → Utilities → Terminal**.
+
+## Linux
+Press **Ctrl + Alt + T** (most distributions), or search "Terminal" in your application launcher.
+
+## Windows (Git Bash)
+Search **Git Bash** in the Start menu and open it.
+
+## Windows (WSL2)
+Search **Ubuntu** (or your chosen distro) in the Start menu and open it.
+:::
+
+---
+
+### Basic Navigation
+
+These three commands let you move around the file system. You will use them
+constantly — every Git session starts with navigation.
+
+#### `pwd` — Print Working Directory
+
+**`pwd`**: displays your current location in the file system.
+
+```bash
+pwd
+```
+
+```text
+/Users/yourname
+```
+
+This is your **home directory** — the starting point for your user account.
+The path `/Users/yourname` means: start at the root `/`, go into `Users/`, then `yourname/`.
+
+#### `ls` — List Directory Contents
+
+**`ls`**: lists the files and folders in the current directory.
+
+```bash
+ls
+```
+
+```text
+Desktop    Documents    Downloads    Movies    Music    Pictures
+```
+
+Add `-la` to see hidden files and detailed information:
+
+```bash
+ls -la
+```
+
+```text
+total 0
+drwxr-xr-x   8 yourname  staff   256 Feb 28 09:00 .
+drwxr-xr-x   6 root      wheel   192 Feb 28 09:00 ..
+-rw-r--r--   1 yourname  staff   220 Feb 28 09:00 .bash_profile
+drwxr-xr-x   2 yourname  staff    64 Feb 28 09:00 Desktop
+drwxr-xr-x   2 yourname  staff    64 Feb 28 09:00 Documents
+```
+
+The `-l` flag shows permissions, owner, size, and modification date.
+The `-a` flag shows **hidden files** (files starting with `.`).
+
+::: {.callout-tip}
+Flags can be combined: `-la` is the same as `-l -a`.
+:::
+
+#### `cd` — Change Directory
+
+**`cd`**: moves you into a different directory.
+
+```bash
+cd Documents
+```
+
+```text
+(no output — success is silence)
+```
+
+```bash
+pwd
+```
+
+```text
+/Users/yourname/Documents
+```
+
+To go back up one level:
+
+```bash
+cd ..
+```
+
+`..` always means "the directory above the current one."
+
+To go directly to your home directory from anywhere:
+
+```bash
+cd ~
+```
+
+`~` is a shortcut for your home directory (`/Users/yourname` on macOS, `/home/yourname` on Linux).
+
+---
+
+### File Operations
+
+These commands let you create, read, copy, move, and delete files — the building
+blocks of organising a research project.
+
+#### `mkdir` — Make Directory
+
+**`mkdir`**: creates a new folder.
+
+```bash
+mkdir rehab-research
+```
+
+```bash
+ls
+```
+
+```text
+Desktop    Documents    Downloads    Movies    Music    Pictures    rehab-research
+```
+
+Use `-p` to create nested directories in one command:
+
+```bash
+mkdir -p rehab-research/scripts rehab-research/data rehab-research/docs
+```
+
+#### `touch` — Create an Empty File
+
+**`touch`**: creates an empty file (or updates a file's timestamp if it exists).
+
+```bash
+touch rehab-research/scripts/analysis.R
+```
+
+#### `cat` — Display File Contents
+
+**`cat`**: prints the contents of a file to the terminal.
+
+```bash
+cat rehab-research/scripts/analysis.R
+```
+
+```text
+(empty — the file exists but has no content yet)
+```
+
+#### `mv` — Move or Rename
+
+**`mv`**: moves a file to a different location, or renames it.
+
+```bash
+# Rename a file
+mv analysis.R grip_strength_analysis.R
+
+# Move a file into a directory
+mv grip_strength_analysis.R rehab-research/scripts/
+```
+
+#### `cp` — Copy
+
+**`cp`**: copies a file.
+
+```bash
+cp rehab-research/scripts/analysis.R rehab-research/scripts/analysis_backup.R
+```
+
+#### `rm` — Remove
+
+**`rm`**: permanently deletes a file.
+
+```bash
+rm rehab-research/scripts/analysis_backup.R
+```
+
+::: {.callout-warning}
+## `rm` is permanent
+Unlike moving to the Trash, `rm` does not offer a recovery option. Double-check
+before running it. Add `-i` for confirmation prompts: `rm -i filename`
+:::
+
+---
+
+### Paths: Absolute vs Relative
+
+Every file on your computer has an **absolute path** — its complete address from
+the root of the file system.
+
+```bash
+# Absolute path (works from anywhere)
+ls /Users/yourname/rehab-research/scripts
+
+# Relative path (works from your home directory)
+ls rehab-research/scripts
+```
+
+A **relative path** is relative to wherever you currently are. An **absolute path**
+starts with `/` (macOS/Linux) or `C:\` (Windows) and works from anywhere.
+
+**Rule of thumb**: Use relative paths when you are confident where you are.
+Use absolute paths when writing scripts or when in doubt.
+
+---
+
+### Command Structure
+
+Every terminal command follows the same pattern:
+
+```text
+command   -flags   argument(s)
+   │          │         │
+   │          │         └── what the command acts on (a file, directory, etc.)
+   │          └──────────── modify the command's behavior
+   └─────────────────────── the action to perform
+```
+
+Example:
+
+```bash
+ls   -la   rehab-research/
+```
+
+- `ls` — the command (list)
+- `-la` — flags: `-l` (long format), `-a` (show hidden files)
+- `rehab-research/` — the argument (which directory to list)
+
+Not all commands require flags or arguments. `pwd` works with none at all.
+
+---
+
+### Getting Help
+
+Two sources of documentation are always available in the terminal.
+
+#### `--help`
+
+Most commands accept a `--help` flag that prints a brief usage summary:
+
+```bash
+git --help
+```
+
+```text
+usage: git [-v | --version] [-h | --help] [-C <path>] ...
+
+These are common Git commands used in various situations:
+
+start a working area
+   clone     Clone a repository into a new directory
+   init      Create an empty Git repository or reinitialize...
+```
+
+#### `man` — Manual Pages
+
+`man` opens the full documentation for a command:
+
+```bash
+man ls
+```
+
+Navigate with arrow keys. Press **`q`** to quit.
+
+::: {.callout-tip}
+**Windows (Git Bash)**: `man` may not be available. Use `command --help` instead, or search [linux.die.net/man](https://linux.die.net/man).
+:::
+
+---
+
+### Common Error Messages
+
+These five errors appear constantly. Learning to read them removes most of the
+anxiety of working in the terminal.
+
+#### `command not found`
+
+```text
+$ gti status
+bash: gti: command not found
+```
+
+**What it means**: The program you typed does not exist (or is not on your PATH).
+**Fix**: Check spelling. The command is `git`, not `gti`.
+
+#### `No such file or directory`
+
+```text
+$ cd Documents/rehab-stuyd
+cd: no such file or directory: Documents/rehab-stuyd
+```
+
+**What it means**: The path you typed does not exist.
+**Fix**: Run `ls` to check the actual name, then correct the typo.
+
+#### `Permission denied`
+
+```text
+$ rm /usr/local/bin/git
+rm: /usr/local/bin/git: Permission denied
+```
+
+**What it means**: You do not have the rights to perform this action on that file.
+**Fix**: For system files, use `sudo`. For your own files, check ownership with `ls -la`.
+
+#### `Is a directory`
+
+```text
+$ cat rehab-research/
+cat: rehab-research/: Is a directory
+```
+
+**What it means**: You used a file command on a folder.
+**Fix**: Use `ls rehab-research/` to list the directory instead.
+
+#### `Not a directory`
+
+```text
+$ cd rehab-research/analysis.R
+cd: not a directory: rehab-research/analysis.R
+```
+
+**What it means**: You tried to `cd` into a file, not a folder.
+**Fix**: Use `cd rehab-research/` and then open the file with `cat` or `nano`.
+
+---
+
+### Why Terminal for Research?
+
+You may be wondering: my GUI works fine — why bother?
+
+**Reproducibility**: Every action you take in a GUI is invisible to collaborators
+and to your future self. In the terminal, every command is text — it can be copied,
+saved to a script, shared in a methods section, and run again identically six months
+later.
+
+**Documentation**: Your terminal history is a log of everything you did.
+`history | grep git` shows every Git command from your current session.
+
+**Automation**: Once you know the commands, you can chain them into shell scripts
+that process entire datasets, push to servers, or generate figures — all from a
+single line.
+
+**Portability**: Terminal commands work on macOS, Linux, and Windows (WSL/Git Bash)
+with minimal variation. A GUI installed on your laptop may not exist on your
+institution's computing cluster or a collaborator's machine. `git` always does.
+
+---
+
+## Hands-on Exercise
+
+Work through the exercises for this module:
+
+**[Exercises 00 →](../exercises/00-exercises.qmd)**
+
+**Quick practice before you go**: Create your course workspace right now.
+
+```bash
+cd ~
+mkdir -p rehab-research/scripts rehab-research/data rehab-research/docs
+ls rehab-research/
+```
+
+```text
+data    docs    scripts
+```
+
+You should see three directories. If you do, you are ready for Module 01.
+
+## What's Next
+
+In **[Module 01 — Git Concepts](01-git-concepts.qmd)**, you will learn what Git
+actually does, explore the `.git` directory from the terminal, and understand the
+mental model that makes everything else in this course click.
